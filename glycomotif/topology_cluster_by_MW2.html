@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topology cluster by MW</title>
+</head>
+<body>
+
+<div>
+    <h1>When "NOT" taking ring_start and ring_end into account</h1>
+    <h1>Number of parsable glycans: 638</h1>
+    <h1>Number of distinct topology: 164</h1>
+    <h1>Total number of glycans in topology cluster: 447</h1>
+    <br>
+
+</div>
+
+<div id="container_eg">
+    <h2>Molecular weight = 100 dalton example</h2>
+    <table>
+        <tr>
+            <th>Cluster1</th>
+            <th><img src="https://glytoucan.org/glycans/G00046MO/image?style=extended&format=png&notation=cfg"><br>G00046MO</th>
+        </tr>
+        <tr>
+            <th>Singleton Items</th>
+            <th><img src="https://glytoucan.org/glycans/G00046MO/image?style=extended&format=png&notation=cfg"><br>G00046MO</th>
+        </tr>
+        <tr>
+            <th>Cluster 3</th>
+            <th><img src="https://glytoucan.org/glycans/G00046MO/image?style=extended&format=png&notation=cfg"><br>G00046MO</th>
+            <th><img src="https://glytoucan.org/glycans/G00046MO/image?style=extended&format=png&notation=cfg"><br>G00046MO</th>
+        </tr>
+        <tr>
+            <th>Cluster 4</th>
+            <th><img src="https://glytoucan.org/glycans/G00046MO/image?style=extended&format=png&notation=cfg"><br>G00046MO</th>
+            <th><img src="https://glytoucan.org/glycans/G00047MO/image?style=extended&format=png&notation=cfg"><br>G00047MO</th>
+        </tr>
+    </table>
+</div>
+
+<div id="container"></div>
+<script>
+    "use strict";
+    let oridata = {"0": [["G58645HA"]], "512": [["G08371CD", "G36123IU", "G73708UL"]], "514": [["G38301SX"]], "518": [["G74515VG"]], "1033": [["G07670VS"]], "1548": [["G00022MO"]], "1039": [["G46748BU"], ["G00062MO"], ["G08079IN"], ["G81787XH"], ["G67638AR", "G58773TI", "G30192OA"]], "1040": [["G69030AU"], ["G12068BR"], ["G19804SF", "G62735WZ"], ["G07357YR", "G45673KX", "G79535HZ", "G21808VY", "G02425YO"]], "600": [["G97569KL"]], "1042": [["G64856PW", "G30687DL"]], "531": [["G41323BT"]], "529": [["G40192EJ", "G68084OM"], ["G46868TY", "G35778AN", "G94435QH"], ["G00066MO", "G10902TC", "G55958KV"], ["G61459JW", "G40696TO", "G88393MK", "G39064VB"], ["G24566OP", "G39023AU", "G01187XC", "G00047MO", "G00051MO"]], "1558": [["G83161QT"]], "1053": [["G45770AV"]], "543": [["G24270KX"]], "1056": [["G85497PI"], ["G43648DB"], ["G82858KU", "G11928TH", "G06031DD"]], "545": [["G17750OE"], ["G32862WC"], ["G76297JC"], ["G25129BT", "G11423ZI"], ["G41709CA", "G90562PB"], ["G83540EL", "G87727XV", "G06239NA"], ["G06580KR", "G23041XK", "G83088MZ", "G94231FZ"], ["G55205ZV", "G74668VC", "G03499BP", "G00076PK", "G27798EJ", "G69426KQ"]], "1580": [["G05952XV", "G40183QN"], ["G02149VR", "G17486WU"], ["G78818SP", "G50762GU"], ["G93468NI", "G68110IF"]], "690": [["G48236KP"], ["G29406SZ", "G23581GL"]], "1072": [["G72565QB"], ["G85278ER", "G84034JH"], ["G80393RT", "G68983XG"]], "1589": [["G99710RT"]], "568": [["G51258AO"]], "570": [["G11971MR"], ["G02240AO", "G96865DJ"]], "1597": [["G72557NR", "G29966WK"]], "1086": [["G80750JQ"]], "1091": [["G54161DR"]], "2486": [["G14406OW"]], "586": [["G61149BD"], ["G76607YV"], ["G68607SL"], ["G00034MO", "G00033MO"], ["G29487JS", "G48117BL"], ["G61730RY", "G32723SL", "G41372SJ"]], "588": [["G21312EA"]], "3662": [["G05248MY"]], "593": [["G14395NH", "G51907PX"]], "1379": [["G55153IW"]], "1111": [["G93400AK"]], "1624": [["G58667NI"]], "1113": [["G83212YI"], ["G96238FJ", "G56045WU"], ["G46055MA", "G26929DQ", "G85779MY", "G17961XM"]], "1551": [["G59819BB"]], "609": [["G89307GT"], ["G10356UT"], ["G57036MA", "G44854SQ"], ["G12295TB", "G78706CK", "G26555CS", "G36845IZ"]], "2659": [["G87293AR"]], "1127": [["G07394RV"], ["G29065KQ"], ["G02657AK", "G41759HA"]], "1640": [["G20966TZ"], ["G52877MJ"]], "623": [["G89591DK"]], "2162": [["G04433GV", "G16999RL"], ["G77608BK", "G26203DP"]], "627": [["G47362BJ"], ["G00037MO", "G00038MO", "G22185MF"]], "2165": [["G00631TY"]], "1655": [["G45215IJ"]], "1144": [["G56526JU", "G91532KA"], ["G91326YS", "G50321QR", "G96401FK"]], "633": [["G14716ZB", "G61010HE"], ["G56516VH", "G28868ZC", "G91237TK"]], "634": [["G05337KJ"], ["G87245HS"]], "639": [["G53277CD", "G54406UD"]], "1155": [["G01866TT"]], "1160": [["G42784QY", "G32254QI"]], "1161": [["G22689CV"]], "650": [["G06873PC"], ["G55026RI", "G18414FL"]], "1168": [["G00063MO"]], "1176": [["G00021MO"]], "665": [["G16821WP"], ["G00045MO"]], "666": [["G00025MO"], ["G34646VD"], ["G91649BT", "G00013MO", "G33224VN"]], "1306": [["G46884IT", "G11485ID"]], "1695": [["G54937EM"]], "676": [["G47812NS", "G62593IS"]], "1185": [["G89524PP", "G49854OS"], ["G22418PV", "G93855LZ"]], "674": [["G45058HZ"], ["G56682BC", "G64050LH"], ["G65562ZE", "G56299XO", "G03777BI"], ["G73578JC", "G46776WR", "G10203DW", "G09376MR", "G59168YE", "G00065MO"]], "675": [["G00052MO", "G00048MO", "G20009SF", "G49963IQ", "G39211DH"]], "164": [["G82576YO"]], "2077": [["G11041DA"]], "176": [["G17927IW"]], "1201": [["G15555MR"], ["G13224CR", "G96400MT"], ["G50123ZO", "G98750DB"]], "1202": [["G71485PH"]], "691": [["G32726WH"], ["G72060BE", "G81516LH"], ["G19524AS", "G90377OF"], ["G08176ZW", "G47269OM"], ["G28420BK", "G81345OW", "G80022XC"], ["G00294TN", "G70519XK", "G43391VM", "G50899UD"], ["G94956AW", "G25651TK", "G26934CO", "G31734OS"]], "180": [["G70323CJ"], ["G65889KE", "G68158BT"], ["G71142DF", "G15021LG"]], "884": [["G06378CG"], ["G53231FE"]], "1722": [["G98066UT"]], "1215": [["G93899SO", "G33570YF"]], "1728": [["G26036PN"], ["G37563FN"]], "1218": [["G80291PD", "G65223RT"], ["G88356HA", "G37830TX"]], "707": [["G00015MO"], ["G00027MO"], ["G00407UJ", "G21856LC", "G00071MO", "G99560EQ", "G05357CB"], ["G00012MO", "G00061MO", "G00072MO", "G57710SU", "G24499XE", "G19926LY"], ["G58896AZ", "G00049MO", "G00070MO", "G40585SO", "G48059CD", "G45827GY", "G00069MO"]], "715": [["G95440AP", "G54118CT", "G55583HW"]], "1656": [["G75811PV", "G57142PA"]], "1234": [["G62971NJ"], ["G55220VL", "G00028MO"]], "1236": [["G36414FS"]], "1243": [["G44060QH", "G03986GH"]], "732": [["G71832QJ", "G17480GI", "G99315PE"], ["G58507AZ", "G17108EX", "G66163TI", "G74353FF"]], "221": [["G64581RP", "G49108TO"], ["G57321FI", "G27025MB", "G61418DU"]], "223": [["G89565QL"], ["G61406KC"]], "738": [["G92341SR"]], "1256": [["G75552OL", "G17994ZD"]], "1770": [["G90017UO"]], "748": [["G64973KT"], ["G29548YX"], ["G00014MO"], ["G88796WA"], ["G95034OI"], ["G85237WB", "G62554JH"], ["G43784HS", "G45207BM", "G11259JT", "G00058MO"]], "754": [["G43191LZ", "G41145LF", "G99745QX", "G93779QZ"]], "244": [["G95090DW"]], "1748": [["G92171GY"]], "1786": [["G00998NI"]], "1275": [["G00029MO"]], "980": [["G00659GQ", "G46799JK"]], "771": [["G57796RK"]], "260": [["G07169WN", "G72548RZ", "G40843KY", "G60011XD"]], "776": [["G00017MO", "G48124SB"]], "1289": [["G23347CS"], ["G81983KG", "G24638PB"], ["G45714BQ", "G13258LA"], ["G46677TE", "G69277LC"], ["G37184KW", "G97612UN"]], "778": [["G82974JM"], ["G61424BA", "G55286YY"]], "779": [["G84173YM"]], "785": [["G82061CN"], ["G41392LY"]], "787": [["G59508TM"], ["G96614JE", "G59736KH", "G96596OC"], ["G56133NW", "G05297EK", "G30925QW", "G50866KI"]], "789": [["G08872UM"]], "794": [["G16142UJ", "G16775IT"]], "795": [["G09105CO"]], "796": [["G06557IC", "G92564XJ"]], "801": [["G06898ZN", "G60606QD"]], "803": [["G11687NW"]], "1316": [["G00030MO"]], "1842": [["G25225ZP"]], "1328": [["G10503MP", "G43040ZY"]], "1330": [["G60890ZT"], ["G33532XU"]], "1331": [["G19619KS", "G69360KJ"]], "820": [["G39294YF"], ["G00053MO", "G00054MO", "G81971FM", "G25705KO"]], "309": [["G50850NI", "G81533KY"]], "649": [["G32969VW", "G75789AR"]], "1849": [["G16194TN"]], "828": [["G04302CX"], ["G00711NG"]], "830": [["G22976NF"], ["G01361SX"]], "2879": [["G28330DZ"]], "2368": [["G90889KG", "G56749GV"]], "1347": [["G06597DS"]], "836": [["G04165ZA"], ["G59126YU"], ["G61168WC", "G79389NT"], ["G15813LB", "G84263XI"], ["G88675ZE", "G44496HJ", "G03509EL"]], "837": [["G13910LY", "G39320DU"], ["G14300ZJ", "G97013VN"], ["G89208KM", "G04156GK", "G60395SO"]], "326": [["G36855WW"], ["G00068MO", "G82749ZI", "G66086EX"]], "840": [["G11148DZ"]], "844": [["G34108PR"]], "1871": [["G17077FL", "G18625KA"], ["G54733XO", "G49791FJ"], ["G99524KA", "G54442GQ"], ["G90598GO", "G26199BG"]], "1363": [["G03506YN"], ["G03067VG"]], "852": [["G18221CF", "G56478LD"]], "853": [["G45869YW"], ["G57920AK"], ["G12045LV", "G78941GA"], ["G42553JB", "G00050MO"], ["G41865GQ", "G34881WK", "G54079WP"], ["G26123AX", "G98173LG", "G72002FC"]], "342": [["G74621DY", "G84224TW", "G20420WT"], ["G07490EK", "G51379UR", "G29313LW"], ["G00046MO", "G62763GO", "G78260AJ", "G24432YB", "G00016MO", "G86123DJ", "G67988RO"]], "1882": [["G66787RA"]], "351": [["G47325QT"]], "867": [["G63813EJ"]], "1380": [["G19336PT"]], "869": [["G00060MO"], ["G60645OK", "G68856EP", "G12460DL"], ["G19298OA", "G41473XU", "G99053DY"]], "999": [["G94938PL"], ["G89659QV", "G09552LA"], ["G70115XG", "G11636EE", "G60629OV"]], "877": [["G85608AG"], ["G41052GC"]], "878": [["G48600JD", "G54826OZ", "G33888AF", "G97501MA"]], "367": [["G80587NA"], ["G57709BH"]], "1906": [["G72494BI"]], "883": [["G79399YJ"]], "1396": [["G03321AC"], ["G80966KZ"]], "1909": [["G96152FT"]], "1404": [["G67969KB"]], "894": [["G08326JL"], ["G17752YB"], ["G77620XT"], ["G29703NT"], ["G61026ND", "G88766TD"]], "383": [["G02880JU"], ["G87315SO", "G60859DF"], ["G00032MO", "G78436BB", "G00031MO", "G61298NX"], ["G00056MO", "G00055MO", "G04616ST", "G47428UI", "G51331BY"]], "900": [["G23322RK", "G80722US"], ["G00672PE", "G77659VW"]], "1418": [["G36476BA", "G35228ZS"]], "908": [["G00020MO"]], "1421": [["G04715SK"]], "910": [["G19266OP"], ["G25323VU"], ["G41806QY"], ["G00064MO"], ["G00026MO", "G20624LQ", "G22768VO"], ["G51699SI", "G98848EU", "G48061MK", "G96428WC", "G80062GG"]], "2453": [["G14091MR", "G86139YL"]], "406": [["G98482BC"]], "1177": [["G65112QB", "G25216QA"]], "1435": [["G93694YU", "G67383AR"]], "1948": [["G93536PN", "G64227KZ"]], "1437": [["G41327HW"], ["G85735NR"]], "838": [["G41959YC"]], "422": [["G20044TD"], ["G50926NK", "G04416BG"]], "424": [["G07982RO"], ["G31736BK", "G00057MO"], ["G00039MO", "G00040MO", "G00044MO", "G00043MO"], ["G00042MO", "G00035MO", "G00041MO", "G00036MO"]], "924": [["G98544DH", "G81928IQ", "G30187JM"]], "1451": [["G75814EP", "G97932OH"]], "940": [["G95233MF"]], "430": [["G82625KX", "G82612XX"]], "948": [["G23094GH"]], "1462": [["G80858MF"]], "951": [["G44411RJ"]], "956": [["G84891DZ"]], "1476": [["G71121NN", "G97345NY"]], "965": [["G93910CU"], ["G14000ZZ"], ["G84350SH", "G05979UI"], ["G65191ST", "G01614ZM"]], "966": [["G74121RX"]], "967": [["G84906ML"]], "458": [["G23517ZK"]], "1186": [["G74578MX", "G85947WY", "G74917JX"]], "974": [["G00023MO"]], "463": [["G13157WZ"]], "2000": [["G00552RX"], ["G93805MV"]], "1492": [["G91348US"], ["G06953DR"], ["G92175CL"]], "982": [["G96874XX"]], "471": [["G77824XV", "G30207PZ", "G44345UH", "G63069TR"]], "1188": [["G26295XE", "G47379VH"]], "762": [["G43195TR", "G82775QT"]], "990": [["G65507FU", "G35186RY"]], "2019": [["G28566CQ"]], "1509": [["G01296LJ"]], "998": [["G54721WC"], ["G32417JV", "G43804GS"], ["G48558GR", "G46613JI"], ["G03277YI", "G14633CL"], ["G79536OW", "G72692DY", "G72506RN", "G21066IE", "G01767JJ", "G48838EV", "G28800UK", "G21938SG", "G83513YI"]], "487": [["G53517XC"]], "488": [["G31301MT"], ["G57548NB"], ["G61399NC", "G10422IZ"], ["G58612ZQ", "G47548GA", "G00067MO"]], "936": [["G00019MO"], ["G00018MO"]], "2036": [["G08855PJ"]], "1014": [["G24034CH"]], "1015": [["G83295FM"], ["G83120FP", "G98465JN"], ["G22270QF", "G63238VS", "G54585VU"]], "504": [["G18464VS"], ["G36810SF"], ["G00024MO"], ["G28528AG", "G25559RS", "G47395XN"], ["G00619DD", "G17780OR", "G72618IM"], ["G39011KA", "G06000DZ", "G00059MO", "G21269SH", "G48740SL", "G78074HX"]], "1364": [["G06148DR", "G82106UN"]], "506": [["G63072CF"]]};
+
+    function getImgURL(acc) {
+        let url = "https://glytoucan.org/glycans/" + acc + "/image?style=extended&format=png&notation=cfg";
+        return url
+    }
+
+    let mwlist = Object.keys(oridata);
+    mwlist.sort(function(a, b){return parseInt(a) - parseInt(b)});
+    for (let i in mwlist){
+        let mw = mwlist[i];
+        let datap = oridata[mw];
+        datap.sort(function (a, b) {
+            return b.length - a.length
+        });
+
+
+        let container = document.getElementById("container");
+
+        let title = document.createElement("h2");
+        title.innerHTML = "Moleculer weight: " + mw + " dalton";
+
+        let table = document.createElement("table");
+
+
+        datap.forEach(function (cluster) {
+            let row = document.createElement("tr");
+            let unit0 = document.createElement("th");
+            if (cluster.length > 1){
+                unit0.innerText = "Cluster:"
+            }
+            else {
+                unit0.innerText = "Singleton:"
+            }
+
+            row.appendChild(unit0);
+            cluster.forEach(function (g){
+                let unit = document.createElement("th");
+
+                let gimg = document.createElement("img");
+                gimg.src = getImgURL(g);
+
+                let br = document.createElement("br");
+
+                unit.appendChild(gimg);
+                unit.appendChild(br);
+                unit.innerHTML += g;
+
+                row.appendChild(unit);
+            });
+            table.appendChild(row);
+        });
+
+
+
+        container.appendChild(title);
+        container.appendChild(table);
+
+    }
+
+    let e = document.getElementById("container_eg");
+    e.parentNode.removeChild(e);
+
+
+</script>
+
+</body>
+</html>
