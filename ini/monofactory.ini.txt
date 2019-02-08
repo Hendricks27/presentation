@@ -29,6 +29,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.man
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 substituent = Substituent.anhydro parent_pos 2 parent_type Linkage.oxygenLost child_pos 1 child_type Linkage.nitrogenAdded; parent_pos 5 parent_type Linkage.oxygenPreserved child_pos 1 child_type Linkage.nitrogenAdded;
 aliases = WURCS20:[h1122h_2-5]
@@ -80,6 +82,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.gal
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 aliases = WURCS20:[h2112h]
 
@@ -126,6 +130,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.glc
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 aliases = WURCS20:[h2122h]
 
@@ -170,6 +176,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.glc
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 substituent = Substituent.nAcetyl parent_pos 2 parent_type Linkage.oxygenLost child_pos 1 child_type Linkage.nitrogenAdded
 aliases = WURCS20:[h2122h_2*NCC/3=O]
@@ -186,6 +194,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.gal
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 substituent = Substituent.nAcetyl parent_pos 2 parent_type Linkage.oxygenLost child_pos 1 child_type Linkage.nitrogenAdded
 aliases = WURCS20:[h2112h_2*NCC/3=O]
@@ -473,6 +483,8 @@ anomer = Anomer.uncyclized
 config = Config.d
 stem = Stem.glc
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 substituent = Substituent.sulfate parent_pos 6 child_pos 1 parent_type Linkage.oxygenPreserved child_type Linkage.nitrogenAdded; Substituent.nAcetyl parent_pos 2 parent_type Linkage.oxygenLost child_pos 1 child_type Linkage.nitrogenAdded
 aliases = WURCS20:[h2122h_2*NCC/3=O_6*OSO/3=O/3=O]
@@ -603,11 +615,15 @@ anomer = Anomer.uncyclized
 config = Config.missing
 stem = Stem.gro
 superclass = SuperClass.TRI
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi
 aliases = WURCS20:[hxh]
 
 [Unknown2]
 superclass = SuperClass.HEX
+ring_start = 0
+ring_end = 0
 mods = 1 Mod.aldi 3,4 Mod.en
 aliases = WURCS20:[hxFFxh]
 
@@ -1126,3 +1142,4 @@ ring_start = 1
 ring_end = 5
 mods = 6 Mod.a
 aliases = Glycam:DIdopA
+
