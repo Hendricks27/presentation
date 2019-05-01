@@ -892,6 +892,7 @@ var glycanviewer = {
 
         function wrapper1(x){
             // console.log(x.nodes);
+            // ????
             if (x.nodes){
                 thisLib.naviRefresh()
             }
