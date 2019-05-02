@@ -124,7 +124,7 @@ var glycanviewer = {
         var thisLib = this;
 
         this.component = this.para.essentials.component;
-        var topoonly = this.para.essentials.topoOnly;
+        this.topoonly = this.para.essentials.topoOnly;
 
         var component = this.component;
         var rootname = component.root;
@@ -161,13 +161,18 @@ var glycanviewer = {
         while (thisLevelNodes.length > 0){
             for(var i=0; i < thisLevelNodes.length; i++){
                 var currentNode = thisLevelNodes[i];
+                if (this.topoonly){
+                    if(component.nodes[currentNode].type == "Saccharide"){
+                        continue
+                    }
+                }
                 var edgesOfCurrentNode = component.edges[currentNode];
                 if ( edgesOfCurrentNode != undefined ){
                     for (var currentEdgeIndex in edgesOfCurrentNode){
                         var currentEdge = edgesOfCurrentNode[currentEdgeIndex];
                         nextLevelNodes.push(currentEdge.to);
                         component.nodes[ currentNode ].level = thisLevel;
-                        if (thisLevel < displayLevel || boolDisplayAll){
+                        if (thisLevel < displayLevel || true){
                             displaynodes[ currentNode ] = 1;
                         }
                         else{
@@ -177,7 +182,7 @@ var glycanviewer = {
                 }
                 else{
                     component.nodes[ currentNode ].level = thisLevel;
-                    if (thisLevel < displayLevel || boolDisplayAll){
+                    if (thisLevel < displayLevel || true){
                         displaynodes[ currentNode ] = 1;
                     }
                     else {
@@ -188,8 +193,6 @@ var glycanviewer = {
                 //console.log(debug);
 
             }
-
-
 
             thisLevelNodes = nextLevelNodes;
             nextLevelNodes = [];
@@ -582,7 +585,7 @@ var glycanviewer = {
             //console.log(clickData);
             document.addEventListener("click",clearEverythingInContextMenu,{once: true});
 
-            boolDisplayAll = true;
+            // boolDisplayAll = true;
 
             var menuELE = thisLib.div_contextMenu;
             var menuList = document.createElement("dl");
@@ -649,6 +652,7 @@ var glycanviewer = {
                     entry.onclick = function(){
                         var para = thisLib.para;
                         para.essentials.viewRoot = id;
+                        para.essentials.topoOnly = false;
                         thisLib.init(para)
                     }
                 }
