@@ -37,7 +37,7 @@ allocateDiv();
 
 function appendicons(iupacComp) {
     var icon = document.createElement("img");
-    icon.src = "icons/" + iupacComp + ".jpg";
+    icon.src = "icons/" + iupacComp.toLowerCase() + ".jpg";
     icon.width = 20;
     icon.height = 20;
     icon.id = iupacComp + "_icon";
