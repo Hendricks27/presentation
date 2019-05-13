@@ -149,7 +149,7 @@ function getImage(gtcid){
     var figure = document.createElement("figure");
     figure.style.margin = 0;
     var img = document.createElement("img");
-    img.src = "http://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
+    img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
     img.style = "width: 100px; height: auto;";
     img.gtcid = gtcid;
     img.onclick = function () {
