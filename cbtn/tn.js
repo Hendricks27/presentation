@@ -6,6 +6,8 @@ var container = document.getElementById("container");
 var leftPanal, rightPanal;
 
 var allPossibleMono = ['Man','Gal','Glc','Xyl','Fuc','GlcNAc','GalNAc','NeuAc','NeuGc', "Xxx"];
+var allPossibleMono = ['GlcNAc','Man','Gal','Fuc','Glc'];
+var otherMono = ['NeuAc','Xyl','GalNAc','NeuGc', "Xxx"];
 
 
 // runtime variable
@@ -47,7 +49,7 @@ function appendicons(iupacComp) {
     count.min = "0";
     count.step = "1";
     count.pattern = "\d+";
-    count.style = "width: 25px;";
+    count.style = "width: 30px;";
     count.value = "0";
     count.id = iupacComp+"_count";
 
