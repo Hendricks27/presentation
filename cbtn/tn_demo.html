@@ -64,6 +64,15 @@
 
         window.location.hash = '';
         window.location.hash = 'viewer';
+
+        setTimeout(wrapfunc, 2000);
+        function wrapfunc() {
+            var c = glycanviewer.network.getConnectedNodes(gtcid);
+            c.push(gtcid);
+            glycanviewer.network.fit({nodes: c});
+            glycanviewer.network.selectNodes(c)
+        }
+
     }
 
 </script>
