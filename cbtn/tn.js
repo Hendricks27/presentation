@@ -11,6 +11,7 @@ var otherMono = ['Glc','Xyl','GalNAc','NeuGc', "Xxx"];
 var keyMapPlus = ["q","w","e","r","t","y","u","i","o"];
 var keyMapMinus = ["a","s","d","f","g","h","j","k","l"];
 var mono = allPossibleMono.concat(["Xxx"]);
+var remainingCompConfig = {};
 
 // runtime variable
 var matchedTopologies = [];
@@ -56,7 +57,11 @@ allocateDiv();
 function compositionChange(iupac, num) {
     var eleID = iupac + "_count";
     var c = parseInt(document.getElementById(eleID).value);
+
     if (num<0 && c+num < 0){
+        // ignore minus count
+    }else if (num>0 && remainingCompConfig[iupac] === 0){
+        // exceed maximum possible configuration
 
     }
     else {
@@ -87,8 +92,6 @@ function appendicons(iupacComp) {
     var hint = document.createElement("p");
     hint.style = "display: inline";
     hint.id = iupacComp + "_hint";
-
-    var tri_style = "fill:blue; stroke:black; stroke-width: 2px";
 
     var ind = monos.indexOf(iupacComp);
 
@@ -215,8 +218,10 @@ function afterChange(){
             }
         }
     }
+
     for (var mc of Object.keys(maxComp)){
         var x = document.getElementById(mc+"_hint");
+        remainingCompConfig[mc] = Math.max((maxComp[mc]-currentComp[mc]), 0);
         x.innerText = Math.max((maxComp[mc]-currentComp[mc]), 0) + " to go";
     }
     updateRightPannal();
