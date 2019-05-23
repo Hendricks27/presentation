@@ -1142,6 +1142,7 @@ var glycanviewer = {
             d.image = para.essentials.imgURL + d.name + '.png';
 
             d.size = d.height / magicNumberForHeightScaleRatio;
+            d.labelHighlightBold = true;
 
 
             if (displaynodes[k] != 1) {

@@ -7,14 +7,19 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
+    <style>
+        html *
+        {
+            font-family: Arial;
+        }
+    </style>
 </head>
 <body>
-<script>
-    // pretend composition is inside
 
-</script>
-<p>Hold ctrl + any of "qwerty" to add mono</p>
-<p>Hold ctrl + any of "asdfgh" to subtract mono</p>
+<!- To anyone who is looking at the source code here ->
+<!- Please don't ->
+<!- Because the code itself is not pretty... hmmm ->
+
 <div id="container"></div>
 <script src="tn.js"></script>
 
@@ -23,6 +28,7 @@
 <script src="hgv.js"></script>
 
 <script>
+
     var displayLevel = 100;
 
     var option = {
@@ -70,9 +76,22 @@
             var c = glycanviewer.network.getConnectedNodes(gtcid);
             c.push(gtcid);
             glycanviewer.network.fit({nodes: c});
-            glycanviewer.network.selectNodes(c)
+            glycanviewer.network.selectNodes(c);
+            glycanviewer.whereAmI();
         }
 
+        if (lastClickedTopology.length > 0){
+            var x = lastClickedTopology[lastClickedTopology.length-1];
+            var h = document.getElementById("img_"+x);
+            if (h) {
+                h.style.border = "none";
+                h.style["border-color"] = "red";
+            }
+        }
+        var h = document.getElementById("img_"+gtcid);
+        h.style.border = "solid";
+        h.style["border-color"] = "red";
+        lastClickedTopology.push(gtcid);
     }
 
 </script>

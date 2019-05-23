@@ -1,216 +1,267 @@
 "use strict";
 
-// https://www.ncbi.nlm.nih.gov/glycans/snfg.html
 
 var container = document.getElementById("container");
 var leftPanal, rightPanal;
 
-var allPossibleMonoOld = ['Man','Gal','Glc','Xyl','Fuc','GlcNAc','GalNAc','NeuAc','NeuGc', "Xxx"];
-var allPossibleMono = ['GlcNAc','Man','Gal','Fuc','NeuAc'];
-var otherMono = ['Glc','Xyl','GalNAc','NeuGc', "Xxx"];
-var keyMapPlus = ["q","w","e","r","t","y","u","i","o"];
-var keyMapMinus = ["a","s","d","f","g","h","j","k","l"];
-var mono = allPossibleMono.concat(["Xxx"]);
-var remainingCompConfig = {};
+// well it suggests all possible monosaccharides except for Xxx, however because this variable are used in too many places...
+var allPossibleMono = ['GlcNAc', 'Man', 'Gal', 'Fuc', 'NeuAc'];
+// monosaccharides which classfied as "others"
+var otherMono = ['Glc', 'Xyl', 'GalNAc', 'NeuGc', "Xxx"];
+var allMonoOnDisplay = allPossibleMono.concat(["Xxx"]);
+var monofreq = {};
+var maxComp = {};
+var icon_config = {
+    'GlcNAc': {"shape": "square", "icon_color": "blue", "count_color": "white"},
+    'Man': {"shape": "circle", "icon_color": "green", "count_color": "white"},
+    'Gal': {"shape": "circle", "icon_color": "yellow", "count_color": "black"},
+    'Fuc': {"shape": "triangle", "icon_color": "red", "count_color": "white"},
+    'NeuAc': {"shape": "diamond", "icon_color": "purple", "count_color": "white"},
+    'Xxx': {"shape": "circle", "icon_color": "grey", "count_color": "white"}
+};
+
+// Deprecated variables
+var allPossibleMonoOld = ['Man', 'Gal', 'Glc', 'Xyl', 'Fuc', 'GlcNAc', 'GalNAc', 'NeuAc', 'NeuGc', "Xxx"];
+var keyMapPlus = ["q", "w", "e", "r", "t", "y", "u", "i", "o"];
+var keyMapMinus = ["a", "s", "d", "f", "g", "h", "j", "k", "l"];
+
+// For the viewer in the bottom
+var lastClickedTopology = [];
+
+function init() {
+    for (var m of allMonoOnDisplay) {
+        monofreq[m] = 0;
+        maxComp[m] = 1;
+    }
+}
+
+init();
 
 // runtime variable
 var matchedTopologies = [];
 
 function convertXxx() {
-    for (var gtcid of Object.keys(data)){
+    for (var gtcid of Object.keys(data)) {
         var d = data[gtcid];
-        if (d.comp){
+        if (d.comp) {
             var x = 0;
-            for (var i of otherMono){
-                if (d.comp[i]){
-                    x+=d.comp[i];
+            for (var i of otherMono) {
+                if (d.comp[i]) {
+                    x += d.comp[i];
                 }
             }
             d.comp["Xxx"] = x;
         }
     }
 }
+
 convertXxx();
 
 function allocateDiv() {
     leftPanal = document.createElement("div");
     rightPanal = document.createElement("div");
 
-    leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 150px; margin: 0px; padding: 0px;";
-    rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
+    //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
+    //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
+    leftPanal.style = "float: left; width: 65px; margin: 0px; padding: 0px;";
     container.style = "border-color: lightgrey; border-style: solid;";
-    
+
     container.appendChild(leftPanal);
     container.appendChild(rightPanal);
-    
+
 }
+
 function resizeContainer() {
     var width = leftPanal.clientWidth + rightPanal.clientWidth;
     var height = Math.max(leftPanal.clientHeight, rightPanal.clientHeight);
-    //console.log(height);
-    container.style.height = height+5 + "px";
-    container.style.width = width+15 + "px";
+
+    container.style.height = height + 5 + "px";
+    container.style.width = width + 15 + "px";
 }
 
 allocateDiv();
 
 function compositionChange(iupac, num) {
-    var eleID = iupac + "_count";
-    var c = parseInt(document.getElementById(eleID).value);
+    var c = monofreq[iupac];
 
-    if (num<0 && c+num < 0){
+    if (num < 0 && c + num < 0) {
         // ignore minus count
-    }else if (num>0 && remainingCompConfig[iupac] === 0){
+    } else if (num > 0 && maxComp[iupac] - monofreq[iupac] === 0) {
         // exceed maximum possible configuration
 
-    }
-    else {
-        document.getElementById(eleID).value = c+num;
+    } else {
+        monofreq[iupac] = monofreq[iupac] + num;
         afterChange();
+        refreshLeftPanal();
     }
+}
+
+function drawMonoIcon(m) {
+    var icon = document.createElement("canvas");
+    icon.setAttribute("width", "20px");
+    icon.setAttribute("height", "20px");
+
+    var config = icon_config[m];
+
+    var ctx = icon.getContext("2d");
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = config.icon_color;
+    ctx.font = "12px Arial";
+
+    if (config.shape == "square") {
+        ctx.moveTo(2, 2);
+        ctx.lineTo(2, 18);
+        ctx.lineTo(18, 18);
+        ctx.lineTo(18, 2);
+    } else if (config.shape == "circle") {
+        ctx.arc(10, 10, 9, 0, 2 * Math.PI);
+    } else if (config.shape == "triangle") {
+        ctx.moveTo(10, 1);
+        ctx.lineTo(1, 19);
+        ctx.lineTo(19, 19);
+    } else if (config.shape == "diamond") {
+        ctx.moveTo(10, 1);
+        ctx.lineTo(19, 10);
+        ctx.lineTo(10, 19);
+        ctx.lineTo(1, 10);
+    } else {
+        console.log("shape is not supported yet")
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+    ctx.fillStyle = config.count_color;
+    var t = monofreq[m].toString();
+    var x, y = 14.3;
+    if (t.length == 1) {
+        x = 6.8;
+    } else {
+        x = 3.3
+    }
+    if (config.shape == "triangle") {
+        y = y + 4;
+    }
+
+    ctx.fillText(t, x, y);
+
+    return icon
+}
+
+function drawAddAndSubButton(add, grey) {
+    var button = document.createElement("canvas");
+    var color = "DodgerBlue";
+    button.setAttribute("width", "20px");
+    button.setAttribute("height", "20px");
+    var ctx = button.getContext('2d');
+    ctx.beginPath();
+    if (add) {
+        ctx.moveTo(1, 1);
+        ctx.lineTo(19, 10);
+        ctx.lineTo(1, 19);
+        color = "SlateBlue";
+    } else {
+        ctx.moveTo(1, 10);
+        ctx.lineTo(19, 19);
+        ctx.lineTo(19, 1);
+    }
+    ctx.closePath();
+    ctx.lineWidth = 2;
+    if (grey) {
+        color = "lightgrey";
+    }
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    return button
 }
 
 
 function appendicons(iupacComp) {
-    var monos = allPossibleMono.concat(["Xxx"]);
+    var icons_container = document.createElement("div");
 
-    var icon = document.createElement("img");
-    icon.src = "icons/" + iupacComp.toLowerCase() + ".jpg";
-    icon.width = 20;
-    icon.height = 20;
-    icon.id = iupacComp + "_icon";
+    var icon = drawMonoIcon(iupacComp);
 
-    var count = document.createElement("input");
-    count.type = "number";
-    count.min = "0";
-    count.step = "1";
-    count.pattern = "\d+";
-    count.style = "width: 30px;";
-    count.value = "0";
-    count.id = iupacComp+"_count";
+    var ind = allMonoOnDisplay.indexOf(iupacComp);
 
-    var hint = document.createElement("p");
-    hint.style = "display: inline";
-    hint.id = iupacComp + "_hint";
-
-    var ind = monos.indexOf(iupacComp);
-
-    var subbutton = document.createElement("canvas");
-    subbutton.setAttribute("width", "20px");
-    subbutton.setAttribute("height", "20px");
-    var ctx = subbutton.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(1, 10);
-    ctx.lineTo(19, 19);
-    ctx.lineTo(19, 1);
-    ctx.closePath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'lightblue';
-    ctx.font = "10px Arial";
-    ctx.fillText(keyMapPlus[ind].toUpperCase(), 10, 14);
-    ctx.stroke();
+    var g = true;
+    if (monofreq[iupacComp] > 0) {
+        g = false
+    }
+    var subbutton = drawAddAndSubButton(false, g);
     subbutton.onclick = function () {
         compositionChange(iupacComp, -1);
     };
 
-
-    var addbutton = document.createElement("canvas");
-    addbutton.setAttribute("width", "20px");
-    addbutton.setAttribute("height", "20px");
-    var ctx = addbutton.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(1, 1);
-    ctx.lineTo(19, 10);
-    ctx.lineTo(1, 19);
-    ctx.closePath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'SpringGreen';
-    ctx.font = "10px Arial";
-    ctx.fillText(keyMapMinus[ind].toUpperCase(), 2, 14);
-    ctx.stroke();
+    if (maxComp[iupacComp] - monofreq[iupacComp] > 0) {
+        g = false
+    } else {
+        g = true
+    }
+    var addbutton = drawAddAndSubButton(true, g);
     addbutton.onclick = function () {
         compositionChange(iupacComp, 1);
-    };
-
-    icon.onclick = function(e){
-        if (e.detail == 1){
-            compositionChange(iupacComp, 1);
-        }
-        else if (e.detail == 2){
-            compositionChange(iupacComp, -1);
-        }else {
-            //document.getElementById(elementID).value = parseInt(document.getElementById(elementID).value)-2
-        }
-
-    };
-
-
-    count.onchange = function(){
-        afterChange();
     };
 
     leftPanal.appendChild(subbutton);
     leftPanal.appendChild(icon);
     leftPanal.appendChild(addbutton);
-    leftPanal.appendChild(count);
-    leftPanal.appendChild(hint);
     leftPanal.appendChild(document.createElement("br"));
 
 }
 
-for (var iupacComp of allPossibleMono.concat(["Xxx"])){
-    appendicons(iupacComp)
-}
-
-function getCurrentComp(){
-    var currentComp = {};
-    for (var m of allPossibleMono.concat(["Xxx"])){
-        var eleId = m + "_count";
-        var c = parseInt(document.getElementById(eleId).value);
-        currentComp[m] = c;
+function refreshLeftPanal() {
+    leftPanal.innerHTML = "";
+    for (var iupacComp of allMonoOnDisplay) {
+        appendicons(iupacComp)
     }
-    return currentComp
 }
 
-function afterChange(){
+refreshLeftPanal();
+
+function getCurrentComp() {
+    return monofreq
+}
+
+function afterChange() {
 
 
     var currentComp = getCurrentComp();
-    var maxComp = {};
 
-    for (var k of Object.keys(currentComp)){
+    for (var k of Object.keys(currentComp)) {
         maxComp[k] = 0;
     }
 
     matchedTopologies = [];
 
-    for (var gtcid of Object.keys(data)){
+    for (var gtcid of Object.keys(data)) {
         var d = data[gtcid];
-        if (d.comp){
+        if (d.comp) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)){
-                if (currentComp[mc] != d.comp[mc]){
+            for (var mc of Object.keys(currentComp)) {
+                if (currentComp[mc] != d.comp[mc]) {
                     flag = false;
                 }
             }
-            if (flag){
+            if (flag) {
                 matchedTopologies.push(gtcid);
             }
         }
     }
 
-    for (var gtcid of Object.keys(data)){
+    for (var gtcid of Object.keys(data)) {
         var d = data[gtcid];
-        if (d.comp){
+        if (d.comp) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)){
-                if (currentComp[mc] > d.comp[mc]){
+            for (var mc of Object.keys(currentComp)) {
+                if (currentComp[mc] > d.comp[mc]) {
                     flag = false;
                 }
             }
-            if (flag){
-                for (var mc of Object.keys(currentComp)){
-                    if (!d.comp[mc]){
+            if (flag) {
+                for (var mc of Object.keys(currentComp)) {
+                    if (!d.comp[mc]) {
                         continue
                     }
                     maxComp[mc] = Math.max(maxComp[mc], d.comp[mc]);
@@ -219,17 +270,13 @@ function afterChange(){
         }
     }
 
-    for (var mc of Object.keys(maxComp)){
-        var x = document.getElementById(mc+"_hint");
-        remainingCompConfig[mc] = Math.max((maxComp[mc]-currentComp[mc]), 0);
-        x.innerText = Math.max((maxComp[mc]-currentComp[mc]), 0) + " to go";
-    }
     updateRightPannal();
 }
 
-function getImage(gtcid){
+function getImage(gtcid) {
     var figure = document.createElement("figure");
     figure.style.margin = 0;
+    figure.id = "img_" + gtcid;
     var img = document.createElement("img");
     img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
     img.style = "width: 100px; height: auto;";
@@ -251,8 +298,8 @@ function getImage(gtcid){
 }
 
 function updateRightPannal() {
-    var colnum = parseInt ((window.innerWidth - 160)/104);
-    if (colnum == 0){
+    var colnum = parseInt((window.innerWidth - 160) / 104);
+    if (colnum == 0) {
         colnum == 1
     }
 
@@ -262,26 +309,26 @@ function updateRightPannal() {
     var row = document.createElement("tr");
     var c = 0;
     matchedTopologies.sort(function (id1, id2) {
-        var x = Object.keys(data[id1].content.nodes).length - Object.keys(data[id2].content.nodes).length
+        var x = Object.keys(data[id2].content.nodes).length - Object.keys(data[id1].content.nodes).length;
         return x
     });
 
-    for (var gtcid of matchedTopologies){
+    for (var gtcid of matchedTopologies) {
         var f = getImage(gtcid);
         var td = document.createElement("td");
 
         td.appendChild(f);
         c++;
-        if (c%colnum != 0){
+        if (c % colnum != 0) {
             row.appendChild(td);
-        }else{
+        } else {
             row.appendChild(td);
             table.appendChild(row);
             row = document.createElement("tr");
         }
 
     }
-    if (c%colnum != 0){
+    if (c % colnum != 0) {
         table.appendChild(row);
     }
     rightPanal.appendChild(table);
@@ -292,17 +339,16 @@ function updateRightPannal() {
 function keyPress() {
     var d = document.getElementsByTagName("body")[0];
     d.onkeypress = function (e) {
-        if (e.ctrlKey){
-            if ("qwertyuio".includes(e.key)){
-                var m = mono[keyMapPlus.indexOf(e.key)];
-                compositionChange(m, 1)
-            }else if ("asdfghjkl".includes(e.key)){
-                var m = mono[keyMapMinus.indexOf(e.key)];
+        if ("qwerty".includes(e.key)) {
+            var m = allMonoOnDisplay[keyMapPlus.indexOf(e.key)];
+            compositionChange(m, 1)
+        }
+        if (e.shiftKey) {
+            if ("qwertyQWERTY".includes(e.key)) {
+                var m = allMonoOnDisplay[keyMapPlus.indexOf(e.key.toLowerCase())];
                 compositionChange(m, -1)
-
             }
         }
-        afterChange();
     }
 }
 
