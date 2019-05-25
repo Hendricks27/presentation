@@ -276,7 +276,7 @@ function appendicons(iupacComp) {
     var icon = drawMonoIcon(iupacComp);
     icon.addEventListener("mouseover", function (e) {
         hintForShortcut.innerHTML = iupacComp + " can be added when press " + keystroke + " or removed when press shift+" + keystroke;
-        hintForShortcut.style = "display: inline; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
+        hintForShortcut.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
     });
     icon.addEventListener("mouseleave", function (e) {
         hintForShortcut.innerHTML = "";
@@ -330,7 +330,7 @@ function refreshLeftPanal() {
             "- Double click on glycan in bottom for zooming\n" +
             "- Right click on glycan in bottom to jump to GlyTouCan.org for more detail\n" +
             "- The topologies are sorted based on graph size on bottom";
-        contHint.style = "display: inline; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
+        contHint.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
     });
     iconHint.addEventListener("mouseleave", function () {
         contHint.innerHTML = "";
