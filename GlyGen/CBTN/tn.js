@@ -63,7 +63,7 @@ function allocateDiv() {
 
     //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
     //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
-    leftPanal.style = "float: left; width: 65px; margin: 0px; padding: 0px;";
+    leftPanal.style = "float: left; width: 80px; margin: 0px; padding: 0px;";
     container.style = "border-color: lightgrey; border-style: solid;";
 
     container.appendChild(leftPanal);
@@ -149,7 +149,7 @@ function drawMonoIcon(m) {
     return icon
 }
 
-function drawAddAndSubButton(add, grey) {
+function drawAddAndSubButtonOld(add, grey) {
     var button = document.createElement("canvas");
     var color = "DodgerBlue";
     button.setAttribute("width", "20px");
@@ -173,6 +173,32 @@ function drawAddAndSubButton(add, grey) {
     }
     ctx.fillStyle = color;
     ctx.fill();
+    button.style = "cursor: pointer; ";
+
+    return button
+}
+
+function drawAddAndSubButton(add, grey) {
+    var button = document.createElement("button");
+    var color = "DodgerBlue";
+    var text = "-1";
+    //button.setAttribute("width", "20px");
+    //button.setAttribute("height", "20px");
+
+    if (add) {
+        text = "+1";
+        color = "SlateBlue";
+    } else {
+
+    }
+
+    if (grey) {
+        color = "lightgrey; pointer-events: none;";
+    }
+
+    button.innerText = text;
+    button.setAttribute("class", "AddAndSub");
+    button.style = "background-color: " + color;
 
     return button
 }
