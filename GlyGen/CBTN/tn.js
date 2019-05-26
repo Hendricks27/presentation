@@ -45,6 +45,23 @@ function allocateDiv() {
 }
 allocateDiv();
 
+function convertXxx() {
+    for (var gtcid of Object.keys(data)) {
+        var d = data[gtcid];
+        if (d.comp) {
+            var x = 0;
+            for (var i of otherMono) {
+                if (d.comp[i]) {
+                    x += d.comp[i];
+                }
+            }
+            d.comp["Xxx"] = x;
+        }
+    }
+}
+
+convertXxx();
+
 function init() {
     for (var m of allMonoOnDisplay) {
         monofreq[m] = 0;
@@ -56,6 +73,8 @@ function init() {
     for (var p of urlobj.searchParams){
         params[p[0]] = p[1];
     }
+
+
     if (Object.keys(params).includes("saccharide")){
         for (var t of Object.keys(data)){
             if (Object.keys(data[t].content.nodes).includes(params["saccharide"])){
@@ -93,7 +112,9 @@ function init() {
 
     }
     else{
+        // composition
         for (var ttt of allMonoOnDisplay) {
+            console.log(ttt);
             if (Object.keys(params).includes(ttt)) {
                 monofreq[ttt] = parseInt(params[ttt]);
             }
@@ -113,22 +134,7 @@ init();
 // runtime variable
 var matchedTopologies = [];
 
-function convertXxx() {
-    for (var gtcid of Object.keys(data)) {
-        var d = data[gtcid];
-        if (d.comp) {
-            var x = 0;
-            for (var i of otherMono) {
-                if (d.comp[i]) {
-                    x += d.comp[i];
-                }
-            }
-            d.comp["Xxx"] = x;
-        }
-    }
-}
 
-convertXxx();
 
 
 
