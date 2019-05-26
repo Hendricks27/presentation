@@ -2,7 +2,7 @@
 
 
 var container = document.getElementById("container");
-var leftPanal, rightPanal;
+var leftPanal, rightPanal, hintForShortcut;
 
 // well it suggests all possible monosaccharides except for Xxx, however because this variable are used in too many places...
 var allPossibleMono = ['GlcNAc', 'Man', 'Gal', 'Fuc', 'NeuAc'];
@@ -12,33 +12,38 @@ var allMonoOnDisplay = allPossibleMono.concat(["Xxx"]);
 var monofreq = {};
 var maxComp = {};
 var icon_config = {
-    'GlcNAc': {"shape": "square", "icon_color": "blue", "count_color": "white"},
-    'Man': {"shape": "circle", "icon_color": "green", "count_color": "white"},
-    'Gal': {"shape": "circle", "icon_color": "yellow", "count_color": "black"},
-    'Fuc': {"shape": "triangle", "icon_color": "red", "count_color": "white"},
-    'NeuAc': {"shape": "diamond", "icon_color": "purple", "count_color": "white"},
+    'GlcNAc': {"shape": "square", "icon_color": "rgb(17,0,250)", "count_color": "white"},
+    'Man': {"shape": "circle", "icon_color": "rgb(0,200,50)", "count_color": "white"},
+    'Gal': {"shape": "circle", "icon_color": "rgb(254,255,0)", "count_color": "black"},
+    'Fuc': {"shape": "triangle", "icon_color": "rgb(250,0,0)", "count_color": "white"},
+    'NeuAc': {"shape": "diamond", "icon_color": "rgb(200,0,200)", "count_color": "white"},
     'Xxx': {"shape": "circle", "icon_color": "grey", "count_color": "white"}
 };
 
 // Deprecated variables
 var allPossibleMonoOld = ['Man', 'Gal', 'Glc', 'Xyl', 'Fuc', 'GlcNAc', 'GalNAc', 'NeuAc', 'NeuGc', "Xxx"];
-var keyMapPlus = ["q", "w", "e", "r", "t", "y", "u", "i", "o"];
-var keyMapMinus = ["a", "s", "d", "f", "g", "h", "j", "k", "l"];
+var keyMap = "nmgfsx";
 
 // For the viewer in the bottom
 var lastClickedTopology = [];
 
-function init() {
-    for (var m of allMonoOnDisplay) {
-        monofreq[m] = 0;
-        maxComp[m] = 1;
-    }
+function allocateDiv() {
+    leftPanal = document.createElement("div");
+    rightPanal = document.createElement("div");
+    hintForShortcut = document.createElement("div");
+
+    //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
+    //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
+    leftPanal.style = "float: left; width: 130px; margin: 0px; padding: 0px;";
+    container.style = "border-color: lightgrey; border-style: solid;";
+    hintForShortcut.style = "display: none";
+
+    container.appendChild(leftPanal);
+    container.appendChild(rightPanal);
+    container.appendChild(hintForShortcut);
+
 }
-
-init();
-
-// runtime variable
-var matchedTopologies = [];
+allocateDiv();
 
 function convertXxx() {
     for (var gtcid of Object.keys(data)) {
@@ -57,29 +62,90 @@ function convertXxx() {
 
 convertXxx();
 
-function allocateDiv() {
-    leftPanal = document.createElement("div");
-    rightPanal = document.createElement("div");
+function init() {
+    for (var m of allMonoOnDisplay) {
+        monofreq[m] = 0;
+        maxComp[m] = 1;
+    }
+    // use this function to load parametersm
+    var urlobj = new URL(window.location);
+    var params = {};
+    for (var p of urlobj.searchParams){
+        params[p[0]] = p[1];
+    }
 
-    //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
-    //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
-    leftPanal.style = "float: left; width: 65px; margin: 0px; padding: 0px;";
-    container.style = "border-color: lightgrey; border-style: solid;";
 
-    container.appendChild(leftPanal);
-    container.appendChild(rightPanal);
+    if (Object.keys(params).includes("saccharide")){
+        for (var t of Object.keys(data)){
+            if (Object.keys(data[t].content.nodes).includes(params["saccharide"])){
+                break
+            }
+        }
 
+        monofreq = {};
+        for (var ttt of allPossibleMono){
+            monofreq[ttt] = data[t].comp[ttt];
+        }
+        var tttt = 0;
+        for (var ttttt of otherMono){
+            tttt += data[t].comp[ttttt];
+        }
+        monofreq["Xxx"] = tttt;
+        afterChange();
+
+        v(t, params["saccharide"]);
+    }
+    else if (Object.keys(params).includes("topology")){
+
+        monofreq = {};
+        for (var ttt of allPossibleMono){
+            monofreq[ttt] = data[params.topology].comp[ttt];
+        }
+        var tttt = 0;
+        for (var ttttt of otherMono){
+            tttt += data[params.topology].comp[ttttt];
+        }
+        monofreq["Xxx"] = tttt;
+        afterChange();
+
+        v(params.topology);
+
+    }
+    else{
+        // composition
+        for (var ttt of allMonoOnDisplay) {
+            console.log(ttt);
+            if (Object.keys(params).includes(ttt)) {
+                monofreq[ttt] = parseInt(params[ttt]);
+            }
+        }
+        for (var tttt of Object.values(monofreq)){
+            if (tttt != 0){
+                afterChange();
+                break;
+            }
+        }
+
+    }
 }
 
+init();
+
+// runtime variable
+var matchedTopologies = [];
+
+
+
+
+
 function resizeContainer() {
-    var width = leftPanal.clientWidth + rightPanal.clientWidth;
+    var width = leftPanal.clientWidth + document.getElementsByTagName("table")[0].clientWidth;
     var height = Math.max(leftPanal.clientHeight, rightPanal.clientHeight);
 
     container.style.height = height + 5 + "px";
     container.style.width = width + 15 + "px";
 }
 
-allocateDiv();
 
 function compositionChange(iupac, num) {
     var c = monofreq[iupac];
@@ -98,8 +164,8 @@ function compositionChange(iupac, num) {
 
 function drawMonoIcon(m) {
     var icon = document.createElement("canvas");
-    icon.setAttribute("width", "20px");
-    icon.setAttribute("height", "20px");
+    icon.setAttribute("width", "40px");
+    icon.setAttribute("height", "40px");
 
     var config = icon_config[m];
 
@@ -108,24 +174,24 @@ function drawMonoIcon(m) {
     ctx.lineWidth = 2;
     ctx.strokeStyle = "black";
     ctx.fillStyle = config.icon_color;
-    ctx.font = "12px Arial";
+    ctx.font = "26px Arial";
 
     if (config.shape == "square") {
         ctx.moveTo(2, 2);
-        ctx.lineTo(2, 18);
-        ctx.lineTo(18, 18);
-        ctx.lineTo(18, 2);
+        ctx.lineTo(2, 38);
+        ctx.lineTo(38, 38);
+        ctx.lineTo(38, 2);
     } else if (config.shape == "circle") {
-        ctx.arc(10, 10, 9, 0, 2 * Math.PI);
+        ctx.arc(20, 20, 19, 0, 2 * Math.PI);
     } else if (config.shape == "triangle") {
-        ctx.moveTo(10, 1);
-        ctx.lineTo(1, 19);
-        ctx.lineTo(19, 19);
+        ctx.moveTo(20, 39);
+        ctx.lineTo(1, 1);
+        ctx.lineTo(39, 1);
     } else if (config.shape == "diamond") {
-        ctx.moveTo(10, 1);
-        ctx.lineTo(19, 10);
-        ctx.lineTo(10, 19);
-        ctx.lineTo(1, 10);
+        ctx.moveTo(20, 1);
+        ctx.lineTo(39, 20);
+        ctx.lineTo(20, 39);
+        ctx.lineTo(1, 20);
     } else {
         console.log("shape is not supported yet")
     }
@@ -134,14 +200,17 @@ function drawMonoIcon(m) {
     ctx.fill();
     ctx.fillStyle = config.count_color;
     var t = monofreq[m].toString();
-    var x, y = 14.3;
+    var x, y = 30;
     if (t.length == 1) {
-        x = 6.8;
+        x = 13;
     } else {
-        x = 3.3
+        x = 5;
     }
     if (config.shape == "triangle") {
-        y = y + 4;
+        y = y - 9;
+        if (t.length == 1){
+            y+=3;
+        }
     }
 
     ctx.fillText(t, x, y);
@@ -149,22 +218,22 @@ function drawMonoIcon(m) {
     return icon
 }
 
-function drawAddAndSubButton(add, grey) {
+function drawAddAndSubButtonOld(add, grey) {
     var button = document.createElement("canvas");
     var color = "DodgerBlue";
-    button.setAttribute("width", "20px");
-    button.setAttribute("height", "20px");
+    button.setAttribute("width", "40px");
+    button.setAttribute("height", "40px");
     var ctx = button.getContext('2d');
     ctx.beginPath();
     if (add) {
         ctx.moveTo(1, 1);
-        ctx.lineTo(19, 10);
-        ctx.lineTo(1, 19);
+        ctx.lineTo(39, 20);
+        ctx.lineTo(1, 39);
         color = "SlateBlue";
     } else {
-        ctx.moveTo(1, 10);
-        ctx.lineTo(19, 19);
-        ctx.lineTo(19, 1);
+        ctx.moveTo(1, 20);
+        ctx.lineTo(39, 39);
+        ctx.lineTo(39, 1);
     }
     ctx.closePath();
     ctx.lineWidth = 2;
@@ -173,6 +242,32 @@ function drawAddAndSubButton(add, grey) {
     }
     ctx.fillStyle = color;
     ctx.fill();
+    button.style = "cursor: pointer; ";
+
+    return button
+}
+
+function drawAddAndSubButton(add, grey) {
+    var button = document.createElement("button");
+    var color = "DodgerBlue";
+    var text = "-1";
+    //button.setAttribute("width", "20px");
+    //button.setAttribute("height", "20px");
+
+    if (add) {
+        text = "+1";
+        color = "SlateBlue";
+    } else {
+
+    }
+
+    if (grey) {
+        color = "lightgrey; pointer-events: none;";
+    }
+
+    button.innerText = text;
+    button.setAttribute("class", "AddAndSub");
+    button.style = "background-color: " + color;
 
     return button
 }
@@ -181,15 +276,26 @@ function drawAddAndSubButton(add, grey) {
 function appendicons(iupacComp) {
     var icons_container = document.createElement("div");
 
-    var icon = drawMonoIcon(iupacComp);
-
     var ind = allMonoOnDisplay.indexOf(iupacComp);
+    var keystroke = keyMap[ind];
+
+    var icon = drawMonoIcon(iupacComp);
+    icon.addEventListener("mouseover", function (e) {
+        hintForShortcut.innerHTML = iupacComp + " can be added when press " + keystroke + " or removed when press shift+" + keystroke;
+        hintForShortcut.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
+    });
+    icon.addEventListener("mouseleave", function (e) {
+        hintForShortcut.innerHTML = "";
+        hintForShortcut.style = "display: none";
+    });
+
+
 
     var g = true;
     if (monofreq[iupacComp] > 0) {
         g = false
     }
-    var subbutton = drawAddAndSubButton(false, g);
+    var subbutton = drawAddAndSubButtonOld(false, g);
     subbutton.onclick = function () {
         compositionChange(iupacComp, -1);
     };
@@ -199,7 +305,7 @@ function appendicons(iupacComp) {
     } else {
         g = true
     }
-    var addbutton = drawAddAndSubButton(true, g);
+    var addbutton = drawAddAndSubButtonOld(true, g);
     addbutton.onclick = function () {
         compositionChange(iupacComp, 1);
     };
@@ -216,6 +322,31 @@ function refreshLeftPanal() {
     for (var iupacComp of allMonoOnDisplay) {
         appendicons(iupacComp)
     }
+
+    var iconHint = document.createElement("img");
+    iconHint.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8Lr6xs3-e3MmHYA6moRFMnmwrdxawtrINAIcSy1bUIwjt3_Jg";
+    iconHint.width = 40;
+    iconHint.height = 40;
+    iconHint.onclick = function () {
+
+    };
+    iconHint.addEventListener("mouseover", function (e) {
+        contHint.innerText = "- You may use keyboard shortcut to add or subtract the composition for each monosaccharide\n" +
+            "- Move cursor to each monosaccharide to learn more\n" +
+            "- Double click on glycan in bottom for zooming\n" +
+            "- Right click on glycan in bottom to jump to GlyTouCan.org for more detail\n" +
+            "- The topologies are sorted based on graph size on bottom";
+        contHint.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
+    });
+    iconHint.addEventListener("mouseleave", function () {
+        contHint.innerHTML = "";
+        contHint.style = "display: none";
+    });
+    var contHint = document.createElement("div");
+    contHint.style = "display: none";
+
+    leftPanal.appendChild(iconHint);
+    leftPanal.appendChild(contHint);
 }
 
 refreshLeftPanal();
@@ -279,7 +410,7 @@ function getImage(gtcid) {
     figure.id = "img_" + gtcid;
     var img = document.createElement("img");
     img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
-    img.style = "width: 100px; height: auto;";
+    img.style = "width: 200px; height: auto;";
     img.gtcid = gtcid;
     img.onclick = function () {
         v(gtcid);
@@ -298,7 +429,7 @@ function getImage(gtcid) {
 }
 
 function updateRightPannal() {
-    var colnum = parseInt((window.innerWidth - 160) / 104);
+    var colnum = parseInt((window.innerWidth - 130) / 204);
     if (colnum == 0) {
         colnum == 1
     }
@@ -339,13 +470,13 @@ function updateRightPannal() {
 function keyPress() {
     var d = document.getElementsByTagName("body")[0];
     d.onkeypress = function (e) {
-        if ("qwerty".includes(e.key)) {
-            var m = allMonoOnDisplay[keyMapPlus.indexOf(e.key)];
+        if (keyMap.includes(e.key)) {
+            var m = allMonoOnDisplay[keyMap.indexOf(e.key)];
             compositionChange(m, 1)
         }
         if (e.shiftKey) {
-            if ("qwertyQWERTY".includes(e.key)) {
-                var m = allMonoOnDisplay[keyMapPlus.indexOf(e.key.toLowerCase())];
+            if (keyMap.includes(e.key) || keyMap.toUpperCase().includes(e.key)) {
+                var m = allMonoOnDisplay[keyMap.indexOf(e.key.toLowerCase())];
                 compositionChange(m, -1)
             }
         }

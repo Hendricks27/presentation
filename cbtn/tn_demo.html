@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Topology Navigator</title>
-    <script src="content3.js"></script>
+    <script src="content4.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
@@ -11,6 +11,23 @@
         html *
         {
             font-family: Arial;
+        }
+
+        .AddAndSub {
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: white;
+            border: none;
+            border-radius: 1px;
+            box-shadow: 0 10px #999;
+        }
+        .AddAndSub:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(3px);
         }
     </style>
 </head>
@@ -21,7 +38,6 @@
 <!- Because the code itself is not pretty... hmmm ->
 
 <div id="container"></div>
-<script src="tn.js"></script>
 
 <div id="viewer" style="border-style: solid; border-color: lightgrey; width: calc(100%); height: 910px; right: 0;"></div>
 
@@ -63,7 +79,7 @@
         }
     };
 
-    function v(gtcid){
+    function v(gtcid, highlightNode){
         var ele = data[gtcid].content;
         option.essentials.component = ele;
         glycanviewer.init(option);
@@ -73,11 +89,21 @@
 
         setTimeout(wrapfunc, 2000);
         function wrapfunc() {
+            if (highlightNode){
+                gtcid = highlightNode;
+            }
             var c = glycanviewer.network.getConnectedNodes(gtcid);
             c.push(gtcid);
-            glycanviewer.network.fit({nodes: c});
-            glycanviewer.network.selectNodes(c);
-            glycanviewer.whereAmI();
+            glycanviewer.network.fit({
+                nodes: c,
+                animation: true
+            });
+
+            function wrapper2(){
+                glycanviewer.whereAmI();
+            }
+            glycanviewer.network.selectNodes([gtcid]);
+            setTimeout(wrapper2, 2000);
         }
 
         if (lastClickedTopology.length > 0){
@@ -85,16 +111,17 @@
             var h = document.getElementById("img_"+x);
             if (h) {
                 h.style.border = "none";
-                h.style["border-color"] = "red";
+                h.style["border-color"] = "none";
             }
         }
         var h = document.getElementById("img_"+gtcid);
         h.style.border = "solid";
-        h.style["border-color"] = "red";
+        h.style["border-color"] = "rgb(42,124,233)";
         lastClickedTopology.push(gtcid);
     }
 
 </script>
+<script src="tn.js"></script>
 
 </body>
 </html>

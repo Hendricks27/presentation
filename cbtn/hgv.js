@@ -702,27 +702,6 @@ var glycanviewer = {
 
             if (selectedNode !== undefined && selectedNode !== "Topology" && !selectedNode.startsWith("fake")){
 
-                var entry = document.createElement("dt");
-                entry.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
-                entry.onmouseover = function(d){
-                    entry.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
-                };
-                entry.onmouseout = function(d){
-                    entry.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
-                };
-                entry.innerHTML = "Jump to GlycoMotif"; //change the description
-                entry.name = selectedNode;
-
-                entry.onclick = function(){
-                    var nodeID = this.name;
-                    var pre, suf;
-                    if (thisLib.para.contextMenu.externalURL1){pre = thisLib.para.contextMenu.externalURL1}else{pre = ""}
-                    if (thisLib.para.contextMenu.externalURL2){suf = thisLib.para.contextMenu.externalURL2}else{suf = ""}
-                    var externalURL = pre + nodeID + suf;
-                    window.open(externalURL);
-                };
-                menuList.appendChild(entry);
-
                 var entry2 = document.createElement("dt");
                 entry2.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
                 entry2.onmouseover = function(d){
@@ -731,7 +710,7 @@ var glycanviewer = {
                 entry2.onmouseout = function(d){
                     entry2.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
                 };
-                entry2.innerHTML = "Jump to GlyTouCan"; //change the description
+                entry2.innerHTML = "GlyTouCan"; //change the description
                 entry2.name = selectedNode;
 
                 entry2.onclick = function(){
