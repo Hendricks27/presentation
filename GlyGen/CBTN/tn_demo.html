@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Topology Navigator</title>
     <script src="content4.js"></script>
+    <script src="composition.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
@@ -35,8 +36,11 @@
 
 <div id="container"></div>
 
-<div id="viewer" style="border-style: solid; border-color: lightgrey; width: calc(100%); height: 910px; right: 0;"></div>
-
+<div id="viewer" style=""></div>
+<script>
+    var h = document.documentElement.clientHeight;
+    document.getElementById("viewer").setAttribute("style", "border-style: solid; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px");
+</script>
 <script src="hgv.js"></script>
 
 <script>
