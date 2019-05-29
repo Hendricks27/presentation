@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GlyGen Motif List</title>
+    <script src="content.js"></script>
+</head>
+<body>
+<div id="hmm"></div>
+<script>
+    var container = document.getElementById("hmm");
+
+    var ht = document.createElement("table");
+    for (var row of table){
+        var tr = document.createElement("tr");
+
+        row.sort(function (x) {
+            return x.gtc
+        });
+        for (var cell of row){
+            var td = document.createElement("td");
+
+            var figure = document.createElement("figure");
+            var img = document.createElement("img");
+            var caption = document.createElement("figcaption");
+
+            img.src = "https://edwardslab.bmcb.georgetown.edu/~nedwards/dropbox/q4dRFkWJuM/image/red-extended-checked/" + cell.gtc + ".png";
+            img.src = "https://glytoucan.org/glycans/"+ cell.gtc +"/image?style=extended&format=png&notation=cfg";
+            img.width = 200;
+            img.setAttribute("data-gtc", cell.gtc);
+            img.onclick = function () {
+                var e = this;
+                window.open("https://glytoucan.org/Structures/Glycans/" + e.getAttribute("data-gtc") );
+            };
+
+            var s = cell.col + "-" + cell.gtc + "\n" + cell.red + "," + cell.agly;
+            caption.innerText = s;
+            caption.setAttribute("style", "text-align: center;");
+
+            figure.appendChild(img);
+            figure.appendChild(caption);
+            td.appendChild(figure);
+            tr.appendChild(td)
+        }
+        ht.appendChild(tr);
+    }
+    container.appendChild(ht);
+
+</script>
+
+</body>
+</html>
