@@ -24,8 +24,9 @@
             var img = document.createElement("img");
             var caption = document.createElement("figcaption");
 
-            img.src = "https://edwardslab.bmcb.georgetown.edu/~nedwards/dropbox/q4dRFkWJuM/image/red-extended-checked/" + cell.gtc + ".png";
-            img.src = "https://glytoucan.org/glycans/"+ cell.gtc +"/image?style=extended&format=png&notation=cfg";
+            //img.src = "https://edwardslab.bmcb.georgetown.edu/~nedwards/dropbox/q4dRFkWJuM/image/red-extended-checked/" + cell.gtc + ".png";
+            //img.src = "https://glytoucan.org/glycans/"+ cell.gtc +"/image?style=extended&format=png&notation=cfg";
+            img.src = "./img/" + cell.gtc + ".jpg" ;
             img.width = 200;
             img.setAttribute("data-gtc", cell.gtc);
             img.onclick = function () {
@@ -33,7 +34,7 @@
                 window.open("https://glytoucan.org/Structures/Glycans/" + e.getAttribute("data-gtc") );
             };
 
-            var s = cell.col + "-" + cell.gtc + "\n" + cell.red + "," + cell.agly;
+            var s = cell.col + "-" + cell.gtc + "\n" + cell.name + "\n" + cell.red + "," + cell.agly;
             caption.innerText = s;
             caption.setAttribute("style", "text-align: center;");
 
