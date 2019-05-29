@@ -1,6 +1,5 @@
 "use strict";
 
-
 var container = document.getElementById("container");
 var leftPanal, rightPanal, hintForShortcut;
 
@@ -45,7 +44,7 @@ function allocateDiv() {
 }
 allocateDiv();
 
-function convertXxx() {
+function convertXxxOld() {
     for (var gtcid of Object.keys(data)) {
         var d = data[gtcid];
         if (d.comp) {
@@ -56,6 +55,21 @@ function convertXxx() {
                 }
             }
             d.comp["Xxx"] = x;
+        }
+    }
+}
+
+function convertXxx() {
+    for (var gtcid of Object.keys(data)) {
+        var d = data[gtcid];
+        if (d.comp) {
+            var x = 0;
+            for (var i of allPossibleMono) {
+                if (d.comp[i]) {
+                    x += d.comp[i];
+                }
+            }
+            d.comp["Xxx"] = d.comp["Count"] - x;
         }
     }
 }
@@ -111,10 +125,25 @@ function init() {
         v(params.topology);
 
     }
+    else if(Object.keys(params).includes("composition")){
+        var cx = compositions[params["composition"]];
+        if(cx){
+            var c = 0;
+            for (var ttt of allPossibleMono){
+                c += cx[ttt];
+                monofreq[ttt] = cx[ttt];
+            }
+            monofreq["Xxx"] = cx["Count"] - c;
+            afterChange();
+        }
+        else {
+            console.log("Composition not found");
+        }
+
+    }
     else{
         // composition
         for (var ttt of allMonoOnDisplay) {
-            console.log(ttt);
             if (Object.keys(params).includes(ttt)) {
                 monofreq[ttt] = parseInt(params[ttt]);
             }
@@ -441,7 +470,11 @@ function updateRightPannal() {
     var c = 0;
     matchedTopologies.sort(function (id1, id2) {
         var x = Object.keys(data[id2].content.nodes).length - Object.keys(data[id1].content.nodes).length;
-        return x
+        var y = 0;
+        if (data[id1].content.root == id1){
+            y = -0.1;
+        }
+        return x+y
     });
 
     for (var gtcid of matchedTopologies) {
