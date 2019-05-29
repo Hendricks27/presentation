@@ -14,8 +14,9 @@
     for (var row of table){
         var tr = document.createElement("tr");
 
-        row.sort(function (x) {
-            return x.gtc
+        row.sort(function (x, y) {
+            if (x.gtc < y.gtc){return -1}
+            if (x.gtc > y.gtc){return 1}
         });
         for (var cell of row){
             var td = document.createElement("td");
