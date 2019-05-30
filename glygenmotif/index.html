@@ -33,6 +33,7 @@
             img.onclick = function () {
                 var e = this;
                 window.open("https://glytoucan.org/Structures/Glycans/" + e.getAttribute("data-gtc") );
+                // window.open("https://glytoucan.org/glycans/" + e.getAttribute("data-gtc") +"/image?style=extended&format=png&notation=cfg");
             };
 
             var s = cell.col + "-" + cell.gtc + "\n" + cell.name + "\n" + cell.red + "," + cell.agly;
