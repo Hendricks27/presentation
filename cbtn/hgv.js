@@ -463,6 +463,11 @@ var glycanviewer = {
 
             //d.brokenImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII";
 
+            if (d.name == "Pseudo"){
+                d.label = "";
+                d.hidden = true;
+            }
+
 
             if (displaynodes[k] != 1) {
                 // d.hidden = true;
@@ -475,6 +480,9 @@ var glycanviewer = {
         var edges = new vis.DataSet();
         d3.keys(component.edges).forEach(function (k) {
             component.edges[k].forEach(function(e) {
+                if (k == "Pseudo"){
+                    e.hidden = true;
+                }
                 e.arrows = 'middle';
                 if (e.type == 'equals') {
                     e.color = {color:'red'};

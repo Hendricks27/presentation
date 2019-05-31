@@ -79,6 +79,44 @@
         }
     };
 
+    function positionCorrection() {
+        var pos = glycanviewer.network.getPositions();
+        var maxx = 0;
+        var maxy = 0;
+
+        for (var c of Object.keys(pos)){
+            var coord = pos[c];
+            if (coord["x"]){
+                if (coord["x"]>maxx){
+                    maxx = coord["x"]
+                }
+                if (coord["y"]>maxy){
+                    maxy = coord["y"]
+                }
+            }
+        }
+        if (maxx/maxy > 15){
+
+        }else if (maxy/maxx > 15){
+            var ratio = maxy/maxx/15;
+            // Y expands to wide
+            var data = glycanviewer.createNodeAndEdges();
+            for (var gtcid of Object.keys(pos)){
+                var coord = pos[c];
+                if (coord["x"]){
+                    var x = pos[gtcid]["x"];
+                    var y = pos[gtcid]["y"];
+                    data.nodes.update([{id: gtcid, x: x, y: y/ratio}]);
+                }
+            }
+
+            glycanviewer.network.setData(data);
+            glycanviewer.naviNetwork.setData(data);
+            glycanviewer.fitScale = glycanviewer.network.getScale();
+            glycanviewer.fitPos = glycanviewer.network.getViewPosition();
+        }
+    }
+
     function v(gtcid, highlightNode){
         var ele = data[gtcid].content;
         option.essentials.component = ele;
@@ -118,7 +156,11 @@
         h.style.border = "solid";
         h.style["border-color"] = "rgb(42,124,233)";
         lastClickedTopology.push(gtcid);
+
+        setTimeout(positionCorrection, 5000)
     }
+    
+
 
 </script>
 <script src="tn.js"></script>
