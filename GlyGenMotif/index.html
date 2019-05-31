@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GlyGen Motif List</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script>
+    <script src="content.js"></script>
+</head>
+<body>
+<div id="hmm"></div>
+<script>
+    var container = document.getElementById("hmm");
+
+    var ht = document.createElement("table");
+    var dump = {};
+    var rowNum = 0;
+    for (var row of table) {
+        var tr = document.createElement("tr");
+
+        row.sort(function (x, y) {
+            if (x.gtc < y.gtc) {
+                return -1
+            }
+            if (x.gtc > y.gtc) {
+                return 1
+            }
+        });
+        rowNum += 1;
+
+        tr.innerText = rowNum;
+
+        for (var cell of row) {
+            var td = document.createElement("td");
+
+            var figure = document.createElement("figure");
+            var img = document.createElement("img");
+            var caption = document.createElement("figcaption");
+
+            //img.src = "https://edwardslab.bmcb.georgetown.edu/~nedwards/dropbox/q4dRFkWJuM/image/red-extended-checked/" + cell.gtc + ".png";
+            //img.src = "https://glytoucan.org/glycans/"+ cell.gtc +"/image?style=extended&format=png&notation=cfg";
+            img.src = "./img/" + cell.gtc + ".jpg";
+            img.width = 200;
+            img.setAttribute("data-gtc", cell.gtc);
+            img.onclick = function () {
+                var e = this;
+                window.open("https://glytoucan.org/Structures/Glycans/" + e.getAttribute("data-gtc"));
+                // window.open("https://glytoucan.org/glycans/" + e.getAttribute("data-gtc") +"/image?style=extended&format=png&notation=cfg");
+            };
+
+            var s = "<a href='https://edwardslab.bmcb.georgetown.edu/glycomotif/" +cell.col + "." + cell.accesssion +"'>" + cell.col + "." + cell.accesssion + "</a><br>" + "<a href='https://glytoucan.org/Structures/Glycans/" + cell.gtc +"'>" + cell.gtc + "</a><br>" + cell.name + "\n" + cell.red + "," + cell.agly;
+            caption.innerHTML = s;
+            caption.setAttribute("style", "text-align: center;");
+
+            figure.appendChild(img);
+            figure.appendChild(caption);
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+
+
+
+        ht.appendChild(tr);
+    }
+    container.appendChild(ht);
+
+
+
+</script>
+
+</body>
+</html>
