@@ -863,11 +863,9 @@ var glycanviewer = {
         var pos =thisLib.network.getPositions();
 
         for (var id in pos){
-            if (movedNodes.includes(id)){
-                var x = pos[id]["x"];
-                var y = pos[id]["y"];
-                data.nodes.update([{id: id, x: x, y: y}]);
-            }
+            var x = pos[id]["x"];
+            var y = pos[id]["y"];
+            data.nodes.update([{id: id, x: x, y: y}]);
         }
 
         thisLib.naviNetwork.moveTo({
@@ -884,7 +882,7 @@ var glycanviewer = {
         function wrapper1(x){
             //console.log(x.nodes);
             if (x.nodes.length>0){
-                thisLib.naviRefresh(x.nodes);
+                //thisLib.naviRefresh(x.nodes);
             }
         }
 
