@@ -854,7 +854,7 @@ var glycanviewer = {
         }
     },
 
-    naviRefresh: function (){
+    naviRefresh: function (movedNodes){
 
         var thisLib = this;
         var data = thisLib.createNodeAndEdges();
@@ -863,9 +863,11 @@ var glycanviewer = {
         var pos =thisLib.network.getPositions();
 
         for (var id in pos){
-            var x = pos[id]["x"];
-            var y = pos[id]["y"];
-            data.nodes.update([{id: id, x: x, y: y}]);
+            if (movedNodes.includes(id)){
+                var x = pos[id]["x"];
+                var y = pos[id]["y"];
+                data.nodes.update([{id: id, x: x, y: y}]);
+            }
         }
 
         thisLib.naviNetwork.moveTo({
@@ -880,9 +882,9 @@ var glycanviewer = {
         var thisLib = this;
 
         function wrapper1(x){
-            // console.log(x.nodes);
-            if (x.nodes){
-                //thisLib.naviRefresh()
+            //console.log(x.nodes);
+            if (x.nodes.length>0){
+                thisLib.naviRefresh(x.nodes);
             }
         }
 
