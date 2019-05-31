@@ -473,7 +473,9 @@ var glycanviewer = {
                 // d.hidden = true;
             } else {
                 // d.hidden = false;
-                nodes.update(d);
+                if (d.name != "Pseudo"){
+                    nodes.update(d);
+                }
             }
         });
 
@@ -492,7 +494,10 @@ var glycanviewer = {
                     e.color = {};
                 }
                 if ((e.to in displaynodes) && (e.from in displaynodes)){
-                    edges.update(e);
+                    if (k != "Pseudo"){
+                        edges.update(e);
+                    }
+
                 }
             });
         });
