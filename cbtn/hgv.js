@@ -556,6 +556,11 @@ var glycanviewer = {
                     animation: true
                 });
             }
+
+            function w1() {
+                thisLib.whereAmI();
+            }
+            setTimeout(w1,1500);
         }
 
         thisLib.network.on("doubleClick",highlightWhenDoubleClicked);
