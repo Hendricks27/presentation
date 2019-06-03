@@ -40,12 +40,9 @@
 <body>
 
 <div id="container"></div>
-
+<button id="button" style="width: 200px; height: 30px; display: none">Show the upper panel</button>
 <div id="viewer" style=""></div>
-<script>
-    var h = document.documentElement.clientHeight;
-    document.getElementById("viewer").setAttribute("style", "border-style: solid; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px");
-</script>
+<script></script>
 <script src="hgv.js"></script>
 
 <script>
@@ -123,12 +120,36 @@
     }
 
     function v(gtcid, highlightNode){
+
+        if (Object.keys(params).includes("focus") && newlyInstantiated){
+
+        }else{
+            newlyInstantiated = false;
+            var s = "?topology=" + gtcid;
+            history.pushState({}, null, s);
+        }
+
+
+        var h = document.documentElement.clientHeight - 50;
+        document.getElementById("viewer").setAttribute("style", "border-style: none; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px");
+
+
         var ele = data[gtcid].content;
         option.essentials.component = ele;
         glycanviewer.init(option);
 
+        glycanviewer.network.on("click", captureClickNode);
+
+        function captureClickNode(x) {
+            if (x.nodes.length>0){
+                var y = x.nodes[0];
+                var s = "?focus=" + y;
+                history.pushState({}, null, s);
+            }
+        }
+
         window.location.hash = '';
-        window.location.hash = 'viewer';
+        window.location.hash = 'button';
 
         setTimeout(wrapfunc, 2000);
         function wrapfunc() {
@@ -157,13 +178,31 @@
                 h.style["border-color"] = "none";
             }
         }
-        var h = document.getElementById("img_"+gtcid);
+
+        var topleveltopogtcid = "";
+        if (data[gtcid].content.root == 'Pseudo'){
+            topleveltopogtcid = data[gtcid].content.edges['Pseudo'][0]["to"];
+        }else{
+            topleveltopogtcid = data[gtcid].content.root;
+        }
+        var h = document.getElementById("img_"+topleveltopogtcid);
         h.style.border = "solid";
         h.style["border-color"] = "rgb(42,124,233)";
         lastClickedTopology.push(gtcid);
 
-        setTimeout(positionCorrection, 5000)
+        setTimeout(positionCorrection, 5000);
+
+        container.setAttribute("style", "display: none");
+        var button = document.getElementById("button");
+        button.setAttribute("style","width: 200px; height: 30px; display: inline");
+        button.addEventListener("click", function () {
+            container.setAttribute("style", "display: inline");
+            button.setAttribute("style","display: none");
+            document.getElementById("viewer").innerHTML = "";
+        })
     }
+
+
     
 
 

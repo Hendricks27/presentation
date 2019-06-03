@@ -4,7 +4,7 @@ var container = document.getElementById("container");
 var leftPanal, rightPanal, hintForShortcut;
 
 // well it suggests all possible monosaccharides except for Xxx, however because this variable are used in too many places...
-var allPossibleMono = ['Glc', 'GlcNAc', 'Gal', 'GalNAc','Man','ManNAc', 'Fuc', 'NeuAc', 'NeuGc'];
+var allPossibleMono = ['GlcNAc','GalNAc','ManNAc', 'Glc',  'Gal',  'Man','Fuc', 'NeuAc', 'NeuGc'];
 // monosaccharides which classfied as "others"
 var otherMono = ['Glc', 'Xyl', 'GalNAc', 'NeuGc', "Xxx"];
 var allMonoOnDisplay = allPossibleMono.concat(["Xxx"]);
@@ -12,10 +12,10 @@ var monofreq = {};
 var maxComp = {};
 var icon_config = {
     'GlcNAc': {"shape": "square", "icon_color": "rgb(17,0,250)", "count_color": "white"},
-    'Glc': {"shape": "circle", "icon_color": "rgb(17,0,250)", "count_color": "white"},
     'ManNAc': {"shape": "square", "icon_color": "rgb(0,200,50)", "count_color": "white"},
-    'Man': {"shape": "circle", "icon_color": "rgb(0,200,50)", "count_color": "white"},
     'GalNAc': {"shape": "square", "icon_color": "rgb(254,255,0)", "count_color": "black"},
+    'Glc': {"shape": "circle", "icon_color": "rgb(17,0,250)", "count_color": "white"},
+    'Man': {"shape": "circle", "icon_color": "rgb(0,200,50)", "count_color": "white"},
     'Gal': {"shape": "circle", "icon_color": "rgb(254,255,0)", "count_color": "black"},
     'Fuc': {"shape": "triangle", "icon_color": "rgb(250,0,0)", "count_color": "white"},
     'NeuAc': {"shape": "diamond", "icon_color": "rgb(200,0,200)", "count_color": "white"},
@@ -25,10 +25,19 @@ var icon_config = {
 
 // Deprecated variables
 var allPossibleMonoOld = ['Man', 'Gal', 'Glc', 'Xyl', 'Fuc', 'GlcNAc', 'GalNAc', 'NeuAc', 'NeuGc', "Xxx"];
-var keyMap = "nmgfsx";
+var keyMap = "n   gmfs  ";
 
 // For the viewer in the bottom
 var lastClickedTopology = [];
+
+var newlyInstantiated = true;
+
+// use this function to load parameters from URL
+var urlobj = new URL(window.location);
+var params = {};
+for (var p of urlobj.searchParams){
+    params[p[0]] = p[1];
+}
 
 function allocateDiv() {
     leftPanal = document.createElement("div");
@@ -38,12 +47,12 @@ function allocateDiv() {
     //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
     //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
     leftPanal.style = "float: left; width: 130px; margin: 0px; padding: 0px;";
-    container.style = "border-color: lightgrey; border-style: solid;";
+    container.style = "border-color: lightgrey; border-style: none;";
     hintForShortcut.style = "display: none";
 
     container.appendChild(leftPanal);
     container.appendChild(rightPanal);
-    container.appendChild(hintForShortcut);
+    //container.appendChild(hintForShortcut);
 
 }
 allocateDiv();
@@ -85,45 +94,45 @@ function init() {
         monofreq[m] = 0;
         maxComp[m] = 1;
     }
-    // use this function to load parametersm
-    var urlobj = new URL(window.location);
-    var params = {};
-    for (var p of urlobj.searchParams){
-        params[p[0]] = p[1];
-    }
 
 
-    if (Object.keys(params).includes("saccharide")){
+
+    if (Object.keys(params).includes("focus") ){
+        var foundSaccharide = false;
         for (var t of Object.keys(data)){
-            if (Object.keys(data[t].content.nodes).includes(params["saccharide"])){
+            if (Object.keys(data[t].content.nodes).includes(params["focus"])){
+                foundSaccharide = true;
                 break
             }
         }
 
-        monofreq = {};
-        for (var ttt of allPossibleMono){
-            monofreq[ttt] = data[t].comp[ttt];
-        }
-        var tttt = 0;
-        for (var ttttt of allPossibleMono){
-            tttt += data[t].comp[ttttt];
-        }
-        monofreq["Xxx"] = monofreq["Count"] - tttt;
-        afterChange();
+        if (foundSaccharide){
+            monofreq = {};
+            var tttt = 0;
+            for (var ttt of allPossibleMono){
+                monofreq[ttt] = data[t].comp[ttt];
+                tttt += data[t].comp[ttt];
+            }
 
-        v(t, params["saccharide"]);
+            monofreq["Xxx"] = data[t].comp["Count"] - tttt;
+            refreshLeftPanal();
+            afterChange();
+
+            v(t, params["focus"]);
+        }
+
     }
     else if (Object.keys(params).includes("topology")){
 
         monofreq = {};
+        var tttt = 0;
         for (var ttt of allPossibleMono){
             monofreq[ttt] = data[params.topology].comp[ttt];
+            tttt += data[params.topology].comp[ttt];
         }
-        var tttt = 0;
-        for (var ttttt of allPossibleMono){
-            tttt += data[params.topology].comp[ttttt];
-        }
-        monofreq["Xxx"] = monofreq["Count"] - tttt;
+
+        monofreq["Xxx"] = data[params["topology"]].comp["Count"] - tttt;
+        refreshLeftPanal();
         afterChange();
 
         v(params.topology);
@@ -138,6 +147,7 @@ function init() {
                 monofreq[ttt] = cx[ttt];
             }
             monofreq["Xxx"] = cx["Count"] - c;
+            refreshLeftPanal();
             afterChange();
         }
         else {
@@ -154,6 +164,7 @@ function init() {
         }
         for (var tttt of Object.values(monofreq)){
             if (tttt != 0){
+                refreshLeftPanal();
                 afterChange();
                 break;
             }
@@ -166,8 +177,6 @@ init();
 
 // runtime variable
 var matchedTopologies = [];
-
-
 
 
 
@@ -314,6 +323,7 @@ function appendicons(iupacComp) {
     var keystroke = keyMap[ind];
 
     var icon = drawMonoIcon(iupacComp);
+    /*
     icon.addEventListener("mouseover", function (e) {
         hintForShortcut.innerHTML = iupacComp + " can be added when press " + keystroke + " or removed when press shift+" + keystroke;
         hintForShortcut.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
@@ -322,7 +332,7 @@ function appendicons(iupacComp) {
         hintForShortcut.innerHTML = "";
         hintForShortcut.style = "display: none";
     });
-
+    */
 
 
     var g = true;
@@ -381,6 +391,7 @@ function refreshLeftPanal() {
             }
         });
     };
+    /*
     iconHint.addEventListener("mouseover", function (e) {
         contHint.innerText = "- You may use keyboard shortcut to add or subtract the composition for each monosaccharide\n" +
             "- Move cursor to each monosaccharide to learn more\n" +
@@ -395,9 +406,11 @@ function refreshLeftPanal() {
     });
     var contHint = document.createElement("div");
     contHint.style = "display: none";
+    */
+
+    iconHint.style = "padding-left: 40px";
 
     leftPanal.appendChild(iconHint);
-    leftPanal.appendChild(contHint);
 }
 
 refreshLeftPanal();
@@ -453,7 +466,7 @@ function afterChange() {
     }
 
     var tempMatchedTopologies = [];
-    console.clear();
+    //console.clear();
     for (var t of matchedTopologies){
         // must be root level and also in matchedtopologies
         var intopo = false;
@@ -482,6 +495,36 @@ function afterChange() {
     }
 
     updateRightPannal();
+    // use this function to load parametersm
+    var urlobj = new URL(window.location);
+    var params = {};
+    for (var p of urlobj.searchParams){
+        params[p[0]] = p[1];
+    }
+
+
+    if (!Object.keys(params).includes("saccharide")) {
+        encodeComp2URL();
+    }
+
+}
+
+function encodeComp2URL() {
+    var s = "?";
+    for (var c of Object.keys(monofreq)){
+        if (monofreq[c]>0){
+            s+=c;
+            s+="=";
+            s+=monofreq[c].toString();
+            s+="&";
+        }
+    }
+    s = s.slice(0, s.length-1);
+    if (!s){
+        s = location.protocol + '//' + location.host + location.pathname;
+        console.log('ss');
+    }
+    history.pushState({}, null, s);
 }
 
 function getImage(gtcid) {
@@ -554,6 +597,9 @@ function updateRightPannal() {
 function keyPress() {
     var d = document.getElementsByTagName("body")[0];
     d.onkeypress = function (e) {
+        if (e.key == " "){
+            return null
+        }
         if (keyMap.includes(e.key)) {
             var m = allMonoOnDisplay[keyMap.indexOf(e.key)];
             compositionChange(m, 1)
