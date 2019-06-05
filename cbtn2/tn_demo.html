@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topology Navigator</title>
+    <script src="content4.js"></script>
+    <script src="composition.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/zebra_dialog.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/css/flat/zebra_dialog.min.css">
+    <style>
+        html *
+        {
+            font-family: Arial;
+        }
+
+        .AddAndSub {
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: white;
+            border: none;
+            border-radius: 1px;
+            box-shadow: 0 10px #999;
+        }
+        .AddAndSub:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(3px);
+        }
+    </style>
+</head>
+<body>
+
+<div id="container"></div>
+<button id="button" style="width: 200px; height: 30px; display: none">Show the upper panel</button>
+<div id="viewer" style=""></div>
+<script></script>
+<script src="hgv.js"></script>
+
+<script>
+
+    var displayLevel = 100;
+
+    var option = {
+        essentials: {
+            div_ID: "viewer", // the ID of div container
+            component: {}, // the data
+            topoOnly: false,
+            viewRoot: "",
+            useGlyTouCanAsImageSource: false,
+            GlyTouCanImagePara: {
+                style: "extended", // Other Options: normal, compact
+                format: "png", // Other Options: jpg
+                notation: "cfg" // Other Options: cfgbw, uoxf, uoxf-color, cfg-uoxf, iupac
+            },
+            imgURL1: "http://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/", // Unnecessary if useGlyTouCanAsImageSource is true
+            imgURL2: ".png"
+        },
+        display: {
+            enableTitle: false,
+            enableNavi: true,
+            naviOption: {
+                size: 0.2,
+                position: 4
+            },
+            orientation: 2 // 1, 2, 3, 4 Stand for top2bottom left2right bottom2top right2left
+        },
+        contextMenu: {
+            enable: true,
+            defaultMenu: false,
+            externalURL1: "https://glytoucan.org/glycans/",
+            externalURL2: "/image?style=extended&format=png&notation=cfg"
+        }
+    };
+
+    function positionCorrection() {
+        var pos = glycanviewer.network.getPositions();
+        var maxx = 0;
+        var maxy = 0;
+
+        for (var c of Object.keys(pos)){
+            var coord = pos[c];
+            if (coord["x"]){
+                if (coord["x"]>maxx){
+                    maxx = coord["x"]
+                }
+                if (coord["y"]>maxy){
+                    maxy = coord["y"]
+                }
+            }
+        }
+        if (maxx/maxy > 15){
+
+        }else if (maxy/maxx > 15){
+            var ratio = maxy/maxx/15;
+            // Y expands to wide
+            var data = glycanviewer.createNodeAndEdges();
+            for (var gtcid of Object.keys(pos)){
+                var coord = pos[c];
+                if (coord["x"]){
+                    var x = pos[gtcid]["x"];
+                    var y = pos[gtcid]["y"];
+                    data.nodes.update([{id: gtcid, x: x, y: y/ratio}]);
+                }
+            }
+
+            glycanviewer.network.setData(data);
+            glycanviewer.naviNetwork.setData(data);
+            glycanviewer.fitScale = glycanviewer.network.getScale();
+            glycanviewer.fitPos = glycanviewer.network.getViewPosition();
+        }
+    }
+
+    function v(gtcid, highlightNode){
+
+        if (Object.keys(params).includes("focus") && newlyInstantiated){
+
+        }else{
+            newlyInstantiated = false;
+            var s = "?topology=" + gtcid;
+            history.pushState({}, null, s);
+        }
+
+
+        var h = document.documentElement.clientHeight - 50;
+        document.getElementById("viewer").setAttribute("style", "border-style: none; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px");
+
+
+        var ele = data[gtcid].content;
+        option.essentials.component = ele;
+        glycanviewer.init(option);
+
+        glycanviewer.network.on("click", captureClickNode);
+
+        function captureClickNode(x) {
+            if (x.nodes.length>0){
+                var y = x.nodes[0];
+                var s = "?focus=" + y;
+                history.pushState({}, null, s);
+            }
+        }
+
+        window.location.hash = '';
+        window.location.hash = 'button';
+
+        setTimeout(wrapfunc, 2000);
+        function wrapfunc() {
+            if (highlightNode){
+                gtcid = highlightNode;
+            }
+            var c = glycanviewer.network.getConnectedNodes(gtcid);
+            c.push(gtcid);
+            glycanviewer.network.fit({
+                nodes: c,
+                animation: true
+            });
+
+            function wrapper2(){
+                glycanviewer.whereAmI();
+            }
+            glycanviewer.network.selectNodes([gtcid]);
+            setTimeout(wrapper2, 2000);
+        }
+
+        if (lastClickedTopology.length > 0){
+            var x = lastClickedTopology[lastClickedTopology.length-1];
+            var h = document.getElementById("img_"+x);
+            if (h) {
+                h.style.border = "none";
+                h.style["border-color"] = "none";
+            }
+        }
+
+        var topleveltopogtcid = "";
+        if (data[gtcid].content.root == 'Pseudo'){
+            topleveltopogtcid = data[gtcid].content.edges['Pseudo'][0]["to"];
+        }else{
+            topleveltopogtcid = data[gtcid].content.root;
+        }
+        var h = document.getElementById("img_"+topleveltopogtcid);
+        h.style.border = "solid";
+        h.style["border-color"] = "rgb(42,124,233)";
+        lastClickedTopology.push(gtcid);
+
+        setTimeout(positionCorrection, 5000);
+
+        container.setAttribute("style", "display: none");
+        var button = document.getElementById("button");
+        button.setAttribute("style","width: 200px; height: 30px; display: inline");
+        button.addEventListener("click", function () {
+            container.setAttribute("style", "display: inline");
+            button.setAttribute("style","display: none");
+            document.getElementById("viewer").innerHTML = "";
+        })
+    }
+
+
+    
+
+
+</script>
+<script src="tn.js"></script>
+
+</body>
+</html>
