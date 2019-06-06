@@ -27,7 +27,14 @@ var icon_config = {
 
 var urlPara = {};
 
-var keyMap = "n   gmfs  ";
+var keyMap = {
+    "n": "GlcNAc",
+    "m": "Man",
+    "g": "Gal",
+    "f": "Fuc",
+    "s": "NeuAc",
+    //"x": "Xxx"
+};
 
 var lastClickedTopology = [];
 var matchedTopologies = [];
@@ -245,7 +252,7 @@ function getImage(gtcid) {
     img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
     img.style = "width: 200px; height: auto;";
     img.onclick = function () {
-        showLowerTopology([gtcid]);
+        showLowerTopology(gtcid);
     };
     var caption = document.createElement("figcaption");
     caption.innerText = gtcid;
@@ -339,15 +346,15 @@ function afterCompostionChanged() {
 
 
 function resizeContainer() {
-    var width = leftPanel.clientWidth + document.getElementsByTagName("table")[0].clientWidth;
+    var width = leftPanel.clientWidth + rightPanel.getElementsByTagName("table")[0].clientWidth;
     var height = Math.max(leftPanel.clientHeight, rightPanel.clientHeight);
 
-    //container.style.height = height + 5 + "px";
-    //container.style.width = width + 15 + "px";
+    container.style.height = height + 5 + "px";
+    container.style.width = width + 15 + "px";
 }
 
 function updateRightPanel() {
-    var colnum = parseInt((window.innerWidth - 130) / 210);
+    var colnum = parseInt((window.innerWidth - 135) / 210);
     if (colnum == 0) {
         colnum == 1
     }
@@ -370,7 +377,7 @@ function updateRightPanel() {
         var x = Object.keys(data_topology_related[ind2].nodes).length - Object.keys(data_topology_related[ind1].nodes).length;
         var y = 0;
         //if (data_topology_related[id1].top.includes(id1)) {y = -0.1;}
-        if (!ind1 || !ind2){
+        if (!ind1 || !ind2) {
 
         }
 
@@ -402,7 +409,18 @@ function updateRightPanel() {
 
 
 function keyPress() {
-
+    var d = document.getElementsByTagName("body")[0];
+    d.onkeypress = function (e) {
+        if (Object.keys(keyMap).includes(e.key.toLowerCase())) {
+            var num = 1;
+            if (e.shiftKey) {
+                num = -1;
+            }
+            compositionChange(keyMap[e.key.toLowerCase()], num);
+        } else {
+            // Not capturing
+        }
+    }
 }
 
 function statusLog(t, gtcid) {
@@ -415,10 +433,10 @@ function statusLog(t, gtcid) {
             }
         }
         p = p.slice(0, p.length - 1)
-    }else if (t == "topology"){
-        p+= "topology" + "=" + gtcid;
-    }else if (t == "saccharide"){
-        p+= "saccharide" + "=" + gtcid;
+    } else if (t == "topology") {
+        p += "topology" + "=" + gtcid;
+    } else if (t == "saccharide") {
+        p += "saccharide" + "=" + gtcid;
     }
     if (p.length < 3) {
         p = location.protocol + '//' + location.host + location.pathname;
@@ -443,62 +461,103 @@ function showUpper() {
     panelcontainer.style = cssUpperShow;
 }
 
-
-function showLower(gtcids) {
-    // Highlight and dehighlight topologies
+function lowerPrep() {
     var figures = rightPanel.getElementsByTagName("figure");
     for (var figure of figures) {
         figure.style = "border-style: none; margin: 0;";
-    }
-    for (var gtcid of gtcids) {
-        document.getElementById("img_" + gtcid).style = "border-style: solid; border-color: blue; margin: 0;";
     }
 
     panelcontainer.style = "display: none";
 
     showAndHideButton.style = cssButtonShow;
+    var w = document.documentElement.clientWidth - 20;
     var h = document.documentElement.clientHeight - 25;
 
-    hgvcontainer.style = "border-style: solid; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px";
+    hgvcontainer.style = "border-style: none; border-color: lightgrey; width: " + w + "px; right: 0; height: " + h + "px";
 
-    statusLog("topology", gtcid);
-
-    loadHGV(gtcids,);
 }
 
-function showLowerTopology(gtcids) {
-    // Highlight and dehighlight topologies
-    var figures = rightPanel.getElementsByTagName("figure");
-    for (var figure of figures) {
-        figure.style = "border-style: none; margin: 0;";
-    }
-    for (var gtcid of gtcids) {
-        document.getElementById("img_" + gtcid).style = "border-style: solid; border-color: blue; margin: 0;";
-    }
 
-    panelcontainer.style = "display: none";
+function showLowerSaccharide(gtcid) {
+    lowerPrep();
+    for (var thing of data_topology_related) {
 
-    showAndHideButton.style = cssButtonShow;
-    var h = document.documentElement.clientHeight - 25;
-
-    hgvcontainer.style = "border-style: solid; border-color: lightgrey; width: calc(100%); right: 0; height: " + h + "px";
-
-    statusLog("topology", gtcid);
-
-    loadHGV(gtcids[0]);
-}
-
-function loadHGV(gtcid) {
-    for (var thing of data_topology_related){
-
-        if (thing.topology.includes(gtcid)){
-            option.essentials.component = thing;
+        if (Object.keys(thing.nodes).includes(gtcid)) {
+            var topo_top = thing.top;
             break
         }
     }
 
-    console.log(option.essentials);
+
+    for (var topo_gtcid of topo_top) {
+        document.getElementById("img_" + topo_gtcid).style = "border-style: solid; border-color: blue; margin: 0;";
+    }
+
+    statusLog("saccharide", gtcid);
+
+    loadHGV(gtcid, "saccharide");
+}
+
+function showLowerTopology(gtcid) {
+    lowerPrep();
+
+    document.getElementById("img_" + gtcid).style = "border-style: solid; border-color: rgb(42,124,233); margin: 0;";
+
+    statusLog("topology", gtcid);
+
+    loadHGV(gtcid, "topology");
+}
+
+function loadHGV(gtcid, glycanType) {
+    if (glycanType == "topology") {
+        for (var thing of data_topology_related) {
+
+            if (thing.topology.includes(gtcid)) {
+                option.essentials.component = thing;
+                break
+            }
+        }
+    } else if (glycanType == "saccharide"){
+        for (var thing of data_topology_related) {
+
+            if (Object.keys(thing.nodes).includes(gtcid)) {
+                option.essentials.component = thing;
+                break
+            }
+        }
+    }
+
+
     glycanviewer.init(option);
+
+    glycanviewer.network.on("click", captureClickNode);
+
+    function captureClickNode(x) {
+        if (x.nodes.length > 0) {
+            var y = x.nodes[0];
+            var glycanType = "saccharide";
+            if (thing.topology.includes(y)) {
+                glycanType = "topology";
+            }
+
+            statusLog(glycanType, y);
+        }
+    }
+
+
+    setTimeout(highlightAndZoom, 2000);
+
+    function highlightAndZoom() {
+        var fitNodes = glycanviewer.network.getConnectedNodes(gtcid);
+        fitNodes.push(gtcid);
+
+        glycanviewer.network.selectNodes([gtcid]);
+        glycanviewer.network.fit({
+            nodes: fitNodes,
+            animation: true
+        });
+    }
+
 
 }
 
@@ -506,32 +565,85 @@ function loadHGV(gtcid) {
 function init() {
     getParaFromURL();
     allcateDIV();
+    keyPress();
 
     for (var m of allMono) {
         monofreq[m] = 0;
     }
+
+    var iupacCompositionInitFlag = false;
+    for (var iupac of allMono) {
+        if (Object.keys(urlPara).includes(iupac)) {
+            iupacCompositionInitFlag = true;
+            break
+        }
+    }
+
+    if (Object.keys(urlPara).includes("saccharide")) {
+        saccharideInit();
+    } else if (Object.keys(urlPara).includes("topology")) {
+        topologyInit();
+    } else if (Object.keys(urlPara).includes("composition")) {
+        glytoucanCompositionInit()
+    } else if (iupacCompositionInitFlag) {
+        iupacCompositionInit();
+    } else {
+        normalInit();
+    }
+}
+
+function normalInit() {
     afterCompostionChanged();
     updateUpper();
 }
 
-function normalInit() {
-
-}
-
 function glytoucanCompositionInit() {
+    var gtcid = urlPara["composition"];
+    var comp = data_composition_composition[gtcid];
 
+    monofreq = comp;
+    normalInit();
 }
 
 function iupacCompositionInit() {
-
+    for (var iupac of allMono) {
+        if (Object.keys(urlPara).includes(iupac)) {
+            monofreq[iupac] = parseInt(urlPara[iupac]);
+        }
+    }
+    normalInit();
 }
 
 function topologyInit() {
+    var gtcid = urlPara["topology"];
+    var temp = undefined;
+    for (var thing of data_topology_related) {
+        if (thing.topology.includes(gtcid)) {
+            temp = thing;
+        }
+    }
+    if (temp) {
+        monofreq = temp.composition;
+        normalInit();
+        showLowerTopology(gtcid);
+    }
 
 }
 
 function saccharideInit() {
-
+    var gtcid = urlPara["saccharide"];
+    var temp = undefined;
+    for (var thing of data_topology_related) {
+        if (Object.keys(thing.nodes).includes(gtcid)) {
+            temp = thing;
+            break
+        }
+    }
+    if (temp) {
+        monofreq = temp.composition;
+        normalInit();
+        showLowerSaccharide(gtcid);
+    }
 }
 
 function positionCorrection() {
