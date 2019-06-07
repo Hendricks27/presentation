@@ -312,7 +312,7 @@ function afterCompostionChanged() {
     for (var thing of data_topology_related) {
         if (thing.composition) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)) {
+            for (var mc of allMono) {
                 if (currentComp[mc] != thing.composition[mc]) {
                     flag = false;
                 }
@@ -329,18 +329,19 @@ function afterCompostionChanged() {
     for (var thing of data_topology_related) {
         if (thing.composition) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)) {
+            for (var mc of allMono) {
                 if (currentComp[mc] > thing.composition[mc]) {
                     flag = false;
                 }
             }
             if (flag) {
-                for (var mc of Object.keys(currentComp)) {
+                for (var mc of allMono) {
                     maxComp[mc] = Math.max(maxComp[mc], thing.composition[mc]);
                 }
             }
         }
     }
+
 
 }
 
@@ -349,8 +350,17 @@ function resizeContainer() {
     var width = leftPanel.clientWidth + rightPanel.getElementsByTagName("table")[0].clientWidth;
     var height = Math.max(leftPanel.clientHeight, rightPanel.clientHeight);
 
+    if (width == 0){
+        width = document.documentElement.clientWidth;
+    }
+    if (height == 0){
+        height = document.documentElement.clientHeight;
+    }
+    //console.log(width, height);
+
     container.style.height = height + 5 + "px";
     container.style.width = width + 15 + "px";
+
 }
 
 function updateRightPanel() {
@@ -459,6 +469,8 @@ function showUpper() {
     hgvcontainer.style = cssBottomHide;
 
     panelcontainer.style = cssUpperShow;
+
+    resizeContainer();
 }
 
 function lowerPrep() {
@@ -601,7 +613,11 @@ function glytoucanCompositionInit() {
     var gtcid = urlPara["composition"];
     var comp = data_composition_composition[gtcid];
 
-    monofreq = comp;
+    for (var iupac_sym of Object.keys(comp)){
+        if (allMono.includes(iupac_sym)){
+            monofreq[iupac_sym] = comp[iupac_sym];
+        }
+    }
     normalInit();
 }
 
@@ -623,7 +639,13 @@ function topologyInit() {
         }
     }
     if (temp) {
-        monofreq = temp.composition;
+
+        for (var iupac_sym of Object.keys(temp.composition)){
+            if (allMono.includes(iupac_sym)){
+                monofreq[iupac_sym] = temp.composition[iupac_sym];
+            }
+        }
+
         normalInit();
         showLowerTopology(gtcid);
     }
@@ -640,7 +662,11 @@ function saccharideInit() {
         }
     }
     if (temp) {
-        monofreq = temp.composition;
+        for (var iupac_sym of Object.keys(temp.composition)){
+            if (allMono.includes(iupac_sym)){
+                monofreq[iupac_sym] = temp.composition[iupac_sym];
+            }
+        }
         normalInit();
         showLowerSaccharide(gtcid);
     }
