@@ -48,7 +48,11 @@
                 // window.open("https://glytoucan.org/glycans/" + e.getAttribute("data-gtc") +"/image?style=extended&format=png&notation=cfg");
             };
 
-            var s = "<a href='https://edwardslab.bmcb.georgetown.edu/glycomotif/" +cell.col + "." + cell.accesssion +"'>" + cell.col + "." + cell.accesssion + "</a><br>" + "<a href='https://glytoucan.org/Structures/Glycans/" + cell.gtc +"'>" + cell.gtc + "</a><br>" + cell.name + "\n" + cell.red + "," + cell.agly;
+            if (cell.agly == null){
+                cell.agly = "";
+            }
+
+            var s = "<a href='https://edwardslab.bmcb.georgetown.edu/glycomotif/" +cell.col + "." + cell.accesssion +"'>" + cell.col + "." + cell.accesssion + "</a><br>" + "<a href='https://glytoucan.org/Structures/Glycans/" + cell.gtc +"'>" + cell.gtc + "</a><br>" + cell.name + "<br>" + cell.red + "," + cell.agly;
             caption.innerHTML = s;
             caption.setAttribute("style", "text-align: center;");
 
