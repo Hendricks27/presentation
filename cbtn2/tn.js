@@ -568,6 +568,12 @@ function loadHGV(gtcid, glycanType) {
             nodes: fitNodes,
             animation: true
         });
+
+        setTimeout(refreshMinimap, 2200);
+
+        function refreshMinimap(){
+            glycanviewer.whereAmI();
+        }
     }
 
 
