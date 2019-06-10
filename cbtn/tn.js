@@ -1,15 +1,17 @@
 "use strict";
 
 var container = document.getElementById("container");
-var leftPanal, rightPanal, hintForShortcut;
 
-// well it suggests all possible monosaccharides except for Xxx, however because this variable are used in too many places...
-var allPossibleMono = ['GlcNAc','GalNAc','ManNAc', 'Glc',  'Gal',  'Man','Fuc', 'NeuAc', 'NeuGc'];
-// monosaccharides which classfied as "others"
-var otherMono = ['Glc', 'Xyl', 'GalNAc', 'NeuGc', "Xxx"];
-var allMonoOnDisplay = allPossibleMono.concat(["Xxx"]);
+var panelcontainer, hgvcontainer, showAndHideButton;
+var leftPanel, rightPanel;
+
+var monoExceptForXxx = ['GlcNAc', 'GalNAc', 'ManNAc', 'Glc', 'Gal', 'Man', 'Fuc', 'NeuAc', 'NeuGc'];
+var allMono = monoExceptForXxx.concat(["Xxx"]);
+
 var monofreq = {};
 var maxComp = {};
+var maxCompAtCurrentComp = {};
+
 var icon_config = {
     'GlcNAc': {"shape": "square", "icon_color": "rgb(17,0,250)", "count_color": "white"},
     'ManNAc': {"shape": "square", "icon_color": "rgb(0,200,50)", "count_color": "white"},
@@ -23,171 +25,90 @@ var icon_config = {
     'Xxx': {"shape": "circle", "icon_color": "grey", "count_color": "white"}
 };
 
-// Deprecated variables
-var allPossibleMonoOld = ['Man', 'Gal', 'Glc', 'Xyl', 'Fuc', 'GlcNAc', 'GalNAc', 'NeuAc', 'NeuGc', "Xxx"];
-var keyMap = "n   gmfs  ";
+var urlPara = {};
 
-// For the viewer in the bottom
+var keyMap = {
+    "n": "GlcNAc",
+    "m": "Man",
+    "g": "Gal",
+    "f": "Fuc",
+    "s": "NeuAc",
+    //"x": "Xxx"
+};
+
 var lastClickedTopology = [];
-
-var newlyInstantiated = true;
-
-// use this function to load parameters from URL
-var urlobj = new URL(window.location);
-var params = {};
-for (var p of urlobj.searchParams){
-    params[p[0]] = p[1];
-}
-
-function allocateDiv() {
-    leftPanal = document.createElement("div");
-    rightPanal = document.createElement("div");
-    hintForShortcut = document.createElement("div");
-
-    //leftPanal.style = "float: left; border-color: lightgrey; border-style: solid; width: 65px; margin: 0px; padding: 0px;";
-    //rightPanal.style = "float: left; border-color: lightgrey; border-style: solid;";
-    leftPanal.style = "float: left; width: 130px; margin: 0px; padding: 0px;";
-    container.style = "border-color: lightgrey; border-style: none;";
-    hintForShortcut.style = "display: none";
-
-    container.appendChild(leftPanal);
-    container.appendChild(rightPanal);
-    //container.appendChild(hintForShortcut);
-
-}
-allocateDiv();
-
-function convertXxxOld() {
-    for (var gtcid of Object.keys(data)) {
-        var d = data[gtcid];
-        if (d.comp) {
-            var x = 0;
-            for (var i of otherMono) {
-                if (d.comp[i]) {
-                    x += d.comp[i];
-                }
-            }
-            d.comp["Xxx"] = x;
-        }
-    }
-}
-
-function convertXxx() {
-    for (var gtcid of Object.keys(data)) {
-        var d = data[gtcid];
-        if (d.comp) {
-            var x = 0;
-            for (var i of allPossibleMono) {
-                if (d.comp[i]) {
-                    x += d.comp[i];
-                }
-            }
-            d.comp["Xxx"] = d.comp["Count"] - x;
-        }
-    }
-}
-
-convertXxx();
-
-function init() {
-    for (var m of allMonoOnDisplay) {
-        monofreq[m] = 0;
-        maxComp[m] = 1;
-    }
-
-
-
-    if (Object.keys(params).includes("focus") ){
-        var foundSaccharide = false;
-        for (var t of Object.keys(data)){
-            if (Object.keys(data[t].content.nodes).includes(params["focus"])){
-                foundSaccharide = true;
-                break
-            }
-        }
-
-        if (foundSaccharide){
-            monofreq = {};
-            var tttt = 0;
-            for (var ttt of allPossibleMono){
-                monofreq[ttt] = data[t].comp[ttt];
-                tttt += data[t].comp[ttt];
-            }
-
-            monofreq["Xxx"] = data[t].comp["Count"] - tttt;
-            refreshLeftPanal();
-            afterChange();
-
-            v(t, params["focus"]);
-        }
-
-    }
-    else if (Object.keys(params).includes("topology")){
-
-        monofreq = {};
-        var tttt = 0;
-        for (var ttt of allPossibleMono){
-            monofreq[ttt] = data[params.topology].comp[ttt];
-            tttt += data[params.topology].comp[ttt];
-        }
-
-        monofreq["Xxx"] = data[params["topology"]].comp["Count"] - tttt;
-        refreshLeftPanal();
-        afterChange();
-
-        v(params.topology);
-
-    }
-    else if(Object.keys(params).includes("composition")){
-        var cx = compositions[params["composition"]];
-        if(cx){
-            var c = 0;
-            for (var ttt of allPossibleMono){
-                c += cx[ttt];
-                monofreq[ttt] = cx[ttt];
-            }
-            monofreq["Xxx"] = cx["Count"] - c;
-            refreshLeftPanal();
-            afterChange();
-        }
-        else {
-            console.log("Composition not found");
-        }
-
-    }
-    else{
-        // composition
-        for (var ttt of allMonoOnDisplay) {
-            if (Object.keys(params).includes(ttt)) {
-                monofreq[ttt] = parseInt(params[ttt]);
-            }
-        }
-        for (var tttt of Object.values(monofreq)){
-            if (tttt != 0){
-                refreshLeftPanal();
-                afterChange();
-                break;
-            }
-        }
-
-    }
-}
-
-init();
-
-// runtime variable
 var matchedTopologies = [];
 
 
+var cssUpperShow = "";
+var cssUpperHide = "";
+var cssLeftPanelShow = "display: inline";
+var cssLeftPanelHide = "display: none";
+var cssButtonShow = "width: 200px; height: 30px; position: absolute; top: 20px; left: 20px; z-index: 500;";
+var cssButtonHide = "display: none";
+var cssBottomShow = "";
+var cssBottomHide = "display: none";
 
-function resizeContainer() {
-    var width = leftPanal.clientWidth + document.getElementsByTagName("table")[0].clientWidth;
-    var height = Math.max(leftPanal.clientHeight, rightPanal.clientHeight);
 
-    container.style.height = height + 5 + "px";
-    container.style.width = width + 15 + "px";
+var option = {
+    essentials: {
+        div_ID: "viewer", // the ID of div container
+        component: {}, // the data
+        topoOnly: false,
+        viewRoot: "",
+        useGlyTouCanAsImageSource: false,
+        GlyTouCanImagePara: {
+            style: "extended", // Other Options: normal, compact
+            format: "png", // Other Options: jpg
+            notation: "cfg" // Other Options: cfgbw, uoxf, uoxf-color, cfg-uoxf, iupac
+        },
+        imgURL1: "http://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/", // Unnecessary if useGlyTouCanAsImageSource is true
+        imgURL2: ".png"
+    },
+    display: {
+        enableTitle: false,
+        enableNavi: true,
+        naviOption: {
+            size: 0.2,
+            position: 4
+        },
+        orientation: 2 // 1, 2, 3, 4 Stand for top2bottom left2right bottom2top right2left
+    },
+    contextMenu: {
+        enable: true,
+        defaultMenu: false,
+        externalURL1: "https://glytoucan.org/glycans/",
+        externalURL2: "/image?style=extended&format=png&notation=cfg"
+    }
+};
+
+function allcateDIV() {
+    panelcontainer = document.createElement("div");
+    hgvcontainer = document.createElement("div");
+    hgvcontainer.setAttribute("id", "viewer");
+
+    showAndHideButton = document.createElement("button");
+    showAndHideButton.innerText = "Show upper panel";
+    showAndHideButton.onclick = showUpper;
+
+    leftPanel = document.createElement("div");
+    rightPanel = document.createElement("div");
+    leftPanel.style = "float: left; width: 130px; margin: 0px; padding: 0px;";
+
+    panelcontainer.appendChild(leftPanel);
+    panelcontainer.appendChild(rightPanel);
+
+    container.appendChild(showAndHideButton);
+    container.appendChild(panelcontainer);
+    container.appendChild(hgvcontainer);
 }
 
+function getParaFromURL() {
+    var urlobj = new URL(window.location);
+    for (var p of urlobj.searchParams) {
+        urlPara[p[0]] = p[1];
+    }
+}
 
 function compositionChange(iupac, num) {
     var c = monofreq[iupac];
@@ -199,13 +120,13 @@ function compositionChange(iupac, num) {
 
     } else {
         monofreq[iupac] = monofreq[iupac] + num;
-        afterChange();
-        refreshLeftPanal();
-        document.getElementById("viewer").innerHTML = "";
+        afterCompostionChanged();
+        updateUpper();
+        hgvcontainer.innerHTML = "";
     }
 }
 
-function drawMonoIcon(m) {
+function drawEachMonoIcon(m) {
     var icon = document.createElement("canvas");
     icon.setAttribute("width", "40px");
     icon.setAttribute("height", "40px");
@@ -251,8 +172,8 @@ function drawMonoIcon(m) {
     }
     if (config.shape == "triangle") {
         y = y - 9;
-        if (t.length == 1){
-            y+=3;
+        if (t.length == 1) {
+            y += 3;
         }
     }
 
@@ -261,7 +182,8 @@ function drawMonoIcon(m) {
     return icon
 }
 
-function drawAddAndSubButtonOld(add, grey) {
+
+function drawAddAndSubButton(add, grey) {
     var button = document.createElement("canvas");
     var color = "DodgerBlue";
     button.setAttribute("width", "40px");
@@ -290,56 +212,17 @@ function drawAddAndSubButtonOld(add, grey) {
     return button
 }
 
-function drawAddAndSubButton(add, grey) {
-    var button = document.createElement("button");
-    var color = "DodgerBlue";
-    var text = "-1";
-    //button.setAttribute("width", "20px");
-    //button.setAttribute("height", "20px");
-
-    if (add) {
-        text = "+1";
-        color = "SlateBlue";
-    } else {
-
-    }
-
-    if (grey) {
-        color = "lightgrey; pointer-events: none;";
-    }
-
-    button.innerText = text;
-    button.setAttribute("class", "AddAndSub");
-    button.style = "background-color: " + color;
-
-    return button
-}
-
-
-function appendicons(iupacComp) {
-    var icons_container = document.createElement("div");
-
-    var ind = allMonoOnDisplay.indexOf(iupacComp);
+function appendIcons(iupacComp) {
+    var ind = allMono.indexOf(iupacComp);
     var keystroke = keyMap[ind];
 
-    var icon = drawMonoIcon(iupacComp);
-    /*
-    icon.addEventListener("mouseover", function (e) {
-        hintForShortcut.innerHTML = iupacComp + " can be added when press " + keystroke + " or removed when press shift+" + keystroke;
-        hintForShortcut.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
-    });
-    icon.addEventListener("mouseleave", function (e) {
-        hintForShortcut.innerHTML = "";
-        hintForShortcut.style = "display: none";
-    });
-    */
-
+    var icon = drawEachMonoIcon(iupacComp);
 
     var g = true;
     if (monofreq[iupacComp] > 0) {
         g = false
     }
-    var subbutton = drawAddAndSubButtonOld(false, g);
+    var subbutton = drawAddAndSubButton(false, g);
     subbutton.onclick = function () {
         compositionChange(iupacComp, -1);
     };
@@ -349,22 +232,42 @@ function appendicons(iupacComp) {
     } else {
         g = true
     }
-    var addbutton = drawAddAndSubButtonOld(true, g);
+    var addbutton = drawAddAndSubButton(true, g);
     addbutton.onclick = function () {
         compositionChange(iupacComp, 1);
     };
 
-    leftPanal.appendChild(subbutton);
-    leftPanal.appendChild(icon);
-    leftPanal.appendChild(addbutton);
-    leftPanal.appendChild(document.createElement("br"));
-
+    leftPanel.appendChild(subbutton);
+    leftPanel.appendChild(icon);
+    leftPanel.appendChild(addbutton);
+    leftPanel.appendChild(document.createElement("br"));
 }
 
-function refreshLeftPanal() {
-    leftPanal.innerHTML = "";
-    for (var iupacComp of allMonoOnDisplay) {
-        appendicons(iupacComp)
+
+function getImage(gtcid) {
+    var figure = document.createElement("figure");
+    figure.style.margin = 0;
+    figure.id = "img_" + gtcid;
+    var img = document.createElement("img");
+    img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
+    img.style = "width: 200px; height: auto;";
+    img.onclick = function () {
+        showLowerTopology(gtcid);
+    };
+    var caption = document.createElement("figcaption");
+    caption.innerText = gtcid;
+    caption.style.textAlign = "center";
+
+    figure.appendChild(img);
+    figure.appendChild(caption);
+
+    return figure
+}
+
+function updateLeftPanel() {
+    leftPanel.innerHTML = "";
+    for (var iupacComp of allMono) {
+        appendIcons(iupacComp)
     }
 
     var iconHint = document.createElement("img");
@@ -391,184 +294,104 @@ function refreshLeftPanal() {
             }
         });
     };
-    /*
-    iconHint.addEventListener("mouseover", function (e) {
-        contHint.innerText = "- You may use keyboard shortcut to add or subtract the composition for each monosaccharide\n" +
-            "- Move cursor to each monosaccharide to learn more\n" +
-            "- Double click on glycan in bottom for zooming\n" +
-            "- Right click on glycan in bottom to jump to GlyTouCan.org for more detail\n" +
-            "- The topologies are sorted based on graph size on bottom";
-        contHint.style = "display: inline; background-color: white; position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px";
-    });
-    iconHint.addEventListener("mouseleave", function () {
-        contHint.innerHTML = "";
-        contHint.style = "display: none";
-    });
-    var contHint = document.createElement("div");
-    contHint.style = "display: none";
-    */
 
     iconHint.style = "padding-left: 40px";
 
-    leftPanal.appendChild(iconHint);
+    leftPanel.appendChild(iconHint);
 }
 
-refreshLeftPanal();
 
-function getCurrentComp() {
-    return monofreq
-}
-
-function afterChange() {
-
-
-    var currentComp = getCurrentComp();
+function afterCompostionChanged() {
+    var currentComp = JSON.parse(JSON.stringify(monofreq));
 
     for (var k of Object.keys(currentComp)) {
         maxComp[k] = 0;
     }
 
     matchedTopologies = [];
-
-    for (var gtcid of Object.keys(data)) {
-        var d = data[gtcid];
-        if (d.comp) {
+    for (var thing of data_topology_related) {
+        if (thing.composition) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)) {
-                if (currentComp[mc] != d.comp[mc]) {
+            for (var mc of allMono) {
+                if (currentComp[mc] != thing.composition[mc]) {
                     flag = false;
                 }
             }
             if (flag) {
-                matchedTopologies.push(gtcid);
+                for (var t of thing.top) {
+                    matchedTopologies.push(t)
+                }
+                //matchedTopologies.concat(thing.top);
             }
         }
     }
 
-    for (var gtcid of Object.keys(data)) {
-        var d = data[gtcid];
-        if (d.comp) {
+    for (var thing of data_topology_related) {
+        if (thing.composition) {
             var flag = true;
-            for (var mc of Object.keys(currentComp)) {
-                if (currentComp[mc] > d.comp[mc]) {
+            for (var mc of allMono) {
+                if (currentComp[mc] > thing.composition[mc]) {
                     flag = false;
                 }
             }
             if (flag) {
-                for (var mc of Object.keys(currentComp)) {
-                    if (!d.comp[mc]) {
-                        continue
-                    }
-                    maxComp[mc] = Math.max(maxComp[mc], d.comp[mc]);
+                for (var mc of allMono) {
+                    maxComp[mc] = Math.max(maxComp[mc], thing.composition[mc]);
                 }
             }
         }
     }
 
-    var tempMatchedTopologies = [];
-    //console.clear();
-    for (var t of matchedTopologies){
-        // must be root level and also in matchedtopologies
-        var intopo = false;
-        var inrootlevel = false;
-
-        //console.log(data[t].content);
-        if (t == data[t].content.root){
-            inrootlevel = true;
-        }else if (data[t].content.root == "Pseudo"){
-            for (var et of data[t].content.edges.Pseudo){
-                if (et.to == t){
-                    inrootlevel = true;
-                }
-            }
-        }
-
-        if (inrootlevel){
-            tempMatchedTopologies.push(t);
-        }
-        else {
-            // Omitted topologies
-            // console.log(t);
-        }
-
-        matchedTopologies = tempMatchedTopologies;
-    }
-
-    updateRightPannal();
-    // use this function to load parametersm
-    var urlobj = new URL(window.location);
-    var params = {};
-    for (var p of urlobj.searchParams){
-        params[p[0]] = p[1];
-    }
-
-
-    if (!Object.keys(params).includes("saccharide")) {
-        encodeComp2URL();
-    }
 
 }
 
-function encodeComp2URL() {
-    var s = "?";
-    for (var c of Object.keys(monofreq)){
-        if (monofreq[c]>0){
-            s+=c;
-            s+="=";
-            s+=monofreq[c].toString();
-            s+="&";
-        }
+
+function resizeContainer() {
+    var width = leftPanel.clientWidth + rightPanel.getElementsByTagName("table")[0].clientWidth;
+    var height = Math.max(leftPanel.clientHeight, rightPanel.clientHeight);
+
+    if (width == 0){
+        width = document.documentElement.clientWidth;
     }
-    s = s.slice(0, s.length-1);
-    if (!s){
-        s = location.protocol + '//' + location.host + location.pathname;
-        console.log('ss');
+    if (height == 0){
+        height = document.documentElement.clientHeight;
     }
-    history.pushState({}, null, s);
+    //console.log(width, height);
+
+    container.style.height = height + 5 + "px";
+    container.style.width = width + 15 + "px";
+
 }
 
-function getImage(gtcid) {
-    var figure = document.createElement("figure");
-    figure.style.margin = 0;
-    figure.id = "img_" + gtcid;
-    var img = document.createElement("img");
-    img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
-    img.style = "width: 200px; height: auto;";
-    img.gtcid = gtcid;
-    img.onclick = function () {
-        v(gtcid);
-    };
-    img.onload = function () {
-        resizeContainer();
-    };
-    var caption = document.createElement("figcaption");
-    caption.innerText = gtcid;
-    caption.style.textAlign = "center";
-
-    figure.appendChild(img);
-    figure.appendChild(caption);
-
-    return figure
-}
-
-function updateRightPannal() {
-    var colnum = parseInt((window.innerWidth - 130) / 204);
+function updateRightPanel() {
+    var colnum = parseInt((window.innerWidth - 135) / 210);
     if (colnum == 0) {
         colnum == 1
     }
 
-    rightPanal.innerHTML = "";
+    rightPanel.innerHTML = "";
 
     var table = document.createElement("table");
     var row = document.createElement("tr");
     var c = 0;
     matchedTopologies.sort(function (id1, id2) {
-        var x = Object.keys(data[id2].content.nodes).length - Object.keys(data[id1].content.nodes).length;
-        var y = 0;
-        if (data[id1].content.root == id1){
-            y = -0.1;
+        var ind1, ind2;
+        for (var ind in data_topology_related) {
+            if (data_topology_related[ind].topology.includes(id1)) {
+                ind1 = ind
+            }
+            if (data_topology_related[ind].topology.includes(id2)) {
+                ind2 = ind
+            }
         }
-        return x+y
+        var x = Object.keys(data_topology_related[ind2].nodes).length - Object.keys(data_topology_related[ind1].nodes).length;
+        var y = 0;
+        //if (data_topology_related[id1].top.includes(id1)) {y = -0.1;}
+        if (!ind1 || !ind2) {
+
+        }
+
+        return x + y
     });
 
     for (var gtcid of matchedTopologies) {
@@ -589,28 +412,309 @@ function updateRightPannal() {
     if (c % colnum != 0) {
         table.appendChild(row);
     }
-    rightPanal.appendChild(table);
+    rightPanel.appendChild(table);
 
     resizeContainer();
 }
 
+
 function keyPress() {
     var d = document.getElementsByTagName("body")[0];
     d.onkeypress = function (e) {
-        if (e.key == " "){
-            return null
-        }
-        if (keyMap.includes(e.key)) {
-            var m = allMonoOnDisplay[keyMap.indexOf(e.key)];
-            compositionChange(m, 1)
-        }
-        if (e.shiftKey) {
-            if (keyMap.includes(e.key) || keyMap.toUpperCase().includes(e.key)) {
-                var m = allMonoOnDisplay[keyMap.indexOf(e.key.toLowerCase())];
-                compositionChange(m, -1)
+        if (Object.keys(keyMap).includes(e.key.toLowerCase())) {
+            var num = 1;
+            if (e.shiftKey) {
+                num = -1;
             }
+            compositionChange(keyMap[e.key.toLowerCase()], num);
+        } else {
+            // Not capturing
         }
     }
 }
 
-keyPress();
+function statusLog(t, gtcid) {
+    var p = "?";
+    if (t == "comp") {
+        for (var iupac of allMono) {
+            var c = monofreq[iupac];
+            if (c != 0) {
+                p += iupac + "=" + c.toString() + "&";
+            }
+        }
+        p = p.slice(0, p.length - 1)
+    } else if (t == "topology") {
+        p += "topology" + "=" + gtcid;
+    } else if (t == "saccharide") {
+        p += "saccharide" + "=" + gtcid;
+    }
+    if (p.length < 3) {
+        p = location.protocol + '//' + location.host + location.pathname;
+    }
+    history.pushState({}, null, p);
+}
+
+function updateUpper() {
+    showAndHideButton.style = cssButtonHide;
+    hgvcontainer.style = cssBottomHide;
+
+    panelcontainer.style = cssUpperShow;
+    updateLeftPanel();
+    updateRightPanel();
+    statusLog("comp");
+}
+
+function showUpper() {
+    showAndHideButton.style = cssButtonHide;
+    hgvcontainer.style = cssBottomHide;
+
+    panelcontainer.style = cssUpperShow;
+
+    resizeContainer();
+}
+
+function lowerPrep() {
+    var figures = rightPanel.getElementsByTagName("figure");
+    for (var figure of figures) {
+        figure.style = "border-style: none; margin: 0;";
+    }
+
+    panelcontainer.style = "display: none";
+
+    showAndHideButton.style = cssButtonShow;
+    var w = document.documentElement.clientWidth - 20;
+    var h = document.documentElement.clientHeight - 25;
+
+    hgvcontainer.style = "border-style: none; border-color: lightgrey; width: " + w + "px; right: 0; height: " + h + "px";
+
+}
+
+
+function showLowerSaccharide(gtcid) {
+    lowerPrep();
+    for (var thing of data_topology_related) {
+
+        if (Object.keys(thing.nodes).includes(gtcid)) {
+            var topo_top = thing.top;
+            break
+        }
+    }
+
+
+    for (var topo_gtcid of topo_top) {
+        document.getElementById("img_" + topo_gtcid).style = "border-style: solid; border-color: blue; margin: 0;";
+    }
+
+    statusLog("saccharide", gtcid);
+
+    loadHGV(gtcid, "saccharide");
+}
+
+function showLowerTopology(gtcid) {
+    lowerPrep();
+
+    document.getElementById("img_" + gtcid).style = "border-style: solid; border-color: rgb(42,124,233); margin: 0;";
+
+    statusLog("topology", gtcid);
+
+    loadHGV(gtcid, "topology");
+}
+
+function loadHGV(gtcid, glycanType) {
+    if (glycanType == "topology") {
+        for (var thing of data_topology_related) {
+
+            if (thing.topology.includes(gtcid)) {
+                option.essentials.component = thing;
+                break
+            }
+        }
+    } else if (glycanType == "saccharide"){
+        for (var thing of data_topology_related) {
+
+            if (Object.keys(thing.nodes).includes(gtcid)) {
+                option.essentials.component = thing;
+                break
+            }
+        }
+    }
+
+
+    glycanviewer.init(option);
+
+    glycanviewer.network.on("click", captureClickNode);
+
+    function captureClickNode(x) {
+        if (x.nodes.length > 0) {
+            var y = x.nodes[0];
+            var glycanType = "saccharide";
+            if (thing.topology.includes(y)) {
+                glycanType = "topology";
+            }
+
+            statusLog(glycanType, y);
+        }
+    }
+
+
+    setTimeout(highlightAndZoom, 2000);
+
+    function highlightAndZoom() {
+        var fitNodes = glycanviewer.network.getConnectedNodes(gtcid);
+        fitNodes.push(gtcid);
+
+        glycanviewer.network.selectNodes([gtcid]);
+        glycanviewer.network.fit({
+            nodes: fitNodes,
+            animation: true
+        });
+
+        setTimeout(refreshMinimap, 2200);
+
+        function refreshMinimap(){
+            glycanviewer.whereAmI();
+        }
+    }
+
+
+}
+
+
+function init() {
+    getParaFromURL();
+    allcateDIV();
+    keyPress();
+
+    for (var m of allMono) {
+        monofreq[m] = 0;
+    }
+
+    var iupacCompositionInitFlag = false;
+    for (var iupac of allMono) {
+        if (Object.keys(urlPara).includes(iupac)) {
+            iupacCompositionInitFlag = true;
+            break
+        }
+    }
+
+    if (Object.keys(urlPara).includes("saccharide")) {
+        saccharideInit();
+    } else if (Object.keys(urlPara).includes("topology")) {
+        topologyInit();
+    } else if (Object.keys(urlPara).includes("composition")) {
+        glytoucanCompositionInit()
+    } else if (iupacCompositionInitFlag) {
+        iupacCompositionInit();
+    } else {
+        normalInit();
+    }
+}
+
+function normalInit() {
+    afterCompostionChanged();
+    updateUpper();
+}
+
+function glytoucanCompositionInit() {
+    var gtcid = urlPara["composition"];
+    var comp = data_composition_composition[gtcid];
+
+    for (var iupac_sym of Object.keys(comp)){
+        if (allMono.includes(iupac_sym)){
+            monofreq[iupac_sym] = comp[iupac_sym];
+        }
+    }
+    normalInit();
+}
+
+function iupacCompositionInit() {
+    for (var iupac of allMono) {
+        if (Object.keys(urlPara).includes(iupac)) {
+            monofreq[iupac] = parseInt(urlPara[iupac]);
+        }
+    }
+    normalInit();
+}
+
+function topologyInit() {
+    var gtcid = urlPara["topology"];
+    var temp = undefined;
+    for (var thing of data_topology_related) {
+        if (thing.topology.includes(gtcid)) {
+            temp = thing;
+        }
+    }
+    if (temp) {
+
+        for (var iupac_sym of Object.keys(temp.composition)){
+            if (allMono.includes(iupac_sym)){
+                monofreq[iupac_sym] = temp.composition[iupac_sym];
+            }
+        }
+
+        normalInit();
+        showLowerTopology(gtcid);
+    }
+
+}
+
+function saccharideInit() {
+    var gtcid = urlPara["saccharide"];
+    var temp = undefined;
+    for (var thing of data_topology_related) {
+        if (Object.keys(thing.nodes).includes(gtcid)) {
+            temp = thing;
+            break
+        }
+    }
+    if (temp) {
+        for (var iupac_sym of Object.keys(temp.composition)){
+            if (allMono.includes(iupac_sym)){
+                monofreq[iupac_sym] = temp.composition[iupac_sym];
+            }
+        }
+        normalInit();
+        showLowerSaccharide(gtcid);
+    }
+}
+
+function positionCorrection() {
+    var pos = glycanviewer.network.getPositions();
+    var maxx = 0;
+    var maxy = 0;
+
+    for (var c of Object.keys(pos)) {
+        var coord = pos[c];
+        if (coord["x"]) {
+            if (coord["x"] > maxx) {
+                maxx = coord["x"]
+            }
+            if (coord["y"] > maxy) {
+                maxy = coord["y"]
+            }
+        }
+    }
+    if (maxx / maxy > 10) {
+
+    } else if (maxy / maxx > 10) {
+        var ratio = maxy / maxx / 10;
+        // Y expands to wide
+        var data = glycanviewer.createNodeAndEdges();
+        for (var gtcid of Object.keys(pos)) {
+            var coord = pos[c];
+            if (coord["x"]) {
+                var x = pos[gtcid]["x"];
+                var y = pos[gtcid]["y"];
+                data.nodes.update([{id: gtcid, x: x, y: y / ratio}]);
+            }
+        }
+
+        glycanviewer.network.setData(data);
+        glycanviewer.naviNetwork.setData(data);
+        glycanviewer.fitScale = glycanviewer.network.getScale();
+        glycanviewer.fitPos = glycanviewer.network.getViewPosition();
+    }
+}
+
+init();
+

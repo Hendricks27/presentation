@@ -167,7 +167,7 @@ var glycanviewer = {
                         var currentEdge = edgesOfCurrentNode[currentEdgeIndex];
                         nextLevelNodes.push(currentEdge.to);
                         component.nodes[ currentNode ].level = thisLevel;
-                        if (thisLevel < displayLevel || boolDisplayAll){
+                        if (thisLevel < 10001 || boolDisplayAll){
                             displaynodes[ currentNode ] = 1;
                         }
                         else{
@@ -177,7 +177,8 @@ var glycanviewer = {
                 }
                 else{
                     component.nodes[ currentNode ].level = thisLevel;
-                    if (thisLevel < displayLevel || boolDisplayAll){
+
+                    if (thisLevel < 10000 || boolDisplayAll){
                         displaynodes[ currentNode ] = 1;
                     }
                     else {
