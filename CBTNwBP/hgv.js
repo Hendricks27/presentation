@@ -543,6 +543,19 @@ var glycanviewer = {
         var thisLib = this;
 
         thisLib.network.on("doubleClick",zoomWhenDoubleClicked);
+        function zoomWhenDoubleClicked(data) {
+            var selectnode = data.nodes;
+
+            if (selectnode.length>0){
+                showLower(selectnode[0]);
+            }
+        }
+    },
+
+    doubleClickEventOld: function(){
+        var thisLib = this;
+
+        thisLib.network.on("doubleClick",zoomWhenDoubleClicked);
         function zoomWhenDoubleClicked(data){
             var selectnode = data.nodes;
             var connectednode = [];
