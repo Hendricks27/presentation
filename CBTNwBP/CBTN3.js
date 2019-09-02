@@ -4,21 +4,25 @@ var container = document.getElementById("container");
 
 var panelcontainer, hgvcontainer, showAndHideButton;
 var leftPanel, rightPanel;
+var leftTurnButton, rightTurnButton;
 
-var monoExceptForXxx = ['GlcNAc', 'GalNAc', 'ManNAc', 'Glc', 'Gal', 'Man', 'Fuc', 'NeuAc', 'NeuGc'];
+var monoExceptForXxx = ['GlcNAc', 'GalNAc', 'ManNAc', 'HexNAc','Glc', 'Gal', 'Man', 'Hex','Fuc', 'NeuAc', 'NeuGc'];
 var allMono = monoExceptForXxx.concat(["Xxx"]);
 
 var monofreq = {};
 var maxComp = {};
 var maxCompAtCurrentComp = {};
 
+
 var icon_config = {
     'GlcNAc': {"shape": "square", "icon_color": "rgb(17,0,250)", "count_color": "white"},
     'ManNAc': {"shape": "square", "icon_color": "rgb(0,200,50)", "count_color": "white"},
     'GalNAc': {"shape": "square", "icon_color": "rgb(254,255,0)", "count_color": "black"},
+    'HexNAc': {"shape": "square", "icon_color": "rgb(255,255,255)", "count_color": "black"},
     'Glc': {"shape": "circle", "icon_color": "rgb(17,0,250)", "count_color": "white"},
     'Man': {"shape": "circle", "icon_color": "rgb(0,200,50)", "count_color": "white"},
     'Gal': {"shape": "circle", "icon_color": "rgb(254,255,0)", "count_color": "black"},
+    'Hex': {"shape": "circle", "icon_color": "rgb(255,255,255)", "count_color": "black"},
     'Fuc': {"shape": "triangle", "icon_color": "rgb(250,0,0)", "count_color": "white"},
     'NeuAc': {"shape": "diamond", "icon_color": "rgb(200,0,200)", "count_color": "white"},
     'NeuGc': {"shape": "diamond", "icon_color": "rgb(233,255,255)", "count_color": "black"},
@@ -45,6 +49,8 @@ var cssUpperHide = "";
 var cssLeftPanelShow = "display: inline";
 var cssLeftPanelHide = "display: none";
 var cssButtonShow = "width: 200px; height: 30px; position: absolute; top: 20px; left: 20px; z-index: 500;";
+var cssButtonShowL = "width: 30px; height: 30px; position: absolute; top: 20px; left: 250px; z-index: 500;";
+var cssButtonShowR = "width: 30px; height: 30px; position: absolute; top: 20px; left: 280px; z-index: 500;";
 var cssButtonHide = "display: none";
 var cssBottomShow = "";
 var cssBottomHide = "display: none";
@@ -91,6 +97,18 @@ function allcateDIV() {
     showAndHideButton.innerText = "Show upper panel";
     showAndHideButton.onclick = showUpper;
 
+    leftTurnButton = document.createElement("button");
+    leftTurnButton.innerText = "↺";
+    leftTurnButton.onclick = function () {
+        turn(1);
+    };
+
+    rightTurnButton = document.createElement("button");
+    rightTurnButton.innerText = "↻";
+    rightTurnButton.onclick = function () {
+        turn(-1);
+    };
+
     leftPanel = document.createElement("div");
     rightPanel = document.createElement("div");
     leftPanel.style = "float: left; width: 130px; margin: 0px; padding: 0px;";
@@ -99,6 +117,8 @@ function allcateDIV() {
     panelcontainer.appendChild(rightPanel);
 
     container.appendChild(showAndHideButton);
+    container.appendChild(leftTurnButton);
+    container.appendChild(rightTurnButton);
     container.appendChild(panelcontainer);
     container.appendChild(hgvcontainer);
 }
@@ -110,14 +130,45 @@ function getParaFromURL() {
     }
 }
 
+function getAddFlag() {
+    var flags = {};
+    for (var sub of ["NAc", ""]){
+        var fourMonoTotalCurrent = 0;
+
+        for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
+            var mc = mcprefix + sub;
+            fourMonoTotalCurrent += monofreq[mc];
+        }
+        var fourMonoTotalMax = maxComp[mc];
+
+        flags[mc] = fourMonoTotalCurrent+1 <= fourMonoTotalMax
+    }
+    for (var m of allMono){
+        if (m.includes("Hex")){
+            continue
+        }
+
+        var f2;
+        if (['Glc', 'Gal', 'Man','GlcNAc', 'GalNAc', 'ManNAc'].includes(m)){
+            f2 = flags[{3: "Hex", 6: "HexNAc"}[m.length]];
+        }else{
+            f2 = true;
+        }
+        flags[m] = monofreq[m]+1 <= maxComp[m] && f2;
+    }
+
+    return flags
+}
+
+
 function compositionChange(iupac, num) {
     var c = monofreq[iupac];
 
+    var flags = getAddFlag();
     if (num < 0 && c + num < 0) {
         // ignore minus count
-    } else if (num > 0 && maxComp[iupac] - monofreq[iupac] === 0) {
+    } else if (num > 0 && !flags[iupac]) {
         // exceed maximum possible configuration
-
     } else {
         monofreq[iupac] = monofreq[iupac] + num;
         afterCompostionChanged();
@@ -227,11 +278,8 @@ function appendIcons(iupacComp) {
         compositionChange(iupacComp, -1);
     };
 
-    if (maxComp[iupacComp] - monofreq[iupacComp] > 0) {
-        g = false
-    } else {
-        g = true
-    }
+    g = !getAddFlag()[iupacComp];
+
     var addbutton = drawAddAndSubButton(true, g);
     addbutton.onclick = function () {
         compositionChange(iupacComp, 1);
@@ -252,7 +300,7 @@ function getImage(gtcid) {
     img.src = "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/" + gtcid + ".png";
     img.style = "width: 200px; height: auto;";
     img.onclick = function () {
-        showLowerTopology(gtcid);
+        showLower(gtcid);
     };
     var caption = document.createElement("figcaption");
     caption.innerText = gtcid;
@@ -301,50 +349,138 @@ function updateLeftPanel() {
 }
 
 
-function afterCompostionChanged() {
+function match2CurrentComposition(thisComp) {
+
+
     var currentComp = JSON.parse(JSON.stringify(monofreq));
 
-    for (var k of Object.keys(currentComp)) {
-        maxComp[k] = 0;
+    for (var mc of ['Fuc', 'NeuAc', 'NeuGc', 'Xxx']) {
+        if (currentComp[mc] != thisComp[mc]) {
+            return false
+        }
     }
 
+    for (var sub of ["NAc", ""]){
+        var fourMonoTotalExpected = 0;
+
+        for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
+            var mc = mcprefix + sub;
+            fourMonoTotalExpected += currentComp[mc];
+        }
+        var fourMonoTotalThis = thisComp[mc + "Total"];
+
+        if (fourMonoTotalExpected != fourMonoTotalThis){
+            return false
+        }
+
+        for (var mcprefix of ['Glc', 'Gal', 'Man']) {
+            var mc = mcprefix + sub;
+            if (thisComp[mc] < currentComp[mc]){
+                return false
+            }
+
+        }
+
+    }
+
+    return true
+}
+
+function dataPreprocess() {
+    for (var acc of Object.keys(data)){
+        for (var m of allMono){
+            if (data[acc].comp[m] == undefined){
+                data[acc].comp[m] =0;
+            }
+        }
+
+        for (var sub of ["NAc", ""]) {
+            var totalx = 0;
+
+            for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']) {
+                var mc = mcprefix + sub;
+                totalx += data[acc].comp[mc];
+            }
+            data[acc].comp[mc + "Total"] = totalx;
+        }
+
+    }
+}
+
+
+function findMatchedTopLeverTopology() {
     matchedTopologies = [];
-    for (var thing of data_topology_related) {
-        if (thing.composition) {
-            var flag = true;
-            for (var mc of allMono) {
-                if (currentComp[mc] != thing.composition[mc]) {
-                    flag = false;
-                }
-            }
-            if (flag) {
-                for (var t of thing.top) {
-                    if(thing.topology.includes(t)){
-                        matchedTopologies.push(t)
-                    }
-                }
-                //matchedTopologies.concat(thing.top);
-            }
+
+    for (var acc of Object.keys(data)){
+        if (match2CurrentComposition(data[acc].comp)){
+            matchedTopologies.push(acc);
         }
     }
 
-    for (var thing of data_topology_related) {
-        if (thing.composition) {
-            var flag = true;
-            for (var mc of allMono) {
-                if (currentComp[mc] > thing.composition[mc]) {
-                    flag = false;
+}
+
+function updateMaxPossibleComp() {
+
+    for (var m of allMono){
+        maxComp[m] = 0;
+    }
+
+    for (var acc of Object.keys(data)){
+
+        var thisComp = data[acc].comp;
+        var f = true;
+        var temp = {};
+        var currentComp = JSON.parse(JSON.stringify(monofreq));
+
+        for (var mc of allMono) {
+            if (mc.includes("Hex")){
+                continue
+            }
+            if (currentComp[mc] > thisComp[mc]) {
+                f = false;
+            }
+        }
+
+        for (var sub of ["NAc", ""]){
+            var fourMonoTotalExpected = 0;
+            var fourMonoTotalThis = 0;
+
+            for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
+                var mc = mcprefix + sub;
+                fourMonoTotalExpected += currentComp[mc];
+                fourMonoTotalThis += thisComp[mc];
+            }
+            temp[mc] = fourMonoTotalThis;
+
+            if (fourMonoTotalExpected > fourMonoTotalThis){
+                f = false;
+            }
+        }
+
+        if (f){
+            for (var m of allMono){
+                if (m.includes("Hex")){
+                    continue
+                }
+                if (thisComp[m] > maxComp[m] ){
+                    maxComp[m] = thisComp[m]
                 }
             }
-            if (flag) {
-                for (var mc of allMono) {
-                    maxComp[mc] = Math.max(maxComp[mc], thing.composition[mc]);
+
+            for (var m of ["Hex", 'HexNAc']){
+                if (temp[m] > maxComp[m]){
+                    maxComp[m] = temp[m];
                 }
             }
+
         }
     }
 
+}
 
+function afterCompostionChanged() {
+    updateMaxPossibleComp();
+    findMatchedTopLeverTopology();
 }
 
 
@@ -376,31 +512,7 @@ function updateRightPanel() {
     var table = document.createElement("table");
     var row = document.createElement("tr");
     var c = 0;
-    matchedTopologies.sort(function (id1, id2) {
-        var ind1, ind2;
-        for (var ind in data_topology_related) {
-            if (data_topology_related[ind].topology.includes(id1)) {
-                ind1 = ind
-            }
-            if (data_topology_related[ind].topology.includes(id2)) {
-                ind2 = ind
-            }
-        }
-        if (ind1 == undefined){
-            return 1000
-        }
-        if (ind2 == undefined){
-            return -1000
-        }
-        var x = Object.keys(data_topology_related[ind2].nodes).length - Object.keys(data_topology_related[ind1].nodes).length;
-        var y = 0;
-        //if (data_topology_related[id1].top.includes(id1)) {y = -0.1;}
-        if (!ind1 || !ind2) {
-
-        }
-
-        return x + y
-    });
+    matchedTopologies.sort();
 
     for (var gtcid of matchedTopologies) {
         var f = getImage(gtcid);
@@ -451,10 +563,8 @@ function statusLog(t, gtcid) {
             }
         }
         p = p.slice(0, p.length - 1)
-    } else if (t == "topology") {
-        p += "topology" + "=" + gtcid;
-    } else if (t == "saccharide") {
-        p += "saccharide" + "=" + gtcid;
+    } else if (["composition", "topology", "saccharide"].includes(t)) {
+        p += t + "=" + gtcid;
     }
     if (p.length < 3) {
         p = location.protocol + '//' + location.host + location.pathname;
@@ -464,16 +574,21 @@ function statusLog(t, gtcid) {
 
 function updateUpper() {
     showAndHideButton.style = cssButtonHide;
+    leftTurnButton.style = cssButtonHide;
+    rightTurnButton.style = cssButtonHide;
     hgvcontainer.style = cssBottomHide;
 
     panelcontainer.style = cssUpperShow;
     updateLeftPanel();
+    afterCompostionChanged();
     updateRightPanel();
     statusLog("comp");
 }
 
 function showUpper() {
     showAndHideButton.style = cssButtonHide;
+    leftTurnButton.style = cssButtonHide;
+    rightTurnButton.style = cssButtonHide;
     hgvcontainer.style = cssBottomHide;
 
     panelcontainer.style = cssUpperShow;
@@ -490,6 +605,8 @@ function lowerPrep() {
     panelcontainer.style = "display: none";
 
     showAndHideButton.style = cssButtonShow;
+    leftTurnButton.style = cssButtonShowL;
+    rightTurnButton.style = cssButtonShowR;
     var w = document.documentElement.clientWidth - 20;
     var h = document.documentElement.clientHeight - 25;
 
@@ -497,106 +614,113 @@ function lowerPrep() {
 
 }
 
-
-function showLowerSaccharide(gtcid) {
+function showLower(acc) {
     lowerPrep();
-    for (var thing of data_topology_related) {
+    statusLog(data[acc].type, acc);
 
-        if (Object.keys(thing.nodes).includes(gtcid)) {
-            var topo_top = thing.top;
-            break
+    //document.getElementById("img_" + acc).style = "border-style: solid; border-color: rgb(42,124,233); margin: 0;";
+
+
+    var component = {};
+    var parent = [];
+
+    for (var p of Object.keys(data)){
+        if (data[p].children.includes(acc)){
+            parent.push(p);
         }
     }
 
+    var children = data[acc].children;
 
-    for (var topo_gtcid of topo_top) {
-        document.getElementById("img_" + topo_gtcid).style = "border-style: solid; border-color: blue; margin: 0;";
-    }
+    var allNodes = parent.concat(children);
+    allNodes.push(acc);
+    allNodes.push("Pseudo");
 
-    statusLog("saccharide", gtcid);
-
-    loadHGV(gtcid, "saccharide");
-}
-
-function showLowerTopology(gtcid) {
-    lowerPrep();
-
-    document.getElementById("img_" + gtcid).style = "border-style: solid; border-color: rgb(42,124,233); margin: 0;";
-
-    statusLog("topology", gtcid);
-
-    loadHGV(gtcid, "topology");
-}
-
-function loadHGV(gtcid, glycanType) {
-    if (glycanType == "topology") {
-        for (var thing of data_topology_related) {
-
-            if (thing.topology.includes(gtcid)) {
-                option.essentials.component = thing;
-                console.log(JSON.stringify(thing));
-                break
-            }
-            if (thing.top.includes(gtcid)) {
-                option.essentials.component = thing;
-                break
-            }
-        }
-    } else if (glycanType == "saccharide"){
-        for (var thing of data_topology_related) {
-
-            if (Object.keys(thing.nodes).includes(gtcid)) {
-                option.essentials.component = thing;
-                break
-            }
+    var nodes = {};
+    for (var n of allNodes){
+        nodes[n] = {"name": n};
+        if (n == "Pseudo"){
+            nodes[n].type = "Pseudo";
+            nodes[n].hidden = true;
+        }else{
+            nodes[n].type = data[n].type;
         }
     }
 
+    var edges = {};
+    for (var n of parent){
+        var e = {};
+        e.from = n;
+        e.to = acc;
+        e.type = "contains";
+        edges[n] = [e];
+    }
+    var temp = [];
+    for (var n of children){
+        var e = {};
+        e.from = acc;
+        e.to = n;
+        e.type = "contains";
+        temp.push(e);
+    }
+    if (children.length > 0){
+        edges[acc] = temp;
+    }
 
+    var temp2 = [];
+
+    if(parent.length > 0){
+        for (var n of parent){
+            var e = {};
+            e.from = "Pseudo";
+            e.to = n;
+            e.type = "contains";
+            temp2.push(e);
+
+            var e2 = {};
+            e2.from = n;
+            e2.to = acc;
+            e2.type = "contains";
+            edges[n] = [e2];
+        }
+    }else{
+        var e = {};
+        e.from = "Pseudo";
+        e.to = acc;
+        e.type = "contains";
+        temp2.push(e);
+    }
+    edges["Pseudo"] = temp2;
+    console.log(nodes);
+    console.log(edges);
+    component["nodes"] = nodes;
+    component["edges"] = edges;
+    component["root"] = "Pseudo";
+
+    option.essentials.component = component;
     glycanviewer.init(option);
 
-    glycanviewer.network.on("click", captureClickNode);
+    // glycanviewer.network.on("click", captureClickNode);
 
     function captureClickNode(x) {
         if (x.nodes.length > 0) {
-            var y = x.nodes[0];
-            var glycanType = "saccharide";
-            if (thing.topology.includes(y)) {
-                glycanType = "topology";
-            }
+            var accx = x.nodes[0];
+            var glycanType = data[accx].type;
 
-            statusLog(glycanType, y);
+            statusLog(glycanType, accx);
         }
     }
 
-
-    setTimeout(highlightAndZoom, 2000);
-
-    function highlightAndZoom() {
-        var fitNodes = glycanviewer.network.getConnectedNodes(gtcid);
-        fitNodes.push(gtcid);
-
-        glycanviewer.network.selectNodes([gtcid]);
-        glycanviewer.network.fit({
-            nodes: fitNodes,
-            animation: true
-        });
-
-        setTimeout(refreshMinimap, 2200);
-
-        function refreshMinimap(){
-            glycanviewer.whereAmI();
-        }
-    }
-
-
+    // console.log(parent, acc, children)
 }
+
 
 
 function init() {
     getParaFromURL();
     allcateDIV();
     keyPress();
+    dataPreprocess();
 
     for (var m of allMono) {
         monofreq[m] = 0;
@@ -611,9 +735,9 @@ function init() {
     }
 
     if (Object.keys(urlPara).includes("saccharide")) {
-        saccharideInit();
+        lowerInit(urlPara["saccharide"]);
     } else if (Object.keys(urlPara).includes("topology")) {
-        topologyInit();
+        lowerInit(urlPara["topology"]);
     } else if (Object.keys(urlPara).includes("composition")) {
         glytoucanCompositionInit()
     } else if (iupacCompositionInitFlag) {
@@ -628,106 +752,45 @@ function normalInit() {
     updateUpper();
 }
 
+function lowerInit(acc) {
+    for (var m of allMono){
+        monofreq[m] = data[acc].comp[m];
+    }
+
+    updateUpper();
+    showLower(acc);
+}
+
+function iupacCompositionInit(){
+
+    for (var m of Object.keys(urlPara)){
+        if (allMono.includes(m)){
+            monofreq[m] = parseInt(urlPara[m]);
+        }
+    }
+    updateUpper();
+}
+
+
 function glytoucanCompositionInit() {
-    var gtcid = urlPara["composition"];
-    var comp = data_composition_composition[gtcid];
-
-    for (var iupac_sym of Object.keys(comp)){
-        if (allMono.includes(iupac_sym)){
-            monofreq[iupac_sym] = comp[iupac_sym];
-        }
-    }
-    normalInit();
+    monofreq = data[urlPara["composition"]].comp;
+    updateUpper();
 }
 
-function iupacCompositionInit() {
-    for (var iupac of allMono) {
-        if (Object.keys(urlPara).includes(iupac)) {
-            monofreq[iupac] = parseInt(urlPara[iupac]);
-        }
+function turn(num) {
+    var ori = option.display.orientation;
+
+    var add = {1: 2, 2: 3, 3: 4, 4: 1};
+    var sub = {1: 4, 2: 1, 3: 2, 4: 3};
+    if (num>0){
+        option.display.orientation = add[ori];
     }
-    normalInit();
+    else{
+        option.display.orientation = sub[ori];
+    }
+
+    glycanviewer.init(option);
 }
 
-function topologyInit() {
-    var gtcid = urlPara["topology"];
-    var temp = undefined;
-    for (var thing of data_topology_related) {
-        if (thing.topology.includes(gtcid)) {
-            temp = thing;
-        }
-    }
-    if (temp) {
-
-        for (var iupac_sym of Object.keys(temp.composition)){
-            if (allMono.includes(iupac_sym)){
-                monofreq[iupac_sym] = temp.composition[iupac_sym];
-            }
-        }
-
-        normalInit();
-        showLowerTopology(gtcid);
-    }
-
-}
-
-function saccharideInit() {
-    var gtcid = urlPara["saccharide"];
-    var temp = undefined;
-    for (var thing of data_topology_related) {
-        if (Object.keys(thing.nodes).includes(gtcid)) {
-            temp = thing;
-            break
-        }
-    }
-    if (temp) {
-        for (var iupac_sym of Object.keys(temp.composition)){
-            if (allMono.includes(iupac_sym)){
-                monofreq[iupac_sym] = temp.composition[iupac_sym];
-            }
-        }
-        normalInit();
-        showLowerSaccharide(gtcid);
-    }
-}
-
-function positionCorrection() {
-    var pos = glycanviewer.network.getPositions();
-    var maxx = 0;
-    var maxy = 0;
-
-    for (var c of Object.keys(pos)) {
-        var coord = pos[c];
-        if (coord["x"]) {
-            if (coord["x"] > maxx) {
-                maxx = coord["x"]
-            }
-            if (coord["y"] > maxy) {
-                maxy = coord["y"]
-            }
-        }
-    }
-    if (maxx / maxy > 10) {
-
-    } else if (maxy / maxx > 10) {
-        var ratio = maxy / maxx / 10;
-        // Y expands to wide
-        var data = glycanviewer.createNodeAndEdges();
-        for (var gtcid of Object.keys(pos)) {
-            var coord = pos[c];
-            if (coord["x"]) {
-                var x = pos[gtcid]["x"];
-                var y = pos[gtcid]["y"];
-                data.nodes.update([{id: gtcid, x: x, y: y / ratio}]);
-            }
-        }
-
-        glycanviewer.network.setData(data);
-        glycanviewer.naviNetwork.setData(data);
-        glycanviewer.fitScale = glycanviewer.network.getScale();
-        glycanviewer.fitPos = glycanviewer.network.getViewPosition();
-    }
-}
 
 init();
-
