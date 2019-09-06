@@ -12,6 +12,7 @@ var allMono = monoExceptForXxx.concat(["Xxx"]);
 var monofreq = {};
 var maxComp = {};
 var maxCompAtCurrentComp = {};
+var topTopology =[];
 
 
 var icon_config = {
@@ -132,30 +133,29 @@ function getParaFromURL() {
 
 function getAddFlag() {
     var flags = {};
-    for (var sub of ["NAc", ""]){
-        var fourMonoTotalCurrent = 0;
-
-        for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
-            var mc = mcprefix + sub;
-            fourMonoTotalCurrent += monofreq[mc];
-        }
-        var fourMonoTotalMax = maxComp[mc];
-
-        flags[mc] = fourMonoTotalCurrent+1 <= fourMonoTotalMax
-    }
     for (var m of allMono){
-        if (m.includes("Hex")){
-            continue
-        }
-
-        var f2;
-        if (['Glc', 'Gal', 'Man','GlcNAc', 'GalNAc', 'ManNAc'].includes(m)){
-            f2 = flags[{3: "Hex", 6: "HexNAc"}[m.length]];
-        }else{
-            f2 = true;
-        }
-        flags[m] = monofreq[m]+1 <= maxComp[m] && f2;
+        flags[m] = monofreq[m]+1 <= maxComp[m];
     }
+
+    return flags
+}
+
+function getSubFlag() {
+    var flags = {};
+    for (var m of allMono){
+        flags[m] = monofreq[m] >= 1;
+    }
+    var hexnacCount = 0, hexCount = 0;
+    for (var m of ['GlcNAc', 'GalNAc', 'ManNAc']){
+        hexnacCount += monofreq[m];
+    }
+    flags["HexNAc"] = hexnacCount < monofreq["HexNAc"];
+
+    for (var m of ['Glc', 'Gal', 'Man']){
+        hexCount += monofreq[m];
+    }
+    flags["Hex"] = hexCount < monofreq["Hex"];
+
 
     return flags
 }
@@ -164,13 +164,20 @@ function getAddFlag() {
 function compositionChange(iupac, num) {
     var c = monofreq[iupac];
 
-    var flags = getAddFlag();
+    var plusFlag = getAddFlag();
+    var minusFlag = getSubFlag();
+
     if (num < 0 && c + num < 0) {
         // ignore minus count
-    } else if (num > 0 && !flags[iupac]) {
+    } else if (num > 0 && !plusFlag[iupac]) {
+        // exceed maximum possible configuration
+    } else if (num < 0 && !minusFlag[iupac]) {
         // exceed maximum possible configuration
     } else {
         monofreq[iupac] = monofreq[iupac] + num;
+        if (['GlcNAc', 'GalNAc', 'ManNAc', 'Glc', 'Gal', 'Man'].includes(iupac)){
+            monofreq[{3: "Hex", 6:"HexNAc"}[iupac.length]] = monofreq[{3: "Hex", 6:"HexNAc"}[iupac.length]]+ num;
+        }
         afterCompostionChanged();
         updateUpper();
         hgvcontainer.innerHTML = "";
@@ -269,10 +276,8 @@ function appendIcons(iupacComp) {
 
     var icon = drawEachMonoIcon(iupacComp);
 
-    var g = true;
-    if (monofreq[iupacComp] > 0) {
-        g = false
-    }
+    var g;
+    g = !getSubFlag()[iupacComp];
     var subbutton = drawAddAndSubButton(false, g);
     subbutton.onclick = function () {
         compositionChange(iupacComp, -1);
@@ -354,35 +359,23 @@ function match2CurrentComposition(thisComp) {
 
     var currentComp = JSON.parse(JSON.stringify(monofreq));
 
-    for (var mc of ['Fuc', 'NeuAc', 'NeuGc', 'Xxx']) {
-        if (currentComp[mc] != thisComp[mc]) {
-            return false
-        }
-    }
-
-    for (var sub of ["NAc", ""]){
-        var fourMonoTotalExpected = 0;
-
-        for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
-            var mc = mcprefix + sub;
-            fourMonoTotalExpected += currentComp[mc];
-        }
-        var fourMonoTotalThis = thisComp[mc + "Total"];
-
-        if (fourMonoTotalExpected != fourMonoTotalThis){
-            return false
-        }
-
-        for (var mcprefix of ['Glc', 'Gal', 'Man']) {
-            var mc = mcprefix + sub;
-            if (thisComp[mc] < currentComp[mc]){
+    for (var mc of allMono) {
+        if (mc.includes("Hex")){
+            if (currentComp[mc] != thisComp[mc]) {
                 return false
             }
-
+        }else if (['Fuc', 'NeuAc', 'NeuGc', "Xxx"].includes(mc)){
+            if (currentComp[mc] != thisComp[mc]) {
+                return false
+            }
+        }
+        else{
+            if (currentComp[mc] > thisComp[mc]) {
+                return false
+            }
         }
 
     }
-
     return true
 }
 
@@ -394,16 +387,9 @@ function dataPreprocess() {
             }
         }
 
-        for (var sub of ["NAc", ""]) {
-            var totalx = 0;
-
-            for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']) {
-                var mc = mcprefix + sub;
-                totalx += data[acc].comp[mc];
-            }
-            data[acc].comp[mc + "Total"] = totalx;
+        if (data[acc].top){
+            topTopology.push(acc);
         }
-
     }
 }
 
@@ -411,7 +397,7 @@ function dataPreprocess() {
 function findMatchedTopLeverTopology() {
     matchedTopologies = [];
 
-    for (var acc of Object.keys(data)){
+    for (var acc of topTopology){
         if (match2CurrentComposition(data[acc].comp)){
             matchedTopologies.push(acc);
         }
@@ -425,53 +411,26 @@ function updateMaxPossibleComp() {
         maxComp[m] = 0;
     }
 
-    for (var acc of Object.keys(data)){
+    for (var acc of topTopology){
 
         var thisComp = data[acc].comp;
         var f = true;
-        var temp = {};
         var currentComp = JSON.parse(JSON.stringify(monofreq));
 
         for (var mc of allMono) {
-            if (mc.includes("Hex")){
-                continue
-            }
             if (currentComp[mc] > thisComp[mc]) {
                 f = false;
             }
         }
 
-        for (var sub of ["NAc", ""]){
-            var fourMonoTotalExpected = 0;
-            var fourMonoTotalThis = 0;
-
-            for (var mcprefix of ['Glc', 'Gal', 'Man', 'Hex']){
-                var mc = mcprefix + sub;
-                fourMonoTotalExpected += currentComp[mc];
-                fourMonoTotalThis += thisComp[mc];
-            }
-            temp[mc] = fourMonoTotalThis;
-
-            if (fourMonoTotalExpected > fourMonoTotalThis){
-                f = false;
-            }
-        }
 
         if (f){
             for (var m of allMono){
-                if (m.includes("Hex")){
-                    continue
-                }
                 if (thisComp[m] > maxComp[m] ){
                     maxComp[m] = thisComp[m]
                 }
             }
 
-            for (var m of ["Hex", 'HexNAc']){
-                if (temp[m] > maxComp[m]){
-                    maxComp[m] = temp[m];
-                }
-            }
 
         }
     }
