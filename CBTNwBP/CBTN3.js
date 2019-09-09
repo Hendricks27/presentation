@@ -684,6 +684,12 @@ function init() {
     keyPress();
     dataPreprocess();
 
+
+    var altOri = getCookie("orientation");
+    if (altOri){
+        option.display.orientation = parseInt(altOri);
+    }
+
     for (var m of allMono) {
         monofreq[m] = 0;
     }
@@ -700,6 +706,8 @@ function init() {
         lowerInit(urlPara["saccharide"]);
     } else if (Object.keys(urlPara).includes("topology")) {
         lowerInit(urlPara["topology"]);
+    }else if (Object.keys(urlPara).includes("focus")) {
+        lowerInit(urlPara["focus"]);
     } else if (Object.keys(urlPara).includes("composition")) {
         glytoucanCompositionInit()
     } else if (iupacCompositionInitFlag) {
@@ -739,18 +747,43 @@ function glytoucanCompositionInit() {
     updateUpper();
 }
 
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return false;
+}
+
 function turn(num) {
     var ori = option.display.orientation;
 
     var add = {1: 2, 2: 3, 3: 4, 4: 1};
     var sub = {1: 4, 2: 1, 3: 2, 4: 3};
+    var newOri = "";
     if (num>0){
-        option.display.orientation = add[ori];
+        newOri = add[ori];
     }
     else{
-        option.display.orientation = sub[ori];
+        newOri = sub[ori];
     }
-
+    option.display.orientation = newOri;
+    setCookie("orientation", newOri, 365);
     glycanviewer.init(option);
 }
 
