@@ -669,7 +669,10 @@ function showLower(acc) {
             statusLog(glycanType, accx);
         }
     }
-
+    function highlight(x) {
+        glycanviewer.network.selectNodes([x]);
+    }
+    setTimeout(highlight, 1500, acc);
     // console.log(parent, acc, children)
 }
 

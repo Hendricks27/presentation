@@ -407,7 +407,7 @@ var glycanviewer = {
                 dragNodes: true,
             },
             nodes: {
-                borderWidth: 0,
+                borderWidth: 2,
                 borderWidthSelected: 2,
                 chosen: true,
                 color: {
@@ -755,6 +755,28 @@ var glycanviewer = {
                     window.open(externalURL);
                 };
                 menuList.appendChild(entry2);
+
+                var entry3 = document.createElement("dt");
+                entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+                entry3.onmouseover = function(d){
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
+                };
+                entry3.onmouseout = function(d){
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
+                };
+                entry3.innerHTML = "GlycanData"; //change the description
+                entry3.name = selectedNode;
+
+                entry3.onclick = function(){
+                    var nodeID = this.name;
+                    var pre, suf;
+                    pre = "https://edwardslab.bmcb.georgetown.edu/glycandata/";
+                    suf = "";
+                    //var acc = nodeID.split("_")[0];
+                    var externalURL = pre + nodeID + suf;
+                    window.open(externalURL);
+                };
+                menuList.appendChild(entry3);
 
             }
 
