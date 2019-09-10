@@ -379,6 +379,28 @@ function match2CurrentComposition(thisComp) {
     return true
 }
 
+function getDecedents(n) {
+    if (!Array.isArray(data[n].children)){
+        // console.log(data[n].children);
+        return []
+    }
+
+    var res = [];
+    for (var nc of data[n].children){
+        res = res.concat(JSON.parse(JSON.stringify(getDecedents(nc))));
+        res.push(nc);
+    }
+
+    var res2 = [];
+    res.forEach(function (d) {
+        if (!Object.keys(res2).includes(d)){
+            res2.push(d);
+        }
+    });
+
+    return res2
+}
+
 function dataPreprocess() {
     for (var acc of Object.keys(data)){
         for (var m of allMono){
@@ -390,6 +412,8 @@ function dataPreprocess() {
         if (data[acc].top){
             topTopology.push(acc);
         }
+
+        data[acc].decedentNum = getDecedents(acc).length;
     }
 }
 
@@ -471,7 +495,9 @@ function updateRightPanel() {
     var table = document.createElement("table");
     var row = document.createElement("tr");
     var c = 0;
-    matchedTopologies.sort();
+    matchedTopologies.sort(function (a, b) {
+        return data[a].decedentNum - data[b].decedentNum
+    });
 
     for (var gtcid of matchedTopologies) {
         var f = getImage(gtcid);
