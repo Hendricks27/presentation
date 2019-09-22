@@ -13,7 +13,7 @@ var monofreq = {};
 var maxComp = {};
 var maxCompAtCurrentComp = {};
 var topTopology =[];
-
+var cacheForMatchedTopology = {};
 
 var icon_config = {
     'GlcNAc': {"shape": "square", "icon_color": "rgb(17,0,250)", "count_color": "white"},
@@ -178,7 +178,7 @@ function compositionChange(iupac, num) {
         if (['GlcNAc', 'GalNAc', 'ManNAc', 'Glc', 'Gal', 'Man'].includes(iupac)){
             monofreq[{3: "Hex", 6:"HexNAc"}[iupac.length]] = monofreq[{3: "Hex", 6:"HexNAc"}[iupac.length]]+ num;
         }
-        afterCompostionChanged();
+        //afterCompostionChanged();
         updateUpper();
         hgvcontainer.innerHTML = "";
     }
@@ -379,6 +379,29 @@ function match2CurrentComposition(thisComp) {
     return true
 }
 
+function compositionMatch(thisComp, nextComp) {
+
+
+    for (var mc of allMono) {
+        if (mc.includes("Hex")){
+            if (nextComp[mc] != thisComp[mc]) {
+                return false
+            }
+        }else if (['Fuc', 'NeuAc', 'NeuGc', "Xxx"].includes(mc)){
+            if (nextComp[mc] != thisComp[mc]) {
+                return false
+            }
+        }
+        else{
+            if (nextComp[mc] > thisComp[mc]) {
+                return false
+            }
+        }
+
+    }
+    return true
+}
+
 function getDecedents(n) {
     if (!Array.isArray(data[n].children)){
         // console.log(data[n].children);
@@ -421,11 +444,19 @@ function dataPreprocess() {
 function findMatchedTopLeverTopology() {
     matchedTopologies = [];
 
-    for (var acc of topTopology){
-        if (match2CurrentComposition(data[acc].comp)){
-            matchedTopologies.push(acc);
+    var currentCompStr = monofreq2str(monofreq);
+    if (Object.keys(cacheForMatchedTopology).includes(currentCompStr)){
+        console.log("cached");
+        matchedTopologies = cacheForMatchedTopology[currentCompStr];
+    }
+    else{
+        for (var acc of topTopology){
+            if (match2CurrentComposition(data[acc].comp)){
+                matchedTopologies.push(acc);
+            }
         }
     }
+
 
 }
 
@@ -464,6 +495,43 @@ function updateMaxPossibleComp() {
 function afterCompostionChanged() {
     updateMaxPossibleComp();
     findMatchedTopLeverTopology();
+    cacheNextMonoCompositionOfMatedTopology();
+}
+
+function monofreq2str(freq) {
+    var res = "";
+    for (var m of allMono){
+        if (freq[m] > 0){
+            res += m+freq[m].toString();
+        }
+    }
+    return res
+}
+
+function cacheNextMonoCompositionOfMatedTopology() {
+    for (var m of allMono){
+        var nextMonoConfig = JSON.parse(JSON.stringify(monofreq));
+        if (['GlcNAc', 'GalNAc', 'ManNAc'].includes(m)){
+            nextMonoConfig["HexNAc"] += 1;
+        }
+        else if (['Glc', 'Gal', 'Man'].includes(m)){
+            nextMonoConfig["Hex"] += 1;
+        }
+        nextMonoConfig[m] += 1;
+
+        var monoCompStr = monofreq2str(nextMonoConfig);
+        if (Object.keys(cacheForMatchedTopology).includes(monoCompStr)){
+            continue
+        }
+        var matchedTopologyForNextLevel = [];
+        for (var acc of topTopology){
+            if (compositionMatch(data[acc].comp, nextMonoConfig)){
+                matchedTopologyForNextLevel.push(acc);
+            }
+        }
+
+        cacheForMatchedTopology[monoCompStr] = matchedTopologyForNextLevel;
+    }
 }
 
 
@@ -564,8 +632,9 @@ function updateUpper() {
     hgvcontainer.style = cssBottomHide;
 
     panelcontainer.style = cssUpperShow;
-    updateLeftPanel();
+
     afterCompostionChanged();
+    updateLeftPanel();
     updateRightPanel();
     statusLog("comp");
 }
@@ -764,6 +833,7 @@ function iupacCompositionInit(){
             monofreq[m] = parseInt(urlPara[m]);
         }
     }
+
     updateUpper();
 }
 
