@@ -757,12 +757,12 @@ var glycanviewer = {
                 menuList.appendChild(entry2);
 
                 var entry3 = document.createElement("dt");
-                entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+                entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: text-decoration;";
                 entry3.onmouseover = function(d){
-                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: line-through; background-color: #111111";
                 };
                 entry3.onmouseout = function(d){
-                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: line-through; background-color: #333333";
                 };
                 entry3.innerHTML = "GlycanData"; //change the description
                 entry3.name = selectedNode;
