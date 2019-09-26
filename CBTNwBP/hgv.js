@@ -614,7 +614,7 @@ var glycanviewer = {
             //console.log(clickData);
             document.addEventListener("click",clearEverythingInContextMenu,{once: true});
 
-            boolDisplayAll = true;
+            // boolDisplayAll = true;
 
             var menuELE = thisLib.div_contextMenu;
             var menuList = document.createElement("dl");
@@ -757,26 +757,61 @@ var glycanviewer = {
                 menuList.appendChild(entry2);
 
                 var entry3 = document.createElement("dt");
-                entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: text-decoration;";
+                var textDecoration = "line-through";
+                if (glycandataAccession.includes(selectedNode)){
+                    textDecoration = "none";
+                    entry3.onclick = function(){
+                        var nodeID = this.name;
+                        var pre, suf;
+                        pre = "https://edwardslab.bmcb.georgetown.edu/glycandata/";
+                        suf = "";
+                        //var acc = nodeID.split("_")[0];
+                        var externalURL = pre + nodeID + suf;
+                        window.open(externalURL);
+                    };
+                }
+                entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: " + textDecoration + ";";
                 entry3.onmouseover = function(d){
-                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: line-through; background-color: #111111";
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; background-color: #111111; text-decoration: "+ textDecoration + ";";
                 };
                 entry3.onmouseout = function(d){
-                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: line-through; background-color: #333333";
+                    entry3.style = "display: block; color: white; text-align: left; padding: 5px; background-color: #333333; text-decoration: "+ textDecoration + ";";
                 };
                 entry3.innerHTML = "GlycanData"; //change the description
                 entry3.name = selectedNode;
 
-                entry3.onclick = function(){
-                    var nodeID = this.name;
-                    var pre, suf;
-                    pre = "https://edwardslab.bmcb.georgetown.edu/glycandata/";
-                    suf = "";
-                    //var acc = nodeID.split("_")[0];
-                    var externalURL = pre + nodeID + suf;
-                    window.open(externalURL);
-                };
                 menuList.appendChild(entry3);
+
+
+
+                var entry4 = document.createElement("dt");
+                var textDecoration4 = "line-through";
+                if (glygenAccession.includes(selectedNode)){
+                    textDecoration4 = "none";
+                    entry4.onclick = function(){
+                        var nodeID = this.name;
+                        var pre, suf;
+                        pre = "https://www.glygen.org/glycan_detail.html?glytoucan_ac=";
+                        suf = "";
+                        //var acc = nodeID.split("_")[0];
+                        var externalURL = pre + nodeID + suf;
+                        window.open(externalURL);
+                    };
+                }
+                entry4.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: " + textDecoration4 + ";";
+                entry4.onmouseover = function(d){
+                    entry4.style = "display: block; color: white; text-align: left; padding: 5px; background-color: #111111; text-decoration: "+ textDecoration4 + ";";
+                };
+                entry4.onmouseout = function(d){
+                    entry4.style = "display: block; color: white; text-align: left; padding: 5px; background-color: #333333; text-decoration: "+ textDecoration4 + ";";
+                };
+                entry4.innerHTML = "GlyGen"; //change the description
+                entry4.name = selectedNode;
+
+                menuList.appendChild(entry4);
+
+
+
 
             }
 
