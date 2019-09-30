@@ -4,7 +4,7 @@ var glycandata_accession = [];
 var glygen_accession = [];
 
 
-var cbtn = function () {
+var CBTN = function () {
     var div_id;
     var container;
 
@@ -48,6 +48,23 @@ var cbtn = function () {
         "s": "NeuAc",
         //"x": "Xxx"
     };
+
+    var hintContentUpper = "* Click controls at left to add/remove monosaccharides<br>" +
+        "* Click a Topology to jump to Subsumption Navigator<br>" +
+        "* Shortcuts:<br>" +
+        "    n/N - add/remove GlcNAc<br>" +
+        "    m/M - add/remove Man<br>" +
+        "    g/G - add/remove Gal<br>" +
+        "    f/F - add/remove Fuc<br>" +
+        "    s/S - add/remove NeuAc";
+    var hintContentLower = "* Double click on structure to navigate subsumption hierarchy.<br>" +
+        "* Right click popup to jump to GlyGen, GlycanData, GlyTouCan.";
+    var hintContentCurrent = hintContentUpper;
+
+
+    var hintHeaderUpper = "Composition Browser";
+    var hintHeaderLower = "Subsumption Navigator";
+    var hintHeaderCurrent = hintHeaderUpper;
 
     var lastClickedTopology = [];
     var matchedTopologies = [];
@@ -336,14 +353,9 @@ var cbtn = function () {
         iconHint.width = 40;
         iconHint.height = 40;
         iconHint.onclick = function () {
-            var s = "- You may use keyboard shortcut to add or subtract the composition for each monosaccharide<br>" +
-                "- Move cursor to each monosaccharide to learn more<br>" +
-                "- Double click on glycan in bottom for zooming<br>" +
-                "- Right click on glycan in bottom to jump to GlyTouCan.org for more detail<br>" +
-                "- The topologies are sorted based on graph size on bottom";
-            var dialog = new $.Zebra_Dialog(s, {
+            var dialog = new $.Zebra_Dialog(hintContentCurrent, {
                 type: 'information',
-                title: 'Hint',
+                title: hintHeaderCurrent,
                 buttons: ['Ok!'],
                 onClose: function (caption) {
 
@@ -356,9 +368,9 @@ var cbtn = function () {
             });
         };
 
-        iconHint.style = "padding-left: 40px";
+        iconHint.style = "position: absolute; top: 10px; right: 10px; z-index: 500; cursor: help;";
 
-        leftPanel.appendChild(iconHint);
+        container.appendChild(iconHint);
     }
 
 
@@ -607,6 +619,9 @@ var cbtn = function () {
                 if (e.shiftKey) {
                     num = -1;
                 }
+                if (e.key == e.key.toUpperCase()){
+                    num = -1;
+                }
                 compositionChange(keyMap[e.key.toLowerCase()], num);
             } else {
                 // Not capturing
@@ -623,7 +638,7 @@ var cbtn = function () {
                     p += iupac + "=" + c.toString() + "&";
                 }
             }
-            p = p.slice(0, p.length - 1)
+            p = p.slice(0, p.length - 1);
         } else if (["composition", "topology", "saccharide"].includes(t)) {
             p += t + "=" + gtcid;
         }
@@ -655,6 +670,9 @@ var cbtn = function () {
 
         panelcontainer.style = cssUpperShow;
 
+        hintContentCurrent = hintContentUpper;
+        hintHeaderCurrent = hintHeaderUpper;
+
         resizeContainer();
     }
 
@@ -679,6 +697,8 @@ var cbtn = function () {
     function showLower(acc) {
         lowerPrep();
         statusLog(data[acc].type, acc);
+        hintContentCurrent = hintContentLower;
+        hintHeaderCurrent = hintHeaderLower;
 
         //document.getElementById("img_" + acc).style = "border-style: solid; border-color: rgb(42,124,233); margin: 0;";
 
@@ -753,8 +773,8 @@ var cbtn = function () {
             temp2.push(e);
         }
         edges["Pseudo"] = temp2;
-        console.log(nodes);
-        console.log(edges);
+        //console.log(nodes);
+        //console.log(edges);
         component["nodes"] = nodes;
         component["edges"] = edges;
         component["root"] = "Pseudo";
@@ -920,14 +940,14 @@ var cbtn = function () {
             resourceSync(1);
         });
 
-        jQuery.getJSON("./data/glygen_accession.json", function (d) {
+        jQuery.getJSON(requiredJSONs["glycandata_accession"], function (d) {
             glycandata_accession = d;
             resourcesStatus["glycandata_accession"] = true;
             resourceSync();
         });
 
 
-        jQuery.getJSON("./data/glycandata_accession.json", function (d) {
+        jQuery.getJSON(requiredJSONs["glygen_accession"], function (d) {
             glygen_accession = d;
             resourcesStatus["glygen_accession"] = true;
             resourceSync();
@@ -944,4 +964,4 @@ var cbtn = function () {
         showLower: showLower
     }
 
-}();
+};

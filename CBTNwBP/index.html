@@ -12,8 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/zebra_dialog.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/css/flat/zebra_dialog.min.css">
 
-    <script src="JS/hgv.js"></script>
-    <script src="JS/CBTNm.js"></script>
+    <script src="./JS/hgv2.js"></script>
+    <script src="./JS/CBTNm.js"></script>
 
     <style>
         html *
@@ -28,17 +28,19 @@
 <script>
     "use strict";
 
-    var CBTNPara = {
-        "div_id": "container",
-        "subsumption_json_url": "./data/data.json",
-        "glycandata_json_url": "./data/glycandata_accession.json",
-        "glygen_json_url": "./data/glygen_accession.json",
+    var CBTNPara = {};
 
-        "HexNAc": 2,
-        "Hex": 3,
-        "Fuc": 1
-    };
+    var urlobj = new URL(window.location);
+    for (var p of urlobj.searchParams) {
+        CBTNPara[p[0]] = p[1];
+    }
 
+    CBTNPara["div_id"] = "container";
+    CBTNPara["subsumption_json_url"] = "./data/data.json";
+    CBTNPara["glycandata_json_url"] = "./data/glycandata_accession.json";
+    CBTNPara["glygen_json_url"] = "./data/glygen_accession.json";
+
+    var cbtn = CBTN();
     cbtn.initializeFromPara(CBTNPara);
 
 
