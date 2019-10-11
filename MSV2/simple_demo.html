@@ -12,12 +12,25 @@
     <script src="./util.js"></script>
 </head>
 <body>
-<h1>Click on the title to collapse or extend the mass spectra.</h1>
+<h1>Test</h1>
 <div class="specpanel_container"></div>
+<div id="container"></div>
+<dic id="container2"></dic>
 <script type="text/javascript">
     "use strict";
 
+    var x;
     var msv_instance = msv();
+
+
+
+    // Debug mode
+    /*
+
+    spectrum_parser.getFragmentAnnotation('./sample_data/fragment.json', console.log);
+    * */
+    msv_instance.debug();
+
 
 
 </script>
