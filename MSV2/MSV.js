@@ -101,6 +101,14 @@ var msv = function () {
         var showBools = {};
 
         var zoomingGroup = {};
+        var zoomongGroupStatus = {};
+        var zoomongGroupStatusExample = {
+            "start": 0,
+            "end": 200,
+            "max": 205
+        };
+
+        var drawingStatus = {};
 
 
         function addInit(id, initBool, initFunc, zgid) {
@@ -108,28 +116,105 @@ var msv = function () {
             initializationStatus[id] = initBool;
             initializationFunction[id] = initFunc;
             zoomingGroup[id] = zgid;
+
             showBools[id] = initBool;
         }
 
         function addResizeFunc(id, resizeFunc) {
-            panels.push(id);
             resizeFunction[id] = resizeFunc;
         }
 
-        function titleClickEvent(id) {
-            if (!initializationStatus[id]){
-                initializationFunction[id]();
+        function resizeAll(id, a,b) {
+
+            if (!Object.keys(zoomingGroup).includes(id)){
+                return undefined
             }
 
-            showAndHide(id);
+            var thisZoomingGroupID = zoomingGroup[id];
+            zoomongGroupStatus[thisZoomingGroupID] = {
+                "start": a,
+                "end": b
+            };
 
+            for (var otherid of Object.keys(zoomingGroup)){
+                if (zoomingGroup[otherid] == thisZoomingGroupID && otherid != id ){
+                    if (showBools[otherid]){
+                        resize(otherid, a,b);
+                    }
+                }
+            }
+        }
+
+        function resize(id, a,b) {
+            resizeFunction[id](a, b);
+        }
+
+        function titleClickEvent(id) {
+
+            if (!initializationStatus[id]){
+                initializationFunction[id]();
+                initializationStatus[id]= true;
+                show(id);
+
+
+
+            }
+            else{
+                showAndHide(id);
+            }
 
         }
 
         function showAndHide(id) {
 
-            if (!showBools[id]){}
+            if (showBools[id]){
+                hide(id);
+            }
+            else{
+                show(id);
+            }
 
+        }
+
+        function buildID(container, tag) {
+            return container + "/" + tag
+        }
+
+        function id2location(id) {
+            var temp = id.split("/");
+            return {
+                "container": temp[0],
+                "tag": temp[1]
+            }
+        }
+
+        function drawingFinished(id) {
+            drawingStatus[id] = true;
+        }
+
+        function show(id) {
+            var container = id2location(id)["container"];
+            var tag = id2location(id)["tag"];
+
+            d3.select("svg."+spcls(container, tag))
+                .style("display", "inline");
+            showBools[id] = true;
+
+            var zoomingGroupID = zoomingGroup[id];
+            if (zoomingGroupID){
+                if (zoomongGroupStatus[zoomingGroupID]) {
+                    resize(id, zoomongGroupStatus[zoomingGroupID]["start"], zoomongGroupStatus[zoomingGroupID]["end"])
+                }
+            }
+        }
+
+        function hide(id) {
+            var container = id2location(id)["container"];
+            var tag = id2location(id)["tag"];
+
+            d3.select("svg#"+spcls(container, tag))
+                .style("display", "none");
+            showBools[id] = false;
         }
 
 
@@ -138,11 +223,14 @@ var msv = function () {
             addResizeFunc: addResizeFunc,
             titleClickEvent: titleClickEvent,
             showAndHide: showAndHide,
-            showBools: showBools,
+            buildID: buildID,
+            drawingFinished: drawingFinished,
+            show: show,
+            hide: hide,
+            resize: resize,
+            resizeAll: resizeAll
         }
     }();
-
-    x = centralControl;
 
     var colorTheme = {
         b: "steelBlue", y: "tomato",
@@ -585,12 +673,13 @@ var msv = function () {
         }
 
         addTitle(container, tag, titleContent, titleTag);
-        centralControl.addInit([container, tag], displayFlag, drawWrapper, zoomingGroupID);
-        if (displayFlag){
-            console.log(titleContent);
+        centralControl.addInit(centralControl.buildID(container, tag), displayFlag, drawWrapper, zoomingGroupID);
+        if (displayFlag) {
             drawWrapper();
+        }else{
+            centralControl.hide(centralControl.buildID(container, tag));
         }
-        centralControl.showAndHide();
+        // centralControl.showAndHide();
 
     }
 
@@ -598,7 +687,13 @@ var msv = function () {
         // Manipulate with title
         d3.select("#"+spcls(container, tag)+"_title")
             .append(titleTag)
-            .html(titleContent);
+            .html(titleContent)
+            .attr("data-id", centralControl.buildID(container, tag))
+            .on("click", function (d) {
+                var x = d3.select(this).attr("data-id");
+                centralControl.titleClickEvent(x);
+            })
+        ;
     }
 
     function drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight){
@@ -693,6 +788,8 @@ var msv = function () {
             .domain([0, containerWidth])
             .range(["skyBlue", "steelblue"]);
 
+        // TODO Drag behavior will not listen to click event any more...
+        // Need alternative solution for reset zoom range by right click
         var drag = d3.drag()
             .on("start", dragStarted)
             .on("drag", dragged)
@@ -703,8 +800,25 @@ var msv = function () {
             .ticks(12)
             .tickSize(3);
 
+        var yAxisLabelMax = 0;
         var yAxis = d3.axisLeft(yAxisScale)
             .ticks(Math.max(2, Math.min(6, Math.round(12 * containerHeight / 500))), "s")
+            .tickFormat(function (d) {
+
+                if (d>yAxisLabelMax){
+                    yAxisLabelMax = d;
+                }
+                if (yAxisLabelMax > 1000000){
+                    var temp = d.toExponential();
+                    return temp;
+                    // Customize y axis label
+                    temp = temp.split("e+");
+                    return temp[0] + " * 10^" + temp[1]
+                }
+                else{
+                    return d
+                }
+            })
             .tickSize(3);
 
         var peakTip = d3.tip()
@@ -828,7 +942,7 @@ var msv = function () {
 
         peakElements.transition()
             .duration(transitionDuration)
-            .delay(transitionDelay)
+            //.delay(transitionDelay)
             .ease(transitionType)
             .attr("y", function (d) {
                 return (containerHeight - heightScale(d.int));
@@ -841,7 +955,7 @@ var msv = function () {
 
         fragmentElements.transition()
             .duration(transitionDuration)
-            .delay(transitionDelay)
+            //.delay(transitionDelay)
             .ease(transitionType)
             .attr("y", function (d) {
                 return containerHeight - heightScale(d.int);
@@ -855,7 +969,7 @@ var msv = function () {
 
         fragmentElementsIntheSameCluster.transition()
             .duration(transitionDuration)
-            .delay(transitionDelay)
+            //.delay(transitionDelay)
             .ease(transitionType)
             .attr("y", function (d) {
                 return containerHeight - heightScale(d.int);
@@ -869,7 +983,7 @@ var msv = function () {
 
         fragmentLabels.transition()
             .duration(transitionDuration)
-            .delay(transitionDelay)
+            //.delay(transitionDelay)
             .ease(transitionType)
             .attr("y", -5)
             .style("opacity", "1");
@@ -898,7 +1012,7 @@ var msv = function () {
 
         chromatographLineElements.transition()
             .duration(transitionDuration)
-            .delay(transitionDelay)
+            //.delay(transitionDelay)
             .ease(transitionType)
             .style("opacity", "1");
 
@@ -958,8 +1072,12 @@ var msv = function () {
             isMiddleClick = d3.event.sourceEvent.which == 2;
             isRightClick = d3.event.sourceEvent.which == 3;
 
-            if (isLeftClick) resizeStarted();
-            else if (isMiddleClick || isRightClick) resetDomain();
+            if (isLeftClick) {
+                resizeStarted()
+            }
+            else if (isMiddleClick || isRightClick) {
+                resetDomain();
+            }
         }
 
         function dragged() {
@@ -970,7 +1088,7 @@ var msv = function () {
         }
 
         function dragEnded() {
-            resizeEnded();
+            resizeEnded(true);
         }
 
         function resizeStarted() {
@@ -998,7 +1116,7 @@ var msv = function () {
                 .attr("width", Math.abs(resizeWidth));
             //  .attr("height", Math.abs(resizeHeight));
 
-            if (resizeWidth < 0) {
+            if (resizeWidth < 1) {
                 resizeGroup.selectAll("rect")
                     .attr("x", lastMouseX);
                 newDomain.min = (lastMouseX / scale) + domain.min;
@@ -1014,15 +1132,8 @@ var msv = function () {
             //}
         }
 
-        function resizeEnded(cascade, metoo) {
-            if (cascade == undefined) {
-                cascade = true;
-            }
-            if (metoo == undefined) {
-                metoo = false;
-            }
+        function resizeEnded(zoomAll) {
 
-            // console.log(d3.select("svg").select(".group").select(".chartGroup").select(".x"));
 
             xAxisScale.domain([clickScale(newDomain.min), clickScale(newDomain.max)]);
             xAxisGroup.transition().duration(zoomDuration).call(xAxis);
@@ -1031,6 +1142,11 @@ var msv = function () {
 
             var minMZinViewField = clickScale(newDomain.min);
             var maxMZinViewField = clickScale(newDomain.max);
+
+            if (zoomAll){
+                centralControl.resizeAll(centralControl.buildID(container, tag), minMZinViewField, maxMZinViewField)
+            }
+
             var maxIntinViewField = 1;
 
             for (var dot of peaks){
@@ -1081,14 +1197,6 @@ var msv = function () {
             fragmentLabelGroup.selectAll("text").attr("transform", "scale(" + [1 / scale, 1/scale2] + ")");
 
 
-            if (cascade) {
-                cTags[container].forEach(function (item, index, array) {
-                    if (item != tag || metoo) {
-                        // cCallbacks[container][item](clickScale(newDomain.min), clickScale(newDomain.max));
-                    }
-                });
-            }
-
             resizeGroup.selectAll("rect")
                 .transition()
                 .duration(zoomDuration)
@@ -1100,10 +1208,14 @@ var msv = function () {
             tooltipTransition("*", container, tag, 0, 500, 0);
         }
 
-        cCallbacks[container][tag] = (function (a, b) {
+        var resizeFunc = function (a, b, zoomAll) {
             setDomain(a, b);
-            resizeEnded(false, false);
-        });
+            resizeEnded(zoomAll);
+        };
+
+        cCallbacks[container][tag] = resizeFunc;
+        centralControl.addResizeFunc(centralControl.buildID(container, tag), resizeFunc);
+        centralControl.drawingFinished(centralControl.buildID(container, tag));
 
 
     }
@@ -1156,33 +1268,38 @@ var msv = function () {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
-            "title": "Hmmmmmm"
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
         });
         showLabelledSpectrum("container", 4102, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
-            "title": "Hmmmmmm"
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
         });
         showLabelledSpectrum("container", 4103, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
             "show": false,
-            "title": "Not display"
+            "title": "Not display",
+            "zoomgroup": "4"
         });
         showLabelledSpectrum("container", 4104, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
-            "title": "Hmmmmmm"
+            "title": "Hmmmmmm",
+            "zoomgroup": "10"
         });
 
         showLabelledSpectrum("container2", 4200, {
             "spectra": "./sample_data/chromatogram.json",
             "titleTag": "h3",
             "title": "Chromatogram",
-            "graphtype": "chromatogram"
+            "graphtype": "chromatogram",
+            "zoomgroup": "x0"
         });
     }
 
