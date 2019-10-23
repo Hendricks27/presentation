@@ -152,12 +152,8 @@ var msv = function () {
         function titleClickEvent(id) {
 
             if (!initializationStatus[id]){
-                initializationFunction[id]();
+                initializationFunction[id](true);
                 initializationStatus[id]= true;
-                show(id);
-
-
-
             }
             else{
                 showAndHide(id);
@@ -217,6 +213,28 @@ var msv = function () {
             showBools[id] = false;
         }
 
+        function reset(id) {
+            var maxMZ = 0;
+
+            var zoomingGroupID = zoomingGroup[id];
+            if (zoomingGroupID){
+                for (var id of Object.keys(zoomingGroup)){
+                    if (zoomingGroup[id] == zoomingGroupID){
+                        var container = id2location(id)["container"];
+                        var tag = id2location(id)["tag"];
+                        var thismz = cMaxMZ[container][tag];
+                        console.log(thismz, zoomingGroupID);
+                        if (thismz > maxMZ){
+                            maxMZ = thismz;
+                        }
+                    }
+                }
+                console.log(id, maxMZ);
+                resize(id, 0, maxMZ);
+                resizeAll(id, 0, maxMZ);
+            }
+        }
+
 
         return {
             addInit: addInit,
@@ -228,7 +246,8 @@ var msv = function () {
             show: show,
             hide: hide,
             resize: resize,
-            resizeAll: resizeAll
+            resizeAll: resizeAll,
+            reset: reset
         }
     }();
 
@@ -669,13 +688,13 @@ var msv = function () {
         * */
 
         function drawWrapper(){
-            drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, titleContent, titleTag);
+            drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, true);
         }
 
         addTitle(container, tag, titleContent, titleTag);
         centralControl.addInit(centralControl.buildID(container, tag), displayFlag, drawWrapper, zoomingGroupID);
         if (displayFlag) {
-            drawWrapper();
+            drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, false);
         }else{
             centralControl.hide(centralControl.buildID(container, tag));
         }
@@ -696,7 +715,7 @@ var msv = function () {
         ;
     }
 
-    function drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight){
+    function drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, delayLoading){
 
         var margin = {top: 10, bottom: 20, left: 80, right: 40};
 
@@ -708,9 +727,30 @@ var msv = function () {
         var containerWidth = canvasWidth - (margin.left + margin.right);
         var containerHeight = canvasHeight - (margin.top + margin.bottom);
 
+        // 500 and 300 in old script
         var transitionDuration = 500;
         var transitionDelay = 300;
         var transitionType = d3.easeBounce;
+
+        var drawingStatus = {
+            "peakElements": false,
+            "fragmentElements": false,
+            "fragmentElementsIntheSameCluster": false,
+            "fragmentLabels": false,
+            "chromatographLineElements": false
+        };
+        function drawingFinshed(item){
+            drawingStatus[item] = true;
+
+
+            if (!Object.values(drawingStatus).includes(false)){
+                centralControl.drawingFinished(centralControl.buildID(container, tag));
+                centralControl.show(centralControl.buildID(container, tag));
+                if ( !delayLoading ){
+                    centralControl.reset(centralControl.buildID(container, tag));
+                }
+            }
+        }
 
 
         var group = canvas.append("g")
@@ -723,6 +763,13 @@ var msv = function () {
         var chartGroup = group.append("g")
             .attr("class", "chartGroup")
             .attr("transform", "translate(" + [margin.left, margin.top] + ")");
+
+        var xAxisGroup = chartGroup.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + [0, containerHeight] + ")");
+
+        var yAxisGroup = chartGroup.append("g")
+            .attr("class", "y axis");
 
         var containerGroup = chartGroup.append("g")
             .attr("class", "container");
@@ -748,13 +795,6 @@ var msv = function () {
 
         var fragmentSelectedGroup = fragmentGroup.append("g")
             .attr("class", "fragementSelectedGroup");
-
-        var xAxisGroup = chartGroup.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(" + [0, containerHeight] + ")");
-
-        var yAxisGroup = chartGroup.append("g")
-            .attr("class", "y axis");
 
         var resizeGroup = selectGroup.append("g")
             .attr("class", "resize");
@@ -794,32 +834,6 @@ var msv = function () {
             .on("start", dragStarted)
             .on("drag", dragged)
             .on("end", dragEnded);
-
-
-        var xAxis = d3.axisBottom(xAxisScale)
-            .ticks(12)
-            .tickSize(3);
-
-        var yAxisLabelMax = 0;
-        var yAxis = d3.axisLeft(yAxisScale)
-            .ticks(Math.max(2, Math.min(6, Math.round(12 * containerHeight / 500))), "s")
-            .tickFormat(function (d) {
-
-                if (d>yAxisLabelMax){
-                    yAxisLabelMax = d;
-                }
-                if (yAxisLabelMax > 1000000){
-                    var temp = d.toExponential();
-                    return temp;
-                    // Customize y axis label
-                    temp = temp.split("e+");
-                    return temp[0] + " * 10^" + temp[1]
-                }
-                else{
-                    return d
-                }
-            })
-            .tickSize(3);
 
         var peakTip = d3.tip()
             .attr('class', 'd3-tip ' + tipcls("peak-tip", container, tag))
@@ -951,7 +965,10 @@ var msv = function () {
                 return heightScale(d.int);
             })
             .attr("fill", colorTheme.other)
-            .attr("opacity", ".5");
+            .attr("opacity", ".5")
+            .on("end", function (d) {
+                drawingFinshed("peakElements");
+            });
 
         fragmentElements.transition()
             .duration(transitionDuration)
@@ -965,6 +982,9 @@ var msv = function () {
             })
             .attr("fill", function (d) {
                 return d.color;
+            })
+            .on("end", function (d) {
+                drawingFinshed("fragmentElements");
             });
 
         fragmentElementsIntheSameCluster.transition()
@@ -979,6 +999,9 @@ var msv = function () {
             })
             .attr("fill", function (d) {
                 return d.color;
+            })
+            .on("end", function (d) {
+                drawingFinshed("fragmentElementsIntheSameCluster");
             });
 
         fragmentLabels.transition()
@@ -986,7 +1009,10 @@ var msv = function () {
             //.delay(transitionDelay)
             .ease(transitionType)
             .attr("y", -5)
-            .style("opacity", "1");
+            .style("opacity", "1")
+            .on("end", function (d) {
+                drawingFinshed("fragmentLabels");
+            });
 
 
         var newLine = d3.line()
@@ -1008,19 +1034,61 @@ var msv = function () {
             .attr("fill-opacity", "0.7")
             .attr("shape-rendering", "geometricPrecision")
             .attr("vector-effect", "non-scaling-stroke")
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 1)
+            .style("z-index","-1999");
 
         chromatographLineElements.transition()
             .duration(transitionDuration)
             //.delay(transitionDelay)
             .ease(transitionType)
-            .style("opacity", "1");
+            .style("opacity", "1")
+            .on("end", function (d) {
+                drawingStatus = {};
+                drawingFinshed("chromatographLineElements");
+            });
+
+        var xAxis = d3.axisBottom(xAxisScale)
+            .ticks(12)
+            .tickSize(3);
+
+        var yAxisLabelMax = 0;
+        var yAxis = d3.axisLeft(yAxisScale)
+            .ticks(Math.max(2, Math.min(6, Math.round(12 * containerHeight / 500))), "s")
+            .tickFormat(function (d) {
+
+                if (d>yAxisLabelMax){
+                    yAxisLabelMax = d;
+                }
+                if (d == 0){
+                    return ""
+                }
+                if (yAxisLabelMax > 1000000){
+                    var temp = d.toExponential();
+                    return d.toExponential();
+                }
+                else{
+                    return d
+                }
+            })
+            .tickSize(3);
 
 
         containerGroup.call(peakTip);
         selectGroup.call(drag);
-        xAxisGroup.transition().duration(transitionDelay).call(xAxis);
-        yAxisGroup.transition().duration(transitionDelay).call(yAxis);
+        xAxisGroup
+            .transition()
+            .duration(transitionDelay)
+            .call(xAxis)
+            .on("end", function () {
+                this.parentElement.appendChild(this);
+            });
+        yAxisGroup
+            .transition()
+            .duration(transitionDelay)
+            .call(yAxis)
+            .on("end", function () {
+                this.parentElement.appendChild(this);
+            });
 
         /*
         setTimeout(function () {
@@ -1116,7 +1184,7 @@ var msv = function () {
                 .attr("width", Math.abs(resizeWidth));
             //  .attr("height", Math.abs(resizeHeight));
 
-            if (resizeWidth < 1) {
+            if (resizeWidth < 0) {
                 resizeGroup.selectAll("rect")
                     .attr("x", lastMouseX);
                 newDomain.min = (lastMouseX / scale) + domain.min;
@@ -1215,8 +1283,6 @@ var msv = function () {
 
         cCallbacks[container][tag] = resizeFunc;
         centralControl.addResizeFunc(centralControl.buildID(container, tag), resizeFunc);
-        centralControl.drawingFinished(centralControl.buildID(container, tag));
-
 
     }
 
@@ -1294,17 +1360,18 @@ var msv = function () {
             "zoomgroup": "10"
         });
 
-        showLabelledSpectrum("container2", 4200, {
+        showLabelledSpectrum("container", 4200, {
             "spectra": "./sample_data/chromatogram.json",
             "titleTag": "h3",
             "title": "Chromatogram",
             "graphtype": "chromatogram",
-            "zoomgroup": "x0"
+            "zoomgroup": "11"
         });
     }
 
     return {
-        debug: debug
+        debug: debug,
+        showLabelledSpectrum: showLabelledSpectrum
     }
 
 };
