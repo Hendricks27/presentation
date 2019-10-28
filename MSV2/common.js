@@ -107,9 +107,6 @@ function loadSVG() {
     // console.log("Start drawing");
 
     var pot = document.getElementsByClassName("mw-parser-output")[0];
-    var chromatographContainer = document.createElement("div");
-    chromatographContainer.setAttribute("id", "specpane0");
-    pot.appendChild(chromatographContainer);
 
     var msContainer = document.createElement("div");
     msContainer.setAttribute("id", "specpanel");
@@ -148,7 +145,7 @@ function loadSVG() {
 
         param0["spectra"] = "https://edwardslab.bmcb.georgetown.edu/~nedwards/dropbox/pBYmLSkGeq/" + spectra_folder + "/" + peptideAcc + "." + charger + '.json';
         param0["width"] = pot.clientWidth * 0.995;
-        msv.showLabelledSpectrum('specpane0','chrom', param0);
+        msv.addLabelledSpectrum('specpanel','chrom', param0);
     }
 
     for (var i in paraFromPage) {
@@ -176,8 +173,9 @@ function loadSVG() {
         if (["12869", "12871"].includes(sc)){
             params["show"] = true;
         }
-        msv.showLabelledSpectrum('specpanel','spec'+sc, params);
+        msv.addLabelledSpectrum('specpanel','spec'+sc, params);
     }
 
+    msv.done();
 
 }

@@ -207,7 +207,6 @@ var msv = function () {
             tryResetAll();
         }
         function tryResetAll() {
-
             if (!doneBool){
                 return
             }
@@ -218,7 +217,6 @@ var msv = function () {
                     t1.push(t2);
                 }
             }
-
             if (t1.length != Object.keys(drawingStatus).length){
                 return
             }
