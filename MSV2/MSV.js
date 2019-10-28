@@ -250,6 +250,9 @@ var msv = function () {
             if (zoomingGroupID){
                 if (zoomongGroupStatus[zoomingGroupID]) {
                     resize(id, zoomongGroupStatus[zoomingGroupID]["start"], zoomongGroupStatus[zoomingGroupID]["end"])
+                }else{
+                    reset(id);
+                    resetAll(id);
                 }
             }
         }
