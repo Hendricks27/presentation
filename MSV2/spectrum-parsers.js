@@ -1,37 +1,29 @@
 "use strict";
 
 var spectrum_parser = function () {
-    var status = {};
     var cache = {};
     var cacheText = {};
     var callbacks = {};
 
-    function getText(url, callback) {
 
-        if (!Object.keys(status).includes(url)){
-            status[url] = false;
-            callbacks[url] = [callback];
-            d3.text(url).then(function (d) {
-                status[url] = true;
-                cacheText[url] = d;
+    // return a Promise object anyway
+    function getText(url) {
 
-                for (var cb of callbacks[url]){
-                    cb(cacheText[url]);
-                }
-                callbacks[url] = [];
-            })
-        }
-        else if (status[url] == false){
-            callbacks[url].push(callback);
+        if (!Object.keys(cacheText).includes(url)){
+            var t = d3.text(url);
+            cacheText[url] = t;
+            return t
         }else{
-            callback(cacheText[url])
+            return cacheText[url]
         }
     }
 
     function getSpectrum(url, format, scan, callback) {
+        // How to deal with MGF format spectra
 
+        /*
         if ((format && format.toLowerCase() == "mgf") || /\.mgf$/i.test(url)) {
-            getText(url, function (data) {
+            getText(url).then( function (data) {
                 cache[url] = mgfparser(data);
                 callback(cache[url][scan]);
                 for (var i = 0, len = callbacks.length; i < len; i++) {
@@ -40,7 +32,7 @@ var spectrum_parser = function () {
             });
         }
         else if ((format && format.toLowerCase() == "json") || /\.json$/i.test(url)) {
-            getText(url, function (data) {
+            getText(url).then(function (data) {
                 cache[url] = jsonparser(data);
 
                 if (Object.keys(cache[url]).length == 1){
@@ -55,6 +47,17 @@ var spectrum_parser = function () {
                 }
             });
         }
+
+         */
+
+    }
+
+    function getSpectrumJSON(url, scan) {
+        return new Promise(resolve => {
+            getText(url).then(function (data) {
+                resolve(JSON.parse(data));
+            });
+        })
 
     }
 
@@ -179,16 +182,20 @@ var spectrum_parser = function () {
         return spec
     }
 
-    function getFragmentAnnotation(url, callback) {
-        getText(url, function (d) {
-            callback(JSON.parse(d));
+    function getFragmentAnnotation(url) {
+        return new Promise(resolve => {
+            getText(url).then(function (d) {
+                resolve(JSON.parse(d));
+            });
         });
+
     }
 
     return {
         getText: getText,
         getSpectrum: getSpectrum,
-        getFragmentAnnotation: getFragmentAnnotation
+        getFragmentAnnotation: getFragmentAnnotation,
+        getSpectrumJSON: getSpectrumJSON
     }
 }();
 

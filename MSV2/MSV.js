@@ -115,6 +115,12 @@ var msv = function () {
             panels.push(id);
             initializationStatus[id] = initBool;
             initializationFunction[id] = initFunc;
+
+            if (initBool){
+                initFunc();
+            }else{
+                hide(id);
+            }
             zoomingGroup[id] = zgid;
 
             showBools[id] = initBool;
@@ -125,7 +131,7 @@ var msv = function () {
         }
 
         function resizeAll(id, a,b) {
-
+            resize(id, a, b);
             if (!Object.keys(zoomingGroup).includes(id)){
                 return undefined
             }
@@ -152,8 +158,15 @@ var msv = function () {
         function titleClickEvent(id) {
 
             if (!initializationStatus[id]){
-                initializationFunction[id](true);
+                initializationFunction[id]();
                 initializationStatus[id]= true;
+
+                var container = id2location(id)["container"];
+                var tag = id2location(id)["tag"];
+
+                d3.select("svg."+spcls(container, tag))
+                    .style("display", "inline");
+                showBools[id] = true;
             }
             else{
                 showAndHide(id);
@@ -184,8 +197,34 @@ var msv = function () {
             }
         }
 
+        var doneBool = false;
+        function done() {
+            doneBool = true;
+            tryResetAll();
+        }
         function drawingFinished(id) {
             drawingStatus[id] = true;
+            tryResetAll();
+        }
+        function tryResetAll() {
+
+            if (!doneBool){
+                return
+            }
+
+            var t1 = [];
+            for (var t2 of Object.keys(initializationStatus)){
+                if(initializationStatus[t2]){
+                    t1.push(t2);
+                }
+            }
+
+            if (t1.length != Object.keys(drawingStatus).length){
+                return
+            }
+
+            resetAll();
+
         }
 
         function show(id) {
@@ -196,12 +235,7 @@ var msv = function () {
                 .style("display", "inline");
             showBools[id] = true;
 
-            var zoomingGroupID = zoomingGroup[id];
-            if (zoomingGroupID){
-                if (zoomongGroupStatus[zoomingGroupID]) {
-                    resize(id, zoomongGroupStatus[zoomingGroupID]["start"], zoomongGroupStatus[zoomingGroupID]["end"])
-                }
-            }
+            zoomToCurrent(id);
         }
 
         function hide(id) {
@@ -213,7 +247,35 @@ var msv = function () {
             showBools[id] = false;
         }
 
+        function zoomToCurrent(id) {
+            var zoomingGroupID = zoomingGroup[id];
+            if (zoomingGroupID){
+                if (zoomongGroupStatus[zoomingGroupID]) {
+                    resize(id, zoomongGroupStatus[zoomingGroupID]["start"], zoomongGroupStatus[zoomingGroupID]["end"])
+                }
+            }
+        }
+
         function reset(id) {
+            var maxMZ = 0;
+
+            var zoomingGroupID = zoomingGroup[id];
+            if (zoomingGroupID){
+                for (var idt of Object.keys(zoomingGroup)){
+                    if (zoomingGroup[idt] == zoomingGroupID){
+                        var container = id2location(idt)["container"];
+                        var tag = id2location(idt)["tag"];
+                        var thismz = cMaxMZ[container][tag];
+                        if (thismz > maxMZ){
+                            maxMZ = thismz;
+                        }
+                    }
+                }
+                resize(id, 0, maxMZ);
+            }
+        }
+
+        function resetGroup(id) {
             var maxMZ = 0;
 
             var zoomingGroupID = zoomingGroup[id];
@@ -223,15 +285,18 @@ var msv = function () {
                         var container = id2location(id)["container"];
                         var tag = id2location(id)["tag"];
                         var thismz = cMaxMZ[container][tag];
-                        console.log(thismz, zoomingGroupID);
                         if (thismz > maxMZ){
                             maxMZ = thismz;
                         }
                     }
                 }
-                console.log(id, maxMZ);
-                resize(id, 0, maxMZ);
-                resizeAll(id, 0, maxMZ);
+                resizeAll(id, 0, maxMZ*0.5);
+            }
+        }
+
+        function resetAll() {
+            for (var id of Object.keys(drawingStatus)){
+                reset(id);
             }
         }
 
@@ -247,7 +312,11 @@ var msv = function () {
             hide: hide,
             resize: resize,
             resizeAll: resizeAll,
-            reset: reset
+            zoomToCurrent: zoomToCurrent,
+            reset: reset,
+            resetGroup: resetGroup,
+            resetAll: resetAll,
+            done: done
         }
     }();
 
@@ -543,7 +612,17 @@ var msv = function () {
         return params
     }
 
-
+    function addTitle(container, tag, titleContent, titleTag) {
+        // Manipulate with title
+        d3.select("#"+spcls(container, tag)+"_title")
+            .append(titleTag)
+            .html(titleContent)
+            .attr("data-id", centralControl.buildID(container, tag))
+            .on("click", function (d) {
+                var x = d3.select(this).attr("data-id");
+                centralControl.titleClickEvent(x);
+            });
+    }
 
     // Exposed functions
 
@@ -555,8 +634,7 @@ var msv = function () {
     *  - title content
     * */
 
-    // Getting data
-    function showLabelledSpectrum(container, tag, params) {
+    function addLabelledSpectrum(container, tag, params) {
 
         params = parameterCheck(params);
         if (!(container in cTags) || cTags[container].indexOf(tag) < 0) {
@@ -566,42 +644,59 @@ var msv = function () {
         }
         clearSpectrum(container, tag);
 
+        addTitle(container, tag, params["title"], params["titleTag"]);
+
+        function drawWrapper() {
+            showLabelledSpectrum(container, tag, params);
+        }
+
+        centralControl.addInit(centralControl.buildID(container, tag), params["show"], drawWrapper, params["zoomgroup"]);
+    }
+
+    // Getting data
+    async function showLabelledSpectrum(container, tag, params) {
+
+
         var spectra = params["spectra"];
         var format = params["format"];
         var scan = params["scan"];
-
-        var data = {
-            "spectrum": undefined,
-            "annotations": undefined
-        };
         /*
+                var data = {
+                    "spectrum": undefined,
+                    "annotations": undefined
+                };
 
+                var syncStatus = {"spectrum": false};
 
-        var syncStatus = {"spectrum": false};
+                if (params.hasOwnProperty("annotations")) {
+                    syncStatus["annotations"] = false;
+                    spectrum_parser.getFragmentAnnotation(params["annotations"], function (d) {
+                        syncStatus["annotations"] = true;
+                        data["annotations"] = d;
+                        sync();
+                    });
+                }
+                spectrum_parser.getSpectrum(spectra, format, scan, function (d) {
+                    syncStatus["spectrum"] = true;
+                    data["spectrum"] = d;
+                    sync();
 
+                });
+
+                function sync() {
+                    if (!Object.values(syncStatus).includes(false)){
+                        showLabelledSpectrumPart2(container, tag, data["spectrum"], data["annotations"], params)
+                    }
+                }
+                 */
+
+        var annotation_data = undefined;
         if (params.hasOwnProperty("annotations")) {
-            syncStatus["annotations"] = false;
-            spectrum_parser.getFragmentAnnotation(params["annotations"], function (d) {
-                syncStatus["annotations"] = true;
-                data["annotations"] = d;
-                sync();
-            });
+            annotation_data = await spectrum_parser.getFragmentAnnotation(params["annotations"]);
         }
-        spectrum_parser.getSpectrum(spectra, format, scan, function (d) {
-            syncStatus["spectrum"] = true;
-            data["spectrum"] = d;
-            sync();
+        var spectra_data = await spectrum_parser.getSpectrumJSON(spectra);
 
-        });
-
-        function sync() {
-            if (!Object.values(syncStatus).includes(false)){
-                showLabelledSpectrumPart2(container, tag, data["spectrum"], data["annotations"], params)
-            }
-        }
-         */
-
-
+        showLabelledSpectrumPart2(container, tag, spectra_data, annotation_data, params)
 
     }
 
@@ -649,8 +744,6 @@ var msv = function () {
                 fragments = fragments.concat(frags);
             }
         }
-
-
 
         var newFragments = [];
         var colorThePeak = [];
@@ -719,33 +812,12 @@ var msv = function () {
         * Start to draw
         * */
 
-        function drawWrapper(){
-            drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, true);
-        }
 
-        addTitle(container, tag, titleContent, titleTag);
-        centralControl.addInit(centralControl.buildID(container, tag), displayFlag, drawWrapper, zoomingGroupID);
-        if (displayFlag) {
-            drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, false);
-        }else{
-            centralControl.hide(centralControl.buildID(container, tag));
-        }
-        // centralControl.showAndHide();
+        drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, !displayFlag);
 
     }
 
-    function addTitle(container, tag, titleContent, titleTag) {
-        // Manipulate with title
-        d3.select("#"+spcls(container, tag)+"_title")
-            .append(titleTag)
-            .html(titleContent)
-            .attr("data-id", centralControl.buildID(container, tag))
-            .on("click", function (d) {
-                var x = d3.select(this).attr("data-id");
-                centralControl.titleClickEvent(x);
-            })
-        ;
-    }
+
 
     function drawStuff(container, tag, maxPeaksMZ, maxPeaksInt, peaks, colorThePeak, newFragments, graphType, zoomHeight, delayLoading){
 
@@ -774,13 +846,15 @@ var msv = function () {
         function drawingFinshed(item){
             drawingStatus[item] = true;
 
-
             if (!Object.values(drawingStatus).includes(false)){
-                centralControl.drawingFinished(centralControl.buildID(container, tag));
-                centralControl.show(centralControl.buildID(container, tag));
-                if ( !delayLoading ){
-                    centralControl.reset(centralControl.buildID(container, tag));
+
+                if (delayLoading){
+                    centralControl.zoomToCurrent(centralControl.buildID(container, tag))
+                }else{
+                    centralControl.drawingFinished(centralControl.buildID(container, tag));
                 }
+
+
             }
         }
 
@@ -1308,12 +1382,12 @@ var msv = function () {
             tooltipTransition("*", container, tag, 0, 500, 0);
         }
 
-        var resizeFunc = function (a, b, zoomAll) {
+        var resizeFunc = function (a, b) {
             setDomain(a, b);
-            resizeEnded(zoomAll);
+            resizeEnded(false);
         };
 
-        cCallbacks[container][tag] = resizeFunc;
+        //cCallbacks[container][tag] = resizeFunc;
         centralControl.addResizeFunc(centralControl.buildID(container, tag), resizeFunc);
 
     }
@@ -1362,29 +1436,37 @@ var msv = function () {
 
 
     function debug() {
-        showLabelledSpectrum("container", 4100, {
+        addLabelledSpectrum("container", 4200, {
+            "spectra": "./sample_data/chromatogram.json",
+            "titleTag": "h3",
+            "title": "Chromatogram",
+            "graphtype": "chromatogram",
+            "zoomgroup": "11"
+        });
+
+        addLabelledSpectrum("container", 4100, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
             "title": "Hmmmmmm",
             "zoomgroup": "4"
         });
-        showLabelledSpectrum("container", 4102, {
+        addLabelledSpectrum("container", 4102, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
             "title": "Hmmmmmm",
             "zoomgroup": "4"
         });
-        showLabelledSpectrum("container", 4103, {
-            "spectra": "./sample_data/ms2.json",
+        addLabelledSpectrum("container", 4103, {
+            "spectra": "./sample_data/ms2x.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
             "show": false,
             "title": "Not display",
             "zoomgroup": "4"
         });
-        showLabelledSpectrum("container", 4104, {
+        addLabelledSpectrum("container", 4104, {
             "spectra": "./sample_data/ms2.json",
             "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
@@ -1392,18 +1474,90 @@ var msv = function () {
             "zoomgroup": "10"
         });
 
-        showLabelledSpectrum("container", 4200, {
-            "spectra": "./sample_data/chromatogram.json",
+
+
+
+
+
+
+        addLabelledSpectrum("container", 41000, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
             "titleTag": "h3",
-            "title": "Chromatogram",
-            "graphtype": "chromatogram",
-            "zoomgroup": "11"
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
         });
+        addLabelledSpectrum("container", 41020, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
+        });
+        addLabelledSpectrum("container", 41030, {
+            "spectra": "./sample_data/ms2x.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Not display",
+            "zoomgroup": "4"
+        });
+        addLabelledSpectrum("container", 41040, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "10"
+        });
+
+
+
+
+        addLabelledSpectrum("container", 410020, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
+        });
+        addLabelledSpectrum("container", 410320, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "4"
+        });
+        addLabelledSpectrum("container", 414030, {
+            "spectra": "./sample_data/ms2x.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Not display",
+            "zoomgroup": "4"
+        });
+        addLabelledSpectrum("container", 415040, {
+            "spectra": "./sample_data/ms2.json",
+            "annotations": "./sample_data/fragment.json",
+            "titleTag": "h3",
+            "show": false,
+            "title": "Hmmmmmm",
+            "zoomgroup": "10"
+        });
+
+
+
+        centralControl.done();
     }
 
     return {
         debug: debug,
-        showLabelledSpectrum: showLabelledSpectrum
+        addLabelledSpectrum: addLabelledSpectrum,
+        done: centralControl.done
     }
 
 };
