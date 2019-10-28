@@ -503,6 +503,46 @@ var msv = function () {
         });
     }
 
+    function parameterCheck(params) {
+        params["width"] = params["width"] || 1000;
+        params["height"] = params["height"] || 300;
+
+        if (params["format"] == "json" && !/\.json$/i.test(params["spectra"])) {
+            params["spectra"] = params["spectra"] + "/" + params["scan"] + ".json";
+        }
+
+        params["intensity_threshold"] = params["intensity_threshold"] || 0.05;
+        params["tolerance"] = params["tolerance"] || 0.1;
+        if (params["fragment_colors"]){
+            colorTheme = params["fragment_colors"];
+        }
+
+        if ("show" in params){
+            params["show"] = params["show"]
+        }
+        else {
+            params["show"] = true;
+        }
+
+        // let the "zoom by its own" be undefined or generating a random number for it?
+        params["zoomgroup"] = params["zoomgroup"];
+
+        params["graphtype"] = params["graphtype"]|| "ms2" ;
+
+        if ([true, false].includes(params["zoomHeight"])){
+
+        }
+        else{
+            params["zoomHeight"] = params["graphtype"] == "chromatogram";
+        }
+
+        params["title"] = params["title"] || "Unnamed Spectrum";
+        params["titleTag"] = params["titleTag"] || "h2";
+
+
+        return params
+    }
+
 
 
     // Exposed functions
@@ -517,10 +557,11 @@ var msv = function () {
 
     // Getting data
     function showLabelledSpectrum(container, tag, params) {
+
+        params = parameterCheck(params);
         if (!(container in cTags) || cTags[container].indexOf(tag) < 0) {
-            // console.log("append spectrum "+container+" "+tag);
-            var width = params["width"] || 1000;
-            var height = params["height"] || 300;
+            var width = params["width"];
+            var height = params["height"];
             appendSpectrum(container, tag, width, height);
         }
         clearSpectrum(container, tag);
@@ -529,14 +570,13 @@ var msv = function () {
         var format = params["format"];
         var scan = params["scan"];
 
-        if (format == "json" && !/\.json$/i.test(spectra)) {
-            spectra = spectra + "/" + scan + ".json";
-        }
-
         var data = {
             "spectrum": undefined,
             "annotations": undefined
         };
+        /*
+
+
         var syncStatus = {"spectrum": false};
 
         if (params.hasOwnProperty("annotations")) {
@@ -559,37 +599,29 @@ var msv = function () {
                 showLabelledSpectrumPart2(container, tag, data["spectrum"], data["annotations"], params)
             }
         }
+         */
+
+
 
     }
 
     // Raw data is ready, process data and draw
     function showLabelledSpectrumPart2(container, tag, spectrum, annotation_data, params) {
 
-        var baseHeightPercent = params["intensity_threshold"] || 0.05;
-        var tolerance = params["tolerance"] || 0.1;
-        if (params["fragment_colors"]){
-            colorTheme = params["fragment_colors"];
-        }
+        var baseHeightPercent = params["intensity_threshold"];
+        var tolerance = params["tolerance"];
 
-        if ("show" in params){
-            var displayFlag = params["show"]
-        }
-        else {
-            var displayFlag = true;
-        }
+
+        var displayFlag = params["show"];
+
         var zoomingGroupID = params["zoomgroup"];
 
-        var graphType = params["graphtype"]|| "ms2" ;
+        var graphType = params["graphtype"];
 
-        var zoomHeight;
-        if (graphType == "chromatogram"){
-            zoomHeight = params["zoomHeight"] || true;
-        }else{
-            zoomHeight = params["zoomHeight"] || false;
-        }
+        var zoomHeight = params["zoomHeight"];
 
-        var titleContent = params["title"] || "Unnamed Spectrum";
-        var titleTag = params["titleTag"] || "h2";
+        var titleContent = params["title"];
+        var titleTag = params["titleTag"];
 
         var peaks;
         if (graphType == "chromatogram") {
