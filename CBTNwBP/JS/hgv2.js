@@ -196,7 +196,12 @@ var glycanviewer = {
             nextLevelNodes = [];
             thisLevel += 1;
         }
-        console.log(component.nodes);
+
+        for (var node of Object.keys(component.nodes)){
+            if (node.includes("3dots")){
+                component.nodes[node].level -= 0.33;
+            }
+        }
 
         this.rootlevel = rootlevel;
         this.displaynodes = displaynodes;
@@ -843,6 +848,7 @@ var glycanviewer = {
         options = thisLib.options;
         naviNetwork.setOptions(options);
         naviNetwork.setData(data);
+        glycanviewer.network.selectNodes(thisLib.para.essentials.highLightedNodes);
 
         thisLib.naviNetwork = naviNetwork;
 
