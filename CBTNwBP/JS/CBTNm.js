@@ -40,6 +40,7 @@ var CBTN = function () {
     };
 
     var urlPara = {};
+    var suppressStatusChange = false;
 
     var keyMap = {
         "n": "GlcNAc",
@@ -116,6 +117,8 @@ var CBTN = function () {
     };
 
     function allcateDIV() {
+        container.innerHTML = "";
+
         panelcontainer = document.createElement("div");
         hgvcontainer = document.createElement("div");
         hgvcontainer.setAttribute("id", "viewer");
@@ -152,6 +155,7 @@ var CBTN = function () {
 
     function getParaFromURL() {
         var urlobj = new URL(window.location);
+        urlPara = {};
         for (var p of urlobj.searchParams) {
             urlPara[p[0]] = p[1];
         }
@@ -666,6 +670,12 @@ var CBTN = function () {
     }
 
     function statusLog(t, gtcid) {
+
+        if (suppressStatusChange){
+            suppressStatusChange = false;
+            return
+        }
+
         var p = "?";
         if (t == "comp") {
             for (var iupac of allMono) {
@@ -678,10 +688,14 @@ var CBTN = function () {
         } else if (["composition", "topology", "saccharide"].includes(t)) {
             p += t + "=" + gtcid;
         }
+
+        var html_title = "CBTN (" + p.substring(1, p.length) + ")";
+        window.document.title = html_title;
+
         if (p.length < 3) {
             p = location.protocol + '//' + location.host + location.pathname;
         }
-        history.pushState({}, null, p);
+        history.pushState({}, "", p);
     }
 
     function updateUpper() {
@@ -902,6 +916,12 @@ var CBTN = function () {
         dataPreprocess();
 
 
+        window.onpopstate = function(event) {
+            getParaFromURL();
+            testFunc();
+        };
+
+
         var altOri = getCookie("orientation");
         if (altOri){
             option.display.orientation = parseInt(altOri);
@@ -940,6 +960,41 @@ var CBTN = function () {
         }
     }
 
+    function testFunc(){
+        suppressStatusChange = true;
+
+        var iupacCompositionInitFlag = false;
+        for (var iupac of allMono) {
+            if (Object.keys(urlPara).includes(iupac)) {
+                iupacCompositionInitFlag = true;
+                break
+            }
+        }
+
+        if (Object.keys(urlPara).includes("saccharide")) {
+            lowerInit(urlPara["saccharide"]);
+        } else if (Object.keys(urlPara).includes("topology")) {
+            lowerInit(urlPara["topology"]);
+        } else if (Object.keys(urlPara).includes("composition")) {
+            glytoucanCompositionInit();
+        } else if (Object.keys(urlPara).includes("focus")) {
+            if (Object.keys(data_composition).includes(urlPara["focus"])){
+                glytoucanCompositionInit();
+            }
+            else{
+                lowerInit(urlPara["focus"]);
+            }
+
+        } else if (iupacCompositionInitFlag) {
+            iupacCompositionInit();
+        } else {
+            for (var m of allMono) {
+                monofreq[m] = 0;
+            }
+            normalInit();
+        }
+    }
+
     function normalInit() {
         afterCompostionChanged();
         updateUpper();
@@ -947,12 +1002,12 @@ var CBTN = function () {
 
     function lowerInit(acc) {
         if (!accessionValidation(acc)){
-            pop_up("Error", acc+" doesn't look like a GlyTouCan accession!");
+            pop_up("Error", "Bad GlyTouCan accession: " + acc);
             normalInit();
             return
         }
         if (!Object.keys(data).includes(acc)){
-            pop_up("Error", "Sorry, we don't have information about "+acc+ " ...");
+            pop_up("Error", "Unsupported GlyTouCan accession: " + acc);
             normalInit();
             return
         }
@@ -960,12 +1015,14 @@ var CBTN = function () {
             monofreq[m] = data[acc].comp[m];
         }
 
-        updateUpper();
+        // updateUpper();
         showLower(acc);
     }
 
     function iupacCompositionInit(){
-
+        for (var m of allMono){
+            monofreq[m] = 0;
+        }
         for (var m of Object.keys(urlPara)){
             if (allMono.includes(m)){
                 monofreq[m] = parseInt(urlPara[m]);
