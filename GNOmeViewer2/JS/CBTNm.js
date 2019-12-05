@@ -406,7 +406,8 @@ var CBTN = function () {
                 }
             }
             else{
-                if (currentComp[mc] < thisComp[mc]) {
+                if (currentComp[mc] == 0){}
+                else if (currentComp[mc] > thisComp[mc]) {
                     return false
                 }
             }
