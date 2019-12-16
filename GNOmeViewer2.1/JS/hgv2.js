@@ -167,7 +167,7 @@ var glycanviewer = {
                         var currentEdge = edgesOfCurrentNode[currentEdgeIndex];
                         nextLevelNodes.push(currentEdge.to);
                         component.nodes[ currentNode ].level = thisLevel;
-                        if (thisLevel < 10001 || boolDisplayAll){
+                        if (thisLevel < 10001 ){
                             displaynodes[ currentNode ] = 1;
                         }
                         else{
@@ -178,7 +178,7 @@ var glycanviewer = {
                 else{
                     component.nodes[ currentNode ].level = thisLevel;
 
-                    if (thisLevel < 10000 || boolDisplayAll){
+                    if (thisLevel < 10000 ){
                         displaynodes[ currentNode ] = 1;
                     }
                     else {
@@ -195,6 +195,12 @@ var glycanviewer = {
             thisLevelNodes = nextLevelNodes;
             nextLevelNodes = [];
             thisLevel += 1;
+        }
+
+        for (var node of Object.keys(component.nodes)){
+            if (node.includes("3dots")){
+                component.nodes[node].level -= 0.33;
+            }
         }
 
         this.rootlevel = rootlevel;
@@ -407,7 +413,7 @@ var glycanviewer = {
                 dragNodes: true,
             },
             nodes: {
-                borderWidth: 0,
+                borderWidth: 2,
                 borderWidthSelected: 2,
                 chosen: true,
                 color: {
@@ -542,6 +548,23 @@ var glycanviewer = {
     doubleClickEvent: function(){
         var thisLib = this;
 
+        thisLib.network.on("doubleClick", function (clickData) {
+            zoomWhenDoubleClicked(clickData, thisLib.para)
+        });
+        function zoomWhenDoubleClicked(data, para) {
+            var selectnode = data.nodes;
+
+            if (selectnode.length>0){
+                if (!selectnode[0].includes("dot")){
+                    para.cbtn.showLower(selectnode[0], true);
+                }
+            }
+        }
+    },
+
+    doubleClickEventOld: function(){
+        var thisLib = this;
+
         thisLib.network.on("doubleClick",zoomWhenDoubleClicked);
         function zoomWhenDoubleClicked(data){
             var selectnode = data.nodes;
@@ -601,7 +624,7 @@ var glycanviewer = {
             //console.log(clickData);
             document.addEventListener("click",clearEverythingInContextMenu,{once: true});
 
-            boolDisplayAll = true;
+            // boolDisplayAll = true;
 
             var menuELE = thisLib.div_contextMenu;
             var menuList = document.createElement("dl");
@@ -693,9 +716,11 @@ var glycanviewer = {
         var thisLib = this;
         // Context menu, pop-up when you right click
         // The default context menu give you to chance to change to sub graph view
-        thisLib.div_network.addEventListener("contextmenu", rightClickMenuGenerator, false);
+        thisLib.div_network.addEventListener("contextmenu", function (clickData){
+            rightClickMenuGenerator(clickData, thisLib.para);
+        }, false);
 
-        function rightClickMenuGenerator(clickData){
+        function rightClickMenuGenerator(clickData, para){
             //console.log(clickData);
             document.addEventListener("click",clearEverythingInContextMenu,{once: true});
 
@@ -714,37 +739,102 @@ var glycanviewer = {
             var selectedNodes = [ selectedNode ];
             var connectedNodes = [];
 
+            if (selectedNode !== undefined && selectedNode !== "Topology" && !selectedNode.startsWith("fake") && !selectedNode.endsWith("3dots")){
+
+            }else{
+                return
+            }
+
+            var pureGTCre = /^G\d{5}\w{2}$/;
+            var pureGTCres = selectedNode.match(pureGTCre);
+            if (Array.isArray(pureGTCres) && pureGTCres.length == 1){
+                var entry = document.createElement("dt");
+                entry.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+                entry.onmouseover = function(d){
+                    this.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
+                };
+                entry.onmouseout = function(d){
+                    this.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
+                };
+                entry.innerHTML = "Copy accession to clipboard"; //change the description
+                entry.name = selectedNode;
+
+                entry.onclick = function(){
+                    var nodeID = this.name;
+
+                    const el = document.createElement('textarea');
+                    el.value = nodeID;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+
+                };
+                menuList.appendChild(entry);
+            }
+
             //updateList("Close Menu","dt");
             menuELE.style = "margin: 0; padding: 0; overflow: hidden; position: absolute; left: "+x+"px; top: "+y+"px; background-color: #333333; border: none; ";//width: 100px; height: 100px
 
-            // updateList("Jump to:", "dt");
+            var entry = document.createElement("dt");
+            entry.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+            entry.innerHTML = "Go to:";
+            menuList.appendChild(entry);
 
-            if (selectedNode !== undefined && selectedNode !== "Topology" && !selectedNode.startsWith("fake")){
+            var nojumpflag = true;
+            var externalLinks = para["contextMenu"]["externalLinks"];
+            for (var externalLink of externalLinks){
+                var title = externalLink["title"] || "";
+                var prefix = externalLink["prefix"] || "";
+                var suffix = externalLink["suffix"] || "";
+                var accs = externalLink["accessions"];
 
-                var entry2 = document.createElement("dt");
-                entry2.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
-                entry2.onmouseover = function(d){
-                    entry2.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
-                };
-                entry2.onmouseout = function(d){
-                    entry2.style = "display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
-                };
-                entry2.innerHTML = "GlyTouCan"; //change the description
-                entry2.name = selectedNode;
+                if (selectedNode !== undefined && selectedNode !== "Topology" && !selectedNode.startsWith("fake") && !selectedNode.endsWith("3dots")){
+                    var entry = document.createElement("dt");
+                    entry.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+                    entry.onmouseover = function(d){
+                        this.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #111111";
+                    };
+                    entry.onmouseout = function(d){
+                        this.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none; background-color: #333333";
+                    };
+                    entry.innerHTML = " - " + title; //change the description
+                    entry.name = selectedNode;
+                    entry.setAttribute("data-prefix", prefix);
+                    entry.setAttribute("data-suffix", suffix);
 
-                entry2.onclick = function(){
-                    var nodeID = this.name;
-                    var pre, suf;
-                    pre = "https://glytoucan.org/Structures/Glycans/";
-                    suf = "";
-                    //var acc = nodeID.split("_")[0];
-                    var externalURL = pre + nodeID + suf;
-                    window.open(externalURL);
-                };
-                menuList.appendChild(entry2);
+                    entry.onclick = function(){
+                        var nodeID = this.name;
+                        var pre = this.getAttribute("data-prefix");
+                        var suf = this.getAttribute("data-suffix");
+                        var externalURL = pre + nodeID + suf;
+                        window.open(externalURL);
+                    };
 
+                    var existFlag = false;
+                    if (accs == undefined){
+                        existFlag = true;
+                    }
+                    else if (accs.includes(selectedNode)){
+                        existFlag = true;
+                    }
+
+                    if (existFlag){
+                        nojumpflag = false;
+                        menuList.appendChild(entry);
+                    }
+                }
+            }
+            /*
+            if (nojumpflag){
+                var entry = document.createElement("dt");
+                entry.style = "cursor: default; display: block; color: white; text-align: left; padding: 5px; text-decoration: none;";
+                entry.innerHTML = "Sorry, no link available.";
+                var menuList = document.createElement("dl");
+                menuList.appendChild(entry);
             }
 
+             */
             menuELE.appendChild(menuList);
 
 
@@ -794,6 +884,7 @@ var glycanviewer = {
         options = thisLib.options;
         naviNetwork.setOptions(options);
         naviNetwork.setData(data);
+        glycanviewer.network.selectNodes(thisLib.para.essentials.highLightedNodes);
 
         thisLib.naviNetwork = naviNetwork;
 
