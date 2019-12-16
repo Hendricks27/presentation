@@ -783,6 +783,15 @@ var glycanviewer = {
 
             var nojumpflag = true;
             var externalLinks = para["contextMenu"]["externalLinks"];
+
+            var gnomeExternalLink = {
+                "title": "GNOme",
+                "prefix": "https://raw.githack.com/glygen-glycan-data/GNOme/master/GNOme.browser.html?composition=",
+                "suffix": "",
+                "accessions": undefined
+            };
+            externalLinks.push(gnomeExternalLink);
+
             for (var externalLink of externalLinks){
                 var title = externalLink["title"] || "";
                 var prefix = externalLink["prefix"] || "";
