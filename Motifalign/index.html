@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Motif align</title>
+    <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <style>
+        #header {
+            background-color:black;
+            color:white;
+            text-align:center;
+            padding:5px;
+        }
+        #motif {
+            line-height:30px;
+            background-color:#eeeeee;
+            float:left;
+            padding:5px;
+        }
+        #structure {
+            line-height:30px;
+            background-color:#C0C0C0;
+            float:left;
+            padding:5px;
+        }
+
+        #compare {
+            line-height:30px;
+            background-color:#808080;
+            width:502px;
+            float:right;
+            padding:5px;
+        }
+
+        .button {
+            background-color: #50BFE6;
+            border: none;
+            color: white;
+            text-align: center;
+            display: inline-block;
+            font-size: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="result_upload">
+</div><br>
+<div id="motif">
+    <h2>Motifs:</h2>
+    <table id="tab_motif">
+    </table>
+</div>
+
+<div id="structure">
+    <h2>Target glycans</h2>
+    <table id="tab_struc">
+    </table>
+</div>
+
+<script>
+    var getPara = function (p) {
+        return new URL(window.location).searchParams.get(p);
+    };
+
+    var motif_data = {};
+    var motif_figures = {};
+
+    jQuery.getJSON("./motif.json", function (d) {
+        motif_data = d;
+        console.log(motif_data);
+
+        var motif_table = document.getElementById("tab_motif");
+
+        var t = document.getElementById("motif");
+        t.style = "overflow-y: scroll; max-height: " + (window.innerHeight-50) + "px; height 300px";
+        var t = document.getElementById("structure");
+        t.style = "overflow-y: scroll; max-height: " + (window.innerHeight-50) + "px; height 300px";
+        //motif_table.style = "overflow: auto;";
+
+        for (var motif_acc of Object.keys(motif_data).sort()){
+            var figure = document.createElement("figure");
+            figure.style.margin = "0";
+            var motif_img = document.createElement("img");
+            var motif_caption = document.createElement("caption");
+
+            motif_img.src = "https://image.glycosmos.org/snfg/png/" + motif_acc;
+            motif_img.width = 200;
+            motif_img.setAttribute("acc", motif_acc);
+            motif_img.onclick = function () {
+                var a = this.getAttribute("acc");
+                fill_left(a);
+                highlightmotif(a);
+            };
+
+            motif_caption.innerHTML = "&#8593"+motif_acc+"&#8593";
+            motif_caption.style = "text-align: center;";
+
+            figure.appendChild(motif_img);
+            figure.appendChild(motif_caption);
+            motif_figures[motif_acc] = figure;
+
+            motif_table.appendChild(figure);
+        }
+
+
+    });
+
+    function highlightmotif(acc) {
+
+        for (var tacc of Object.keys(motif_figures)){
+            figure = motif_figures[tacc];
+            figure.style = "margin: 0;";
+        }
+        var figure = motif_figures[acc];
+        figure.style = "border: solid; border-color: lightblue; margin: 0;";
+    }
+
+    function fill_left(motifacc) {
+        var structure_table = document.getElementById("tab_struc");
+        structure_table.innerHTML = "";
+
+        var common = motif_data[motifacc]["common"];
+        var my_only = motif_data[motifacc]["my"];
+        var gtc_only = motif_data[motifacc]["gtc"];
+        var allres = [];
+
+        for (var i of common){
+            if (getPara("common")){
+                allres.push(i)
+            }
+        }
+        for (var i of my_only){
+            if (getPara("my")){
+                allres.push(i)
+            }
+        }
+        for (var i of gtc_only){
+            if (getPara("gtc")){
+                allres.push(i)
+            }
+        }
+        console.log(motifacc, common.length, my_only.length, gtc_only.length);
+
+        var thingPerRow = (window.innerWidth-250)/210;
+        var i = 0;
+        var tr = document.createElement("tr");
+        for (var acc of allres){
+            i += 1;
+
+            if (i < thingPerRow){
+
+            }else{
+                structure_table.appendChild(tr);
+                tr = document.createElement("tr");
+                i = 1
+            }
+
+            var td = document.createElement("td");
+            var figure = document.createElement("figure");
+            figure.style.margin = "0";
+            var struc_img = document.createElement("img");
+            var struc_caption = document.createElement("caption");
+
+            struc_img.src = "https://image.glycosmos.org/snfg/png/" + acc;
+            struc_img.width = 200;
+            struc_img.setAttribute("acc", acc);
+            struc_img.onclick = function () {
+                var a = this.getAttribute("acc");
+                window.open("https://glytoucan.org/Structures/Glycans/"+a);
+            };
+
+            var status = "";
+            if (my_only.includes(acc)){
+                status = "+"
+            }else if (gtc_only.includes(acc)){
+                status = "-"
+            }
+
+            struc_caption.innerHTML = acc + status;
+
+            figure.appendChild(struc_img);
+            figure.appendChild(struc_caption);
+            td.appendChild(figure);
+
+            tr.appendChild(td);
+
+
+        }
+        structure_table.appendChild(tr);
+    }
+
+
+</script>
+</body>
+</html>
