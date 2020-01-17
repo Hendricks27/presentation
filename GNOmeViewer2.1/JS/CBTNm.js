@@ -443,7 +443,7 @@ var CBTN = function () {
                 if (nextComp[mc] != thisComp[mc]) {
                     return false
                 }
-            }else if (['NeuAc', 'NeuGc', "Xxx"].includes(mc)){
+            }else if (['NeuAc', 'NeuGc', "Xxx", "S", "P", "Me", "aldi"].includes(mc)){
                 if (nextComp[mc] != thisComp[mc]) {
                     return false
                 }
