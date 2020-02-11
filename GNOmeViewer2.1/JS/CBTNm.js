@@ -14,7 +14,7 @@ var CBTN = function () {
     var badge;
 
     var monoExceptForXxx = ['GlcNAc', 'GalNAc', 'ManNAc', 'HexNAc','Glc', 'Gal', 'Man', 'Hex','dHex', 'Fuc', 'NeuAc', 'NeuGc', "S", "P", "Me"];
-    var allMono = monoExceptForXxx.concat(["Xxx"]);
+    var allMono = monoExceptForXxx.concat(["Xxx", "X"]);
 
     var monofreq = {};
     var maxComp = {};
@@ -42,6 +42,7 @@ var CBTN = function () {
         'S': {"shape": "circle", "icon_color": "darkgrey", "count_color": "black"},
         'P': {"shape": "square", "icon_color": "darkgrey", "count_color": "black"},
         'Me': {"shape": "diamond", "icon_color": "darkgrey", "count_color": "black"},
+        'X': {"shape": "triangle", "icon_color": "darkgrey", "count_color": "black"}
     };
 
     var urlPara = {};
@@ -418,7 +419,7 @@ var CBTN = function () {
                 if (currentComp[mc] != thisComp[mc]) {
                     return false
                 }
-            }else if (['NeuAc', 'NeuGc', "Xxx", "S", "P", "Me"].includes(mc)){
+            }else if (['NeuAc', 'NeuGc', "Xxx", "S", "P", "Me", "aldi", "X"].includes(mc)){
                 if (currentComp[mc] != thisComp[mc]) {
                     return false
                 }
@@ -443,7 +444,7 @@ var CBTN = function () {
                 if (nextComp[mc] != thisComp[mc]) {
                     return false
                 }
-            }else if (['NeuAc', 'NeuGc', "Xxx", "S", "P", "Me", "aldi"].includes(mc)){
+            }else if (['NeuAc', 'NeuGc', "Xxx", "S", "P", "Me", "aldi", "X"].includes(mc)){
                 if (nextComp[mc] != thisComp[mc]) {
                     return false
                 }
