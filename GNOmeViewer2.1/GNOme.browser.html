@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Widget 2</title>
+    <title>CBTN</title>
     <!-- https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
@@ -12,8 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/zebra_dialog.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/css/flat/zebra_dialog.min.css">
 
-    <script src="./JS/hgv2.js"></script>
-    <script src="./JS/CBTNm.js"></script>
+    <script src="./JS/hgv_CS.js"></script>
+    <script src="./JS/CBTN_CS.js"></script>
 
     <style>
         html *
@@ -28,56 +28,23 @@
 <script>
     "use strict";
 
-    // Get accessions for GlyGen and GlyTouCan first
+    var CBTNPara = {};
+    var cbtn = CBTN();
 
-    var glygen_accs, glycandata_accs;
-    var accs_received = {
-        "GlyGen": false,
-        "GlycanData": false
-    };
-    d3.json("./JS/glygen_accession.json", function (d) {
-        glygen_accs = d;
-        accs_received["GlyGen"] = true;
-        sync();
-    });
-
-    d3.json("./JS/glycandata_accession.json", function (d) {
-        glycandata_accs = d;
-        accs_received["GlycanData"] = true;
-        sync();
-    });
-
-    function sync(){
-        if ( !Object.values(accs_received).includes(false) ){
-            init_CBTN();
-        }
+    CBTNPara["theme"] = "default";
+    var urlobj = new URL(window.location);
+    for (var p of urlobj.searchParams) {
+        CBTNPara[p[0]] = p[1];
     }
 
+    CBTNPara["div_id"] = "container";
+    CBTNPara["subsumption_json_url"] = "./GNOme.CompositionSelector.json";
+    CBTNPara["compositon"] = "./GNOme.browser.composition.json";
 
-    function init_CBTN() {
-        var CBTNPara = {};
-        var cbtn = CBTN();
 
-        var urlobj = new URL(window.location);
-        for (var p of urlobj.searchParams) {
-            CBTNPara[p[0]] = p[1];
-        }
+    CBTNPara["this"] = cbtn;
 
-        CBTNPara["div_id"] = "container";
-        CBTNPara["subsumption_json_url"] = "./GNOme.browser2.json";
-        CBTNPara["compositon"] = "./GNOme.browser.composition.json";
-
-        CBTNPara["jumps"] = [];
-        CBTNPara["jumps"].push({
-            "title": "GlyTouCan",
-            "prefix": "https://glytoucan.org/Structures/Glycans/",
-            "suffix": "",
-            "accessions": undefined
-        });
-        CBTNPara["this"] = cbtn;
-
-        cbtn.initializeFromPara(CBTNPara);
-    }
+    cbtn.initializeFromPara(CBTNPara);
 
 </script>
 
