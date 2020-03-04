@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Widget</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+</head>
+<body>
+<input type="text" id="acc" value="G00028MO"><button onclick="update()">Submit</button>
+<div id="seq"></div>
+<div id="svg"></div>
+
+<script>
+    var allseq;
+    d3.json("seq.json").then(function (d) {
+        allseq = d;
+    });
+
+
+    var acc, seq, svg;
+
+    function update(){
+        acc = document.getElementById("acc").value;
+
+        update_seq();
+        update_svg();
+    }
+    setTimeout(update, 500);
+
+    function update_seq(){
+        var seq_info = allseq[acc];
+
+        seq = document.createElement("div");
+
+        var seq_prefix = document.createElement("span");
+        seq_prefix.innerText = "WURCS=2.0/" + seq_info[0] + ","  + seq_info[1] + ","  + seq_info[2] + "/";
+        seq.appendChild(seq_prefix);
+
+        var i = 0;
+        for (m of seq_info[3]){
+            i += 1;
+            var ele = document.createElement("span");
+            ele.innerText = "[" + m + "]";
+            ele.setAttribute("distinct_mono_id", i);
+            ele.style.color = "green";
+            ele.onmouseover = function(click_event){
+                var ele = this;
+                var distinct_mono_id = ele.getAttribute("distinct_mono_id");
+
+                var i = 0;
+                var jump_up = [];
+                for (distinct_mono_id0 of seq_info[4]){
+                    i+=1;
+                    if (distinct_mono_id0 == distinct_mono_id){
+                        jump_up.push(i)
+                    }
+                }
+
+                for (g of document.getElementsByTagName("g")){
+                    var mono_id_on_svg = g.getAttribute("wurcs_mono_id");
+                    if (jump_up.includes(parseInt(mono_id_on_svg))){
+                        g.setAttribute("transform","translate(0, -10)");
+                    }
+                }
+            };
+
+            ele.onmouseout = function() {
+                for (g of document.getElementsByTagName("g")){
+                    g.setAttribute("transform","translate(0, 0)");
+                }
+            };
+            seq.appendChild(ele)
+
+        }
+
+        var ele = document.createElement("span");
+        ele.innerText = "/";
+        seq.appendChild(ele);
+
+        var i = 0;
+        for (monoid of seq_info[4]){
+            i+=1;
+            if (i!=1){
+                var ele = document.createElement("span");
+                ele.innerText = "-";
+                seq.appendChild(ele);
+            }
+
+
+            var ele = document.createElement("span");
+            ele.style.color = "blue";
+            ele.setAttribute("mono_id", i);
+            ele.innerText = monoid;
+            ele.onmouseover = function(click_event){
+                var ele = this;
+                var mono_id = ele.getAttribute("mono_id");
+
+                for (g of document.getElementsByTagName("g")){
+                    var mono_id_on_svg = g.getAttribute("wurcs_mono_id");
+                    if (mono_id_on_svg == mono_id){
+                        g.setAttribute("transform","translate(0, -10)");
+                    }
+                }
+                //console.log(ele.getAttribute("mono_id"));
+            };
+
+            ele.onmouseout = function(click_event){
+                var ele = this;
+                var mono_id = ele.getAttribute("mono_id");
+
+                for (g of document.getElementsByTagName("g")){
+                    var mono_id_on_svg = g.getAttribute("wurcs_mono_id");
+                    if (mono_id_on_svg == mono_id){
+                        g.setAttribute("transform","translate(0, 0)");
+                    }
+                }
+            };
+            seq.appendChild(ele)
+        }
+
+        var ele = document.createElement("span");
+        ele.innerText = "/";
+        seq.appendChild(ele);
+
+        var seq_links = document.createElement("span");
+        seq_links.innerText = seq_info[5];
+        seq.appendChild(seq_links);
+
+        //seq = allseq[acc];
+        document.getElementById("seq").innerHTML = "";
+        document.getElementById("seq").appendChild(seq);
+
+
+
+    }
+
+    function update_svg(){
+        d3.text("./snfg/"+acc+".svg").then(function (d) {
+            document.getElementById("svg").innerHTML = d;
+        });
+    }
+
+
+    //document.getElementById('r-1:1').setAttribute("transform","translate(0, -10)")
+
+</script>
+
+</body>
+</html>
