@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
 </head>
 <body>
-<input type="text" id="acc" value="G00028MO"><button onclick="update()">Submit</button>
+<input type="text" id="acc" value="G98906WL"><button onclick="update()">Submit</button>
 <div id="seq"></div>
 <div id="svg"></div>
 
@@ -15,6 +15,12 @@
     d3.json("seq.json").then(function (d) {
         allseq = d;
     });
+
+    var letter2int = {};
+    for (l of "qwertyuiopasdfghjklzxcvbnm"){
+        letter2int[l] = l.charCodeAt(0) - "a".charCodeAt(0) + 1;
+    }
+    console.log(letter2int);
 
 
     var acc, seq, svg;
@@ -122,10 +128,46 @@
         ele.innerText = "/";
         seq.appendChild(ele);
 
-        var seq_links = document.createElement("span");
-        seq_links.innerText = seq_info[5];
-        seq.appendChild(seq_links);
+        //var seq_links = document.createElement("span");
+        //seq_links.innerText = seq_info[5];
+        //seq.appendChild(seq_links);
 
+        for (var l of seq_info[5]){
+            var ele = document.createElement("span");
+            ele.innerText = l;
+            if ("qwertyuiopasdfghjklzxcvbnm".includes(l)){
+                ele.style.color = "red";
+                ele.setAttribute("mono_id", letter2int[l]);
+
+                ele.onmouseover = function(click_event){
+                    var ele = this;
+                    var mono_id = ele.getAttribute("mono_id");
+
+                    for (g of document.getElementsByTagName("g")){
+                        var mono_id_on_svg = g.getAttribute("wurcs_mono_id");
+                        if (mono_id_on_svg == mono_id){
+                            g.setAttribute("transform","translate(0, -10)");
+                        }
+                    }
+                    //console.log(ele.getAttribute("mono_id"));
+                };
+
+                ele.onmouseout = function(click_event){
+                    var ele = this;
+                    var mono_id = ele.getAttribute("mono_id");
+
+                    for (g of document.getElementsByTagName("g")){
+                        var mono_id_on_svg = g.getAttribute("wurcs_mono_id");
+                        if (mono_id_on_svg == mono_id){
+                            g.setAttribute("transform","translate(0, 0)");
+                        }
+                    }
+                };
+
+
+            }
+            seq.appendChild(ele);
+        }
         //seq = allseq[acc];
         document.getElementById("seq").innerHTML = "";
         document.getElementById("seq").appendChild(seq);
@@ -134,9 +176,16 @@
 
     }
 
+
     function update_svg(){
         d3.text("./snfg/"+acc+".svg").then(function (d) {
             document.getElementById("svg").innerHTML = d;
+
+
+            for (var x of document.getElementsByTagName("svg")){
+                x.style.width = "5000px";
+                x.style.height = "5000px";
+            }
         });
     }
 
