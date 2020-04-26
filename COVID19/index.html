@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+</head>
+<body>
+<h2>Nation wide</h2>
+<div id="us"></div>
+<h2>Maryland</h2>
+<select id="state-option">
+    <option value="MD">MD</option>
+    <option value="DC">DC</option>
+    <option value="VA">VA</option>
+    <option value="NY">NY</option>
+</select>
+<div id="state"></div>
+<script>
+    "use strict";
+    /*
+    TODOs:
+    1. Use fixed color for lines
+    2. Add a little bit more interactive item (show data detail)
+    3. Add events support
+    */
+
+    var colorSet = {
+        'new case': 'red', // red, #F0F8FF, rgb(0,0,0)
+        'default': 'black'
+    }
+    var smooth = true;
+
+    draw('us');
+    draw('state');
+    function draw(divid) {
+        // set the dimensions and margins of the graph
+        var margin = {top: 10, right: 100, bottom: 30, left: 30},
+            width = window.innerWidth - margin.left - margin.right,
+            height = Math.max((window.innerHeight-200)/2, 400) - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svg = d3.select("#" + divid)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        //Read the data
+        d3.csv("./data.csv").then(function(data) {
+            if (divid == 'state'){
+                smooth = false;
+            }
+
+            var allGroup = [];
+            for (var key of Object.keys(data[0])){
+                if (key != "time"){
+                    allGroup.push(key);
+                }
+            }
+
+            // Reformat the data: we need an array of arrays of {x, y} tuples
+            var dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
+                var t = {
+                    name: grpName,
+                        values: data.map(function(d) {
+                    return {time: d.time, value: +d[grpName]};
+                })}
+                return t;
+            });
+
+            if (smooth){
+                for (var ds of dataReady){
+                    var ds_name = ds['name'];
+                    var ds_value = ds['values'];
+                    var ds_value_p = [];
+
+                    for (var ds_point_i in ds_value){
+                        ds_point_i = parseInt(ds_point_i);
+                        if (ds_point_i == 0){
+                            var y = ds_value[ds_point_i].value;
+                            var z = ds_value[ds_point_i+1].value;
+                            var a = (y+z)/2;
+                        }
+                        else if (ds_point_i == ds_value.length-1){
+                            var x = ds_value[ds_point_i-1].value;
+                            var y = ds_value[ds_point_i].value;
+                            var a = (x+y)/2;
+                        }
+                        else {
+                            var x = ds_value[ds_point_i-1].value;
+                            var y = ds_value[ds_point_i].value;
+                            var z = ds_value[ds_point_i+1].value;
+                            var a = (x+y+z)/3;
+                        }
+                        var ds_point_new = JSON.parse(JSON.stringify(ds_value[ds_point_i]));
+                        ds_point_new.value = a;
+                        ds_value_p.push(ds_point_new);
+                    }
+                    ds['values'] = ds_value_p;
+                }
+            }
+
+
+
+            var myColor = function (key) {
+                if (Object.keys(colorSet).includes(key)){
+                    return colorSet[key]
+                }
+                return colorSet['default']
+            }
+            // A color scale: one color for each group
+            var myColor = d3.scaleOrdinal()
+                .domain(allGroup)
+                .range(d3.schemeSet2);
+
+
+
+            var alldates = [];
+            for (var x of dataReady[0].values){
+                alldates.push(parseInt(x.time));
+            }
+            var maxDate = Math.max(...alldates);
+
+
+            // X - Y axis
+            var x = d3.scaleLinear()
+                .domain([1, maxDate])
+                .range([ 0, width ]);
+            svg.append("g")
+                .attr("transform", "translate(0," + 0.5*height + ")")
+                .call(d3.axisBottom(x));
+
+            var y = d3.scaleLinear()
+                .domain( [-100, 100])
+                .range([ height, 0 ]);
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+
+            var line = d3.line()
+                .curve(d3.curveCardinal)
+                .x(function(d) { return x(+d.time) })
+                .y(function(d) { return y(+d.value) })
+            svg.selectAll("myLines")
+                .data(dataReady)
+                .enter()
+                .append("path")
+                .attr("class", function(d){ return divid+d.name })
+                .attr("d", function(d){ return line(d.values) } )
+                .attr("stroke", function(d){ return myColor(d.name) })
+                .style("stroke-width", 4)
+                .style("fill", "none")
+
+            // Add the points
+            svg.selectAll("myDots")
+                .data(dataReady)
+                .enter()
+                .append('g')
+                .attr("class", function(d){ return divid+d.name })
+                .style("fill", function(d){ return myColor(d.name) })
+                .selectAll("myPoints")
+                .data(function(d){ return d.values })
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) { return x(d.time) } )
+                .attr("cy", function(d) { return y(d.value) } )
+                .attr("r", 2)
+                .attr("stroke", "white")
+
+
+            svg.selectAll("myLabels")
+                .data(dataReady)
+                .enter()
+                .append('g')
+                .append("text")
+                .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) // keep only the last value of each time series
+                .attr("transform", function(d) { return "translate(" + x(d.value.time) + "," + y(d.value.value) + ")"; }) // Put the text at the position of the last point
+                .attr("x", 12) // shift the text a bit more right
+                .text(function(d) { return d.name; })
+                .style("fill", function(d){ return myColor(d.name) })
+                .style("font-size", 15)
+
+
+            svg.selectAll("myLegend")
+                .data(dataReady)
+                .enter()
+                .append('g')
+                .append("text")
+                .attr('x', function(d,i){ return 30})
+                .attr('y', function(d,i){ return 300 + i * 30})
+                .text(function(d) { return "-- "+d.name+" --"; })
+                .style("fill", function(d){ return myColor(d.name) })
+                .style("font-size", 20)
+                .on("click", function(d){
+                    var currentOpacity = d3.selectAll("." + divid+d.name).style("opacity");
+                    d3.selectAll("." + divid+d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+                })
+
+        })
+
+
+    }
+
+
+</script>
+
+</body>
+</html>
