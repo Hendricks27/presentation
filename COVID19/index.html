@@ -5,6 +5,12 @@
     <title>Title</title>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
+    <style>
+        .event:hover {
+            stroke: black;
+        }
+    </style>
+
 </head>
 <body>
 <h2>Nation wide</h2>
@@ -23,18 +29,15 @@
     TODOs:
     1. Use fixed color for lines
     2. Add a little bit more interactive item (show data detail)
-    3. Add events support
+    4. Add second state
     */
 
-    var colorSet = {
-        'new case': 'red', // red, #F0F8FF, rgb(0,0,0)
-        'default': 'black'
-    }
-    var smooth = true;
 
-    draw('us');
-    draw('state');
-    function draw(divid) {
+    draw('us', true);
+    draw('state', false);
+
+
+    function draw(divid, smooth) {
         // set the dimensions and margins of the graph
         var margin = {top: 10, right: 100, bottom: 30, left: 30},
             width = window.innerWidth - margin.left - margin.right,
@@ -49,11 +52,38 @@
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
 
-        //Read the data
+
         d3.csv("./data.csv").then(function(data) {
-            if (divid == 'state'){
-                smooth = false;
+            console.log(divid);
+            var Tooltip = d3.select("#"+divid)
+                .append("div")
+                .style("opacity", 0)
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "2px")
+                .style("border-radius", "5px")
+                .style("padding", "5px")
+
+
+            var mouseover = function(d) {
+                Tooltip
+                    .style("opacity", 1)
+                    .style("position", "absolute")
+                    .style("left", x.invert(d3.mouse(this)[0]) + "px")
+                    .style("top", y.invert(d3.mouse(this)[1]) + "px")
+                console.log(divid);
+                console.log(Tooltip);
+                console.log(d3.mouse(this))
             }
+            var mousemove = function(d) {
+                Tooltip
+                    .html("Event: " + d.detail)
+            }
+            var mouseleave = function(d) {
+                Tooltip
+                    .style("opacity", 0)
+            }
+
 
             var allGroup = [];
             for (var key of Object.keys(data[0])){
@@ -62,8 +92,8 @@
                 }
             }
 
-            // Reformat the data: we need an array of arrays of {x, y} tuples
-            var dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
+
+            var dataReady = allGroup.map( function(grpName) {
                 var t = {
                     name: grpName,
                         values: data.map(function(d) {
@@ -155,7 +185,6 @@
                 .style("stroke-width", 4)
                 .style("fill", "none")
 
-            // Add the points
             svg.selectAll("myDots")
                 .data(dataReady)
                 .enter()
@@ -199,6 +228,30 @@
                     var currentOpacity = d3.selectAll("." + divid+d.name).style("opacity");
                     d3.selectAll("." + divid+d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
                 })
+
+            var event = [
+                {"date": 30,"detail": "LOL","type": 0},
+                {"date": 45,"detail": "WOW","type": 1},
+                {"date": 90,"detail": "SOS","type": 2},
+                {"date": 10,"detail": "HHH","type": 2},
+                ];
+
+            svg.append("g")
+                .selectAll("dot")
+                .data(event)
+                .enter()
+                .append("circle")
+                .attr("class", "event")
+                .attr("cx", function(d) { return x(d.date) } )
+                .attr("cy", function(d) { return y(0) } )
+                .attr("r", 8)
+                .attr("stroke", function(d) { return myColor(d.type) } ) // TODO use color scale
+                .attr("stroke-width", 3)
+                .attr("fill", "white")
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
+
 
         })
 
