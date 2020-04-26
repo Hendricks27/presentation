@@ -25,12 +25,6 @@
 <div id="state"></div>
 <script>
     "use strict";
-    /*
-    TODOs:
-    1. Use fixed color for lines
-    2. Add a little bit more interactive item (show data detail)
-    4. Add second state
-    */
 
 
     draw('us', true);
@@ -69,19 +63,14 @@
                 Tooltip
                     .style("opacity", 1)
                     .style("position", "absolute")
-                    .style("left", x.invert(d3.mouse(this)[0]) + "px")
-                    .style("top", y.invert(d3.mouse(this)[1]) + "px")
-                console.log(divid);
-                console.log(Tooltip);
-                console.log(d3.mouse(this))
+                    .style("left", d3.mouse(this)[0] + "px")
+                    .style("top", d3.mouse(this)[1] + "px")
             }
             var mousemove = function(d) {
-                Tooltip
-                    .html("Event: " + d.detail)
+                Tooltip.html("Event: " + d.detail)
             }
             var mouseleave = function(d) {
-                Tooltip
-                    .style("opacity", 0)
+                Tooltip.style("opacity", 0)
             }
 
 
@@ -165,16 +154,19 @@
                 .call(d3.axisBottom(x));
 
             var y = d3.scaleLinear()
-                .domain( [-100, 100])
-                .range([ height, 0 ]);
+                        .domain( [-100, 100])
+                        .range([ height, 0 ]);
             svg.append("g")
-                .call(d3.axisLeft(y));
+                   .call(d3.axisLeft(y));
 
 
             var line = d3.line()
                 .curve(d3.curveCardinal)
                 .x(function(d) { return x(+d.time) })
                 .y(function(d) { return y(+d.value) })
+
+
+
             svg.selectAll("myLines")
                 .data(dataReady)
                 .enter()
@@ -184,6 +176,9 @@
                 .attr("stroke", function(d){ return myColor(d.name) })
                 .style("stroke-width", 4)
                 .style("fill", "none")
+
+
+
 
             svg.selectAll("myDots")
                 .data(dataReady)
@@ -220,7 +215,7 @@
                 .append('g')
                 .append("text")
                 .attr('x', function(d,i){ return 30})
-                .attr('y', function(d,i){ return 300 + i * 30})
+                .attr('y', function(d,i){ return height/2 + 40 + i * 30})
                 .text(function(d) { return "-- "+d.name+" --"; })
                 .style("fill", function(d){ return myColor(d.name) })
                 .style("font-size", 20)
@@ -251,6 +246,24 @@
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
+
+
+            svg.append("g")
+                .attr("class", "ygrid")
+                .call(
+                    d3.axisLeft(y)
+                        .ticks(10)
+                        .tickSize(-width)
+                        .tickFormat("")
+                )
+
+
+            svg.selectAll(".ygrid")
+                .selectAll(".tick")
+                .selectAll("line")
+                .style("stroke", "lightgrey")
+                .style("stroke-opacity", "1")
+                .style("shape-rendering", "crispEdges")
 
 
         })
