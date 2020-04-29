@@ -13,31 +13,71 @@
 
 </head>
 <body>
-<h2>Nation wide</h2>
-<div id="us"></div>
-<h2>Maryland</h2>
-<select id="state-option">
-    <option value="MD">MD</option>
-    <option value="DC">DC</option>
-    <option value="VA">VA</option>
-    <option value="NY">NY</option>
-</select>
+<h2>United States</h2>
+<div id="nation"></div>
+<h2 id="statename">Maryland</h2>
+<select id="state-option"></select>
 <div id="state"></div>
 <script>
     "use strict";
 
+    /*
+    TODO
+    1. Add show-hide status to legend
+    2. Comparison - put all lines in single graph (solid vs dot-line)
+    3.
+     */
+    var abbr2state = {'US': 'United States', 'WA': 'Washington', 'VA': 'Virginia', 'DE': 'Delaware', 'DC': 'District_of_Columbia', 'WI': 'Wisconsin', 'WV': 'West_Virginia', 'HI': 'Hawaii', 'FL': 'Florida', 'WY': 'Wyoming', 'NH': 'New_Hampshire', 'NJ': 'New_Jersey', 'NM': 'New_Mexico', 'TX': 'Texas', 'LA': 'Louisiana', 'NC': 'North_Carolina', 'ND': 'North_Dakota', 'NE': 'Nebraska', 'TN': 'Tennessee', 'NY': 'New_York', 'PA': 'Pennsylvania', 'CA': 'California', 'NV': 'Nevada', 'PW': 'Palau', 'GU': 'Guam', 'CO': 'Colorado', 'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'VT': 'Vermont', 'IL': 'Illinois', 'GA': 'Georgia', 'IN': 'Indiana', 'IA': 'Iowa', 'OK': 'Oklahoma', 'AZ': 'Arizona', 'ID': 'Idaho', 'CT': 'Connecticut', 'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'OH': 'Ohio', 'UT': 'Utah', 'MO': 'Missouri', 'MN': 'Minnesota', 'MI': 'Michigan', 'RI': 'Rhode_Island', 'KS': 'Kansas', 'MT': 'Montana', 'MS': 'Mississippi', 'PR': 'Puerto_Rico', 'SC': 'South_Carolina', 'KY': 'Kentucky', 'OR': 'Oregon', 'SD': 'South_Dakota'};
 
-    draw('us', true);
-    draw('state', false);
 
 
-    function draw(divid, smooth) {
-        // set the dimensions and margins of the graph
+    var primary_data;
+    d3.json("./primary.json").then(function (d) {
+        primary_data = d;
+        main()
+    })
+
+    function main(){
+        fill_option();
+        draw('nation', "US", true);
+        draw('state', "AK", true);
+    }
+
+    function fill_option() {
+        var allstate = Object.keys(primary_data["New_Case"]);
+        var selection_DOM = document.getElementById("state-option");
+        selection_DOM.onchange = changeState;
+        for (var s of allstate){
+
+            var e = document.createElement("option");
+            e.setAttribute("value", s);
+            e.innerText = s;
+            selection_DOM.appendChild(e);
+        }
+    }
+
+    function changeState() {
+        var selection_DOM = document.getElementById("state-option");
+        var state = selection_DOM.options[selection_DOM.selectedIndex].value;
+        document.getElementById("state").innerHTML = "";
+        draw('state', state, true);
+        console.log(state);
+    }
+
+
+
+    function draw(divid, state, smooth) {
+        var local_data = [];
+
+        if (divid == "state"){
+            document.getElementById("statename").innerText = abbr2state[state];
+        }
+
         var margin = {top: 10, right: 100, bottom: 30, left: 30},
             width = window.innerWidth - margin.left - margin.right,
-            height = Math.max((window.innerHeight-200)/2, 400) - margin.top - margin.bottom;
+            height = Math.max((window.innerHeight - 200) / 2, 400) - margin.top - margin.bottom;
 
-        // append the svg object to the body of the page
+
         var svg = d3.select("#" + divid)
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -46,230 +86,194 @@
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
 
-
-        d3.csv("./data.csv").then(function(data) {
-            console.log(divid);
-            var Tooltip = d3.select("#"+divid)
-                .append("div")
-                .style("opacity", 0)
-                .style("background-color", "white")
-                .style("border", "solid")
-                .style("border-width", "2px")
-                .style("border-radius", "5px")
-                .style("padding", "5px")
+        var Tooltip = d3.select("#"+divid)
+            .append("div")
+            .style("opacity", 0)
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
 
 
-            var mouseover = function(d) {
-                Tooltip
-                    .style("opacity", 1)
-                    .style("position", "absolute")
-                    .style("left", d3.mouse(this)[0] + "px")
-                    .style("top", d3.mouse(this)[1] + "px")
-            }
-            var mousemove = function(d) {
-                Tooltip.html("Event: " + d.detail)
-            }
-            var mouseleave = function(d) {
-                Tooltip.style("opacity", 0)
-            }
+        var mouseover = function(d) {
+            Tooltip
+                .style("opacity", 1)
+                .style("position", "absolute")
+                .style("left", d3.mouse(this)[0] + "px")
+                .style("top", d3.mouse(this)[1] + "px")
+        }
+        var mousemove = function(d) {
+            Tooltip.html("Event: " + d.detail)
+        }
+        var mouseleave = function(d) {
+            Tooltip.style("opacity", 0)
+        }
 
-
-            var allGroup = [];
-            for (var key of Object.keys(data[0])){
-                if (key != "time"){
-                    allGroup.push(key);
+        var allGroup = Object.keys(primary_data);
+        for (var key of Object.keys(primary_data)){
+            var key_data = primary_data[key];
+            if (key_data[state] != undefined){
+                var tmp = {};
+                tmp['name'] = key;
+                tmp['values'] = [];
+                for (var dateindex of Object.keys(key_data[state])){
+                    tmp['values'].push({"time": dateindex, "value":key_data[state][dateindex]})
                 }
+                local_data.push(tmp);
+
             }
+        }
+
+        var dataReady = JSON.parse(JSON.stringify(local_data));
 
 
-            var dataReady = allGroup.map( function(grpName) {
-                var t = {
-                    name: grpName,
-                        values: data.map(function(d) {
-                    return {time: d.time, value: +d[grpName]};
-                })}
-                return t;
-            });
-
-            if (smooth){
-                for (var ds of dataReady){
-                    var ds_name = ds['name'];
-                    var ds_value = ds['values'];
-                    var ds_value_p = [];
-
-                    for (var ds_point_i in ds_value){
-                        ds_point_i = parseInt(ds_point_i);
-                        if (ds_point_i == 0){
-                            var y = ds_value[ds_point_i].value;
-                            var z = ds_value[ds_point_i+1].value;
-                            var a = (y+z)/2;
-                        }
-                        else if (ds_point_i == ds_value.length-1){
-                            var x = ds_value[ds_point_i-1].value;
-                            var y = ds_value[ds_point_i].value;
-                            var a = (x+y)/2;
-                        }
-                        else {
-                            var x = ds_value[ds_point_i-1].value;
-                            var y = ds_value[ds_point_i].value;
-                            var z = ds_value[ds_point_i+1].value;
-                            var a = (x+y+z)/3;
-                        }
-                        var ds_point_new = JSON.parse(JSON.stringify(ds_value[ds_point_i]));
-                        ds_point_new.value = a;
-                        ds_value_p.push(ds_point_new);
-                    }
-                    ds['values'] = ds_value_p;
-                }
+        var myColor = function (key) {
+            if (Object.keys(colorSet).includes(key)){
+                return colorSet[key]
             }
+            return colorSet['default']
+        }
+        // A color scale: one color for each group
+        var myColor = d3.scaleOrdinal()
+            .domain(allGroup)
+            .range(d3.schemeSet2);
 
 
 
-            var myColor = function (key) {
-                if (Object.keys(colorSet).includes(key)){
-                    return colorSet[key]
-                }
-                return colorSet['default']
-            }
-            // A color scale: one color for each group
-            var myColor = d3.scaleOrdinal()
-                .domain(allGroup)
-                .range(d3.schemeSet2);
+        var alldates = [];
+        for (var x of dataReady[0].values){
+            alldates.push(parseInt(x.time));
+        }
+
+        var minDate = Math.min(...alldates);
+        var maxDate = Math.max(...alldates);
+
+
+        // X - Y axis
+        var x = d3.scaleLinear()
+            .domain([1, maxDate + 20])
+            .range([ 0, width ]);
+        svg.append("g")
+            .attr("transform", "translate(0," + 0.5*height + ")")
+            .call(d3.axisBottom(x));
+
+        var y = d3.scaleLinear()
+            .domain( [-100, 100])
+            .range([ height, 0 ]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+
+        var line = d3.line()
+            .curve(d3.curveCardinal)
+            .x(function(d) { return x(d.time) })
+            .y(function(d) { return y(d.value) })
 
 
 
-            var alldates = [];
-            for (var x of dataReady[0].values){
-                alldates.push(parseInt(x.time));
-            }
-            var maxDate = Math.max(...alldates);
-
-
-            // X - Y axis
-            var x = d3.scaleLinear()
-                .domain([1, maxDate])
-                .range([ 0, width ]);
-            svg.append("g")
-                .attr("transform", "translate(0," + 0.5*height + ")")
-                .call(d3.axisBottom(x));
-
-            var y = d3.scaleLinear()
-                        .domain( [-100, 100])
-                        .range([ height, 0 ]);
-            svg.append("g")
-                   .call(d3.axisLeft(y));
-
-
-            var line = d3.line()
-                .curve(d3.curveCardinal)
-                .x(function(d) { return x(+d.time) })
-                .y(function(d) { return y(+d.value) })
-
-
-
-            svg.selectAll("myLines")
-                .data(dataReady)
-                .enter()
-                .append("path")
-                .attr("class", function(d){ return divid+d.name })
-                .attr("d", function(d){ return line(d.values) } )
-                .attr("stroke", function(d){ return myColor(d.name) })
-                .style("stroke-width", 4)
-                .style("fill", "none")
+        svg.selectAll("myLines")
+            .data(dataReady)
+            .enter()
+            .append("path")
+            .attr("class", function(d){ return divid+d.name })
+            .attr("d", function(d){ return line(d.values) } )
+            .attr("stroke", function(d){ return myColor(d.name) })
+            .style("stroke-width", 4)
+            .style("fill", "none")
 
 
 
 
-            svg.selectAll("myDots")
-                .data(dataReady)
-                .enter()
-                .append('g')
-                .attr("class", function(d){ return divid+d.name })
-                .style("fill", function(d){ return myColor(d.name) })
-                .selectAll("myPoints")
-                .data(function(d){ return d.values })
-                .enter()
-                .append("circle")
-                .attr("cx", function(d) { return x(d.time) } )
-                .attr("cy", function(d) { return y(d.value) } )
-                .attr("r", 2)
-                .attr("stroke", "white")
+        svg.selectAll("myDots")
+            .data(dataReady)
+            .enter()
+            .append('g')
+            .attr("class", function(d){ return divid+d.name })
+            .style("fill", function(d){ return myColor(d.name) })
+            .selectAll("myPoints")
+            .data(function(d){ return d.values })
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) { return x(d.time) } )
+            .attr("cy", function(d) { return y(d.value) } )
+            .attr("r", 2)
+            .attr("stroke", "white")
 
 
-            svg.selectAll("myLabels")
-                .data(dataReady)
-                .enter()
-                .append('g')
-                .append("text")
-                .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) // keep only the last value of each time series
-                .attr("transform", function(d) { return "translate(" + x(d.value.time) + "," + y(d.value.value) + ")"; }) // Put the text at the position of the last point
-                .attr("x", 12) // shift the text a bit more right
-                .text(function(d) { return d.name; })
-                .style("fill", function(d){ return myColor(d.name) })
-                .style("font-size", 15)
+        svg.selectAll("myLabels")
+            .data(dataReady)
+            .enter()
+            .append('g')
+            .append("text")
+            .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) // keep only the last value of each time series
+            .attr("transform", function(d) { return "translate(" + x(d.value.time) + "," + y(d.value.value) + ")"; }) // Put the text at the position of the last point
+            .attr("x", 12) // shift the text a bit more right
+            .text(function(d) { return d.name; })
+            .style("fill", function(d){ return myColor(d.name) })
+            .style("font-size", 15)
 
 
-            svg.selectAll("myLegend")
-                .data(dataReady)
-                .enter()
-                .append('g')
-                .append("text")
-                .attr('x', function(d,i){ return 30})
-                .attr('y', function(d,i){ return height/2 + 40 + i * 30})
-                .text(function(d) { return "-- "+d.name+" --"; })
-                .style("fill", function(d){ return myColor(d.name) })
-                .style("font-size", 20)
-                .on("click", function(d){
-                    var currentOpacity = d3.selectAll("." + divid+d.name).style("opacity");
-                    d3.selectAll("." + divid+d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
-                })
+        svg.selectAll("myLegend")
+            .data(dataReady)
+            .enter()
+            .append('g')
+            .append("text")
+            .attr('x', function(d,i){ return 30})
+            .attr('y', function(d,i){ return height/2 + 40 + i * 30})
+            .text(function(d) { return "-- "+d.name+" --"; })
+            .style("fill", function(d){ return myColor(d.name) })
+            .style("font-size", 20)
+            .on("click", function(d){
+                var currentOpacity = d3.selectAll("." + divid+d.name).style("opacity");
+                d3.selectAll("." + divid+d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+            })
 
-            var event = [
-                {"date": 30,"detail": "LOL","type": 0},
-                {"date": 45,"detail": "WOW","type": 1},
-                {"date": 90,"detail": "SOS","type": 2},
-                {"date": 10,"detail": "HHH","type": 2},
-                ];
+        var event = [
+            {"date": 30,"detail": "???","type": 0},
+            {"date": 45,"detail": "???","type": 1},
+            {"date": 90,"detail": "???","type": 2},
+            {"date": 10,"detail": "???","type": 2},
+        ];
 
-            svg.append("g")
-                .selectAll("dot")
-                .data(event)
-                .enter()
-                .append("circle")
-                .attr("class", "event")
-                .attr("cx", function(d) { return x(d.date) } )
-                .attr("cy", function(d) { return y(0) } )
-                .attr("r", 8)
-                .attr("stroke", function(d) { return myColor(d.type) } ) // TODO use color scale
-                .attr("stroke-width", 3)
-                .attr("fill", "white")
-                .on("mouseover", mouseover)
-                .on("mousemove", mousemove)
-                .on("mouseleave", mouseleave)
-
-
-            svg.append("g")
-                .attr("class", "ygrid")
-                .call(
-                    d3.axisLeft(y)
-                        .ticks(10)
-                        .tickSize(-width)
-                        .tickFormat("")
-                )
+        svg.append("g")
+            .selectAll("dot")
+            .data(event)
+            .enter()
+            .append("circle")
+            .attr("class", "event")
+            .attr("cx", function(d) { return x(d.date) } )
+            .attr("cy", function(d) { return y(0) } )
+            .attr("r", 8)
+            .attr("stroke", function(d) { return myColor(d.type) } ) // TODO use color scale
+            .attr("stroke-width", 3)
+            .attr("fill", "white")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave)
 
 
-            svg.selectAll(".ygrid")
-                .selectAll(".tick")
-                .selectAll("line")
-                .style("stroke", "lightgrey")
-                .style("stroke-opacity", "1")
-                .style("shape-rendering", "crispEdges")
+        svg.append("g")
+            .attr("class", "ygrid")
+            .call(
+                d3.axisLeft(y)
+                    .ticks(10)
+                    .tickSize(-width)
+                    .tickFormat("")
+            )
 
 
-        })
+        svg.selectAll(".ygrid")
+            .selectAll(".tick")
+            .selectAll("line")
+            .style("stroke", "lightgrey")
+            .style("stroke-opacity", "1")
+            .style("shape-rendering", "crispEdges")
+
 
 
     }
+
 
 
 </script>
