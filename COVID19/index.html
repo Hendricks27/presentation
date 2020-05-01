@@ -375,7 +375,7 @@
             .attr('y', function(d,i){ return height/2 + 34 + i * 25} )
             .attr('width', 20)
             .attr('height', 20)
-            .attr("xlink:href", "./click.png")
+            .attr("xlink:href", "./Click.png")
             .on("click", function(d){
                 var currentOpacity = d3.selectAll("." + divid+d.name).style("opacity");
                 d3.selectAll("." + divid+d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
