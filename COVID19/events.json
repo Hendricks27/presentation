@@ -1,0 +1,1696 @@
+{
+  "AK": [
+    {
+      "detail": "First case", 
+      "time": 76, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 88, 
+      "type": "gov"
+    }
+  ], 
+  "AL": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 92, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 110, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 86, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 97, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 104, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 95, 
+      "type": "gov"
+    }
+  ], 
+  "AZ": [
+    {
+      "detail": "First case", 
+      "time": 63, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 90, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 117, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 82, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 96, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 102, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 91, 
+      "type": "gov"
+    }
+  ], 
+  "CA": [
+    {
+      "detail": "First case", 
+      "time": 26, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 81, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 114, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 69, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 97, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 79, 
+      "type": "gov"
+    }
+  ], 
+  "CO": [
+    {
+      "detail": "First case", 
+      "time": 65, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 85, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 73, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 94, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 86, 
+      "type": "gov"
+    }
+  ], 
+  "CT": [
+    {
+      "detail": "First case", 
+      "time": 69, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 86, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 93, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 93, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 83, 
+      "type": "gov"
+    }
+  ], 
+  "DC": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 93, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 92, 
+      "type": "gov"
+    }
+  ], 
+  "DE": [
+    {
+      "detail": "First case", 
+      "time": 72, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 98, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 99, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 91, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 116, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "FL": [
+    {
+      "detail": "First case", 
+      "time": 61, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 83, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 102, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 66, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 93, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 94, 
+      "type": "gov"
+    }
+  ], 
+  "GA": [
+    {
+      "detail": "First case", 
+      "time": 62, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 84, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 99, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 78, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 94, 
+      "type": "gov"
+    }
+  ], 
+  "HI": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 93, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 116, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 85, 
+      "type": "gov"
+    }
+  ], 
+  "IA": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 98, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 111, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 101, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 115, 
+      "type": "death"
+    }
+  ], 
+  "ID": [
+    {
+      "detail": "First case", 
+      "time": 74, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 94, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 106, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 86, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 99, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 85, 
+      "type": "gov"
+    }
+  ], 
+  "IL": [
+    {
+      "detail": "First case", 
+      "time": 30, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 82, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 98, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 91, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 92, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 81, 
+      "type": "gov"
+    }
+  ], 
+  "IN": [
+    {
+      "detail": "First case", 
+      "time": 67, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 88, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 101, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 77, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 92, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 94, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 85, 
+      "type": "gov"
+    }
+  ], 
+  "KS": [
+    {
+      "detail": "First case", 
+      "time": 72, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 99, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 116, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 81, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 98, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 111, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 90, 
+      "type": "gov"
+    }
+  ], 
+  "KY": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 96, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 104, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 86, 
+      "type": "gov"
+    }
+  ], 
+  "LA": [
+    {
+      "detail": "First case", 
+      "time": 70, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 83, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 91, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 75, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 84, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 83, 
+      "type": "gov"
+    }
+  ], 
+  "MA": [
+    {
+      "detail": "First case", 
+      "time": 63, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 84, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 91, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 81, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 91, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 92, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "MD": [
+    {
+      "detail": "First case", 
+      "time": 65, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 89, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 100, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 80, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 96, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 98, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 90, 
+      "type": "gov"
+    }
+  ], 
+  "ME": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 117, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 89, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 99, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 93, 
+      "type": "gov"
+    }
+  ], 
+  "MI": [
+    {
+      "detail": "First case", 
+      "time": 70, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 82, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 93, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 88, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 88, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "MN": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 98, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 86, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 101, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 108, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 88, 
+      "type": "gov"
+    }
+  ], 
+  "MO": [
+    {
+      "detail": "First case", 
+      "time": 72, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 90, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 113, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 80, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 98, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 101, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 97, 
+      "type": "gov"
+    }
+  ], 
+  "MS": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 92, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 105, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 85, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 105, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 94, 
+      "type": "gov"
+    }
+  ], 
+  "MT": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 109, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 88, 
+      "type": "gov"
+    }
+  ], 
+  "NC": [
+    {
+      "detail": "First case", 
+      "time": 66, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 89, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 119, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 86, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 105, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 105, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 90, 
+      "type": "gov"
+    }
+  ], 
+  "ND": [
+    {
+      "detail": "First case", 
+      "time": 77, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 113, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 90, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 101, 
+      "type": "death"
+    }
+  ], 
+  "NE": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 107, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 114, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 104, 
+      "type": "death"
+    }
+  ], 
+  "NH": [
+    {
+      "detail": "First case", 
+      "time": 63, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 104, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 109, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 99, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 88, 
+      "type": "gov"
+    }
+  ], 
+  "NJ": [
+    {
+      "detail": "First case", 
+      "time": 65, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 81, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 87, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 74, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 81, 
+      "type": "gov"
+    }
+  ], 
+  "NM": [
+    {
+      "detail": "First case", 
+      "time": 71, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 101, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 112, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 88, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 103, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 118, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "NV": [
+    {
+      "detail": "First case", 
+      "time": 66, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 90, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 103, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 80, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 92, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 102, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 92, 
+      "type": "gov"
+    }
+  ], 
+  "NY": [
+    {
+      "detail": "First case", 
+      "time": 63, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 77, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 83, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 74, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 82, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 84, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 82, 
+      "type": "gov"
+    }
+  ], 
+  "OH": [
+    {
+      "detail": "First case", 
+      "time": 69, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 87, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 111, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 81, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 96, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "OK": [
+    {
+      "detail": "First case", 
+      "time": 70, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 95, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 82, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 94, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 105, 
+      "type": "death"
+    }
+  ], 
+  "OR": [
+    {
+      "detail": "First case", 
+      "time": 61, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 96, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 77, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 100, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 83, 
+      "type": "gov"
+    }
+  ], 
+  "PA": [
+    {
+      "detail": "First case", 
+      "time": 66, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 85, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 81, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 94, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 92, 
+      "type": "gov"
+    }
+  ], 
+  "PR": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 107, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 75, 
+      "type": "gov"
+    }
+  ], 
+  "RI": [
+    {
+      "detail": "First case", 
+      "time": 61, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 97, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 88, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 93, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 107, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 88, 
+      "type": "gov"
+    }
+  ], 
+  "SC": [
+    {
+      "detail": "First case", 
+      "time": 67, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 91, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 113, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 80, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 97, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 106, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 98, 
+      "type": "gov"
+    }
+  ], 
+  "SD": [
+    {
+      "detail": "First case", 
+      "time": 70, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 104, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 106, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 97, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 115, 
+      "type": "death"
+    }
+  ], 
+  "TN": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 87, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 108, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 81, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 97, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 101, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 92, 
+      "type": "gov"
+    }
+  ], 
+  "TX": [
+    {
+      "detail": "First case", 
+      "time": 65, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 86, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 118, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 78, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 102, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 93, 
+      "type": "gov"
+    }
+  ], 
+  "US": [
+    {
+      "detail": "First case", 
+      "time": 24, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 71, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 96, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 77, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 91, 
+      "type": "death"
+    }
+  ], 
+  "UT": [
+    {
+      "detail": "First case", 
+      "time": 70, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 92, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 108, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 87, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 111, 
+      "type": "death"
+    }
+  ], 
+  "VA": [
+    {
+      "detail": "First case", 
+      "time": 68, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 90, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 109, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 77, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 100, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 100, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 90, 
+      "type": "gov"
+    }
+  ], 
+  "VT": [
+    {
+      "detail": "First case", 
+      "time": 72, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 100, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 84, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 85, 
+      "type": "gov"
+    }
+  ], 
+  "WA": [
+    {
+      "detail": "First case", 
+      "time": 59, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 77, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 94, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 61, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 78, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 83, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 83, 
+      "type": "gov"
+    }
+  ], 
+  "WI": [
+    {
+      "detail": "First case", 
+      "time": 69, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 89, 
+      "type": "case"
+    }, 
+    {
+      "detail": "1 out of 1k population are infected", 
+      "time": 116, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 79, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 95, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Hits 100 deaths", 
+      "time": 99, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 85, 
+      "type": "gov"
+    }
+  ], 
+  "WV": [
+    {
+      "detail": "First case", 
+      "time": 78, 
+      "type": "case"
+    }, 
+    {
+      "detail": "Hits 1000 cases", 
+      "time": 115, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 92, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 110, 
+      "type": "death"
+    }, 
+    {
+      "detail": "Stay-At-Home order", 
+      "time": 84, 
+      "type": "gov"
+    }
+  ], 
+  "WY": [
+    {
+      "detail": "First case", 
+      "time": 73, 
+      "type": "case"
+    }, 
+    {
+      "detail": "First death", 
+      "time": 106, 
+      "type": "death"
+    }, 
+    {
+      "detail": "1 out of 100k population are dead due to COVID-19", 
+      "time": 112, 
+      "type": "death"
+    }
+  ]
+}
