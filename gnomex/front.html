@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GNOme Browser</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
+
+    <script src="./gnome.js"></script>
+</head>
+<body>
+<div id="gnome"></div>
+
+<script>
+    "use strict";
+
+    //let gsb = new GNOmeCompositionBrowser("gnome");
+    let gsb = new GNOmeStructureBrowser("gnome");
+    let FullScreenControl = new GNOmeDisplayPresetFullScreen(gsb);
+    let InitialPara = FullScreenControl.GetURLParameter();
+
+    let Init = async function (){
+
+        await gsb.Init({
+            "data":"./GNOme.browser.json_byonic",
+            "theme":"./theme/default.json",
+            "icon_style":"cfg",
+            "image_url_prefix":"https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/",
+            "image_url_suffix":".png",
+        })
+
+        FullScreenControl.ResizeToCurrent();
+        FullScreenControl.StartMonitor();
+
+        FullScreenControl.UpdateGNOmeBrowser(InitialPara);
+
+    }
+    Init();
+
+
+
+
+    // focus=HexNAc(1)Hex(4)dHex(1)NeuAc(1)
+    // focus=G00012MO
+
+</script>
+
+</body>
+</html>
