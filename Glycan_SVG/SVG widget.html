@@ -39,9 +39,11 @@
             document.getElementById("svg").innerHTML = svg;
 
             var bBox = document.getElementsByTagName("svg")[0].getBBox();
+            console.log(bBox.width, bBox.height);
+            //document.getElementById("svg").style.overflow = "visible";
+            document.getElementsByTagName("svg")[0].style.width = bBox.width + "px";
+            document.getElementsByTagName("svg")[0].style.height = bBox.height + "px";
 
-            document.getElementsByTagName("svg")[0].style.width = bBox.width;
-            document.getElementsByTagName("svg")[0].style.height = bBox.height;
 
             findallele();
             addMouseEvents();
