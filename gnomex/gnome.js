@@ -1340,11 +1340,13 @@ function GNOmeBrowserBase (DIVID) {
     this.ItemCount = {};
     this.ItemCountMax = {};
     this.MatchedGlycans = [];
-    this.HightLightGlycans = [];
+    this.HighLightGlycans = [];
     this.SubsumptionNavigatorFocusAccession = "";
     this.DisplayScreen = 0;
     this.ScreenATitle = "";
     this.ScreenBTitle = "GNOme Subsumption Navigator";
+    this.UpdateHighlightGlycansFlag = true;
+    this.UpdateMonoFreqFlag = true;
 
     // Display parameters
     this.Width = 1000;
@@ -1365,7 +1367,6 @@ function GNOmeBrowserBase (DIVID) {
     this.ContainerAlert;
     // this.LeftTurnButton;
     // this.RightTurnButton;
-
 
 
     // Base64 encoded images
@@ -1464,9 +1465,22 @@ function GNOmeBrowserBase (DIVID) {
     };
     this.IconConfig = IconConfigCFG;
 
-    // Hmmmmm
-    this.HintMessageForScreenA = "AAA";
-    this.HintMessageForScreenB = "BBB";
+    // Hint title and message
+    this.HintTitleForScreenA = 'Topology Selector';
+    this.HintTitleForScreenB = 'Subsumption Navigator';
+
+    this.HintMessageForScreenA = "<ul style='position: relative; top: -20px; text-align: left; '><li>Click controls at left to add/remove monosaccharides</li>" +
+        "<li>Click a Topology to jump to Subsumption Navigator</li>" +
+        "<li>Shortcuts:</li><ul>" +
+        "<li>n/N - add/remove GlcNAc</li>" +
+        "<li>m/M - add/remove Man</li>" +
+        "<li>g/G - add/remove Gal</li>" +
+        "<li>f/F - add/remove Fuc</li>" +
+        "<li>s/S - add/remove NeuAc</li></ul></ul>";
+    this.HintMessageForScreenB = "<ul style='position: relative; top: -20px; text-align: left; '><li>Double click on structure to navigate subsumption hierarchy.</li>" +
+        "<li>Right click popup to jump to GlyGen, GlycanData, GlyTouCan.</li></ul>";
+
+
 
 
     // Functions start here
@@ -1477,31 +1491,40 @@ function GNOmeBrowserBase (DIVID) {
         if (Object.keys(para).includes('theme')){
             theme = await this.GetJSON(para.theme);
         }
-        else {
-            if (Object.keys(para).includes('icon_style')){
-                theme['icon_style'] = para['icon_style'];
-            }
 
-            if (Object.keys(para).includes('image_url_prefix')){
-                theme['image_url_prefix'] = para['image_url_prefix'];
-            }
 
-            if (Object.keys(para).includes('image_url_suffix')){
-                theme['image_url_suffix'] = para['image_url_suffix'];
-            }
+
+        if (Object.keys(para).includes('icon_style')){
+            theme['icon_style'] = para['icon_style'];
         }
 
+        if (Object.keys(para).includes('image_url_prefix')){
+            theme['image_url_prefix'] = para['image_url_prefix'];
+        }
+
+        if (Object.keys(para).includes('image_url_suffix')){
+            theme['image_url_suffix'] = para['image_url_suffix'];
+        }
+
+        // Backward compatibility with theme encoding
+        if (Object.keys(theme).includes('image_source_prefix')){
+            theme['image_url_prefix'] = theme['image_source_prefix'];
+        }
+
+        if (Object.keys(theme).includes('image_source_suffix')){
+            theme['image_url_suffix'] = theme['image_source_suffix'];
+        }
+
+
+        // TODO probably add a checker for parameter validity
         if (Object.keys(theme).includes('icon_style')){
-            this.IconStyle = para['icon_style']
+            this.SetIconConfig(theme['icon_style']);
         }
 
-        if (Object.keys(theme).includes('image_url_prefix')){
-            this.ImageURLPrefix = para['image_url_prefix']
+        if (Object.keys(theme).includes('image_url_prefix') && Object.keys(theme).includes('image_url_suffix')){
+            this.SetImageSource(theme['image_url_prefix'], theme['image_url_suffix'])
         }
 
-        if (Object.keys(theme).includes('image_url_suffix')){
-            this.ImageURLSuffix = para['image_url_suffix']
-        }
 
         if (Object.keys(theme).includes('external_resources')){
             this.SubsumptionNavigatorOption.contextMenu.externalLinks = theme["external_resources"];
@@ -1658,6 +1681,21 @@ function GNOmeBrowserBase (DIVID) {
 
             this.ContainerScreenSwitch.style.display = "inline";
 
+            if (this.UpdateMonoFreqFlag){
+                this.ItemCount = JSON.parse(JSON.stringify(this.SubsumptionData[this.SubsumptionNavigatorFocusAccession].ButtonConfig));
+            }
+            else {
+                this.UpdateMonoFreqFlag = true;
+            }
+
+            if (this.UpdateHighlightGlycansFlag){
+                this.UpdateHighlightGlycans(this.SubsumptionNavigatorFocusAccession);
+            }
+            else {
+                this.HighLightGlycans = [this.SubsumptionNavigatorFocusAccession];
+                this.UpdateHighlightGlycansFlag = true;
+            }
+
             this.ShowSubsumptionNavigator();
         }
 
@@ -1665,8 +1703,42 @@ function GNOmeBrowserBase (DIVID) {
         this.ContainerBanner.style.width = this.Width * 0.97 + "px";
     }
 
+    this.Alert = function (title, msg, GNOmelinkFlag) {
+        let ele = document.createElement('div');
+        ele.style = "width: 400px; height: 260px; background-color: white; border-radius: 10px; box-shadow: 5px 5px 3px grey;";
 
-    this.Alert = function (ele, width, height, VerticalPositionPercentage) {
+        let titleEle = document.createElement('h3');
+        let separationEle = document.createElement("div");
+        let messageEle = document.createElement('div');
+        let glinkEle = document.createElement('a');
+
+        titleEle.style = 'width: 100%; text-align: center; padding-top: 20px; ';
+        separationEle.style = 'width: 100%; height: 0; border: 0 0 1px 0; border-style: solid; border-color: grey; ';
+        messageEle.style = 'width: 100%; height: 100%; text-align: center; padding: 20px 0 0 0';
+        glinkEle.style = 'position: absolute; bottom: 0px; right: 40px; text-align: right;';
+
+        titleEle.innerText = title;
+        glinkEle.innerText = 'GNOme';
+        glinkEle.href = "https://github.com/glygen-glycan-data/GNOme/blob/master/README.md";
+
+        messageEle.innerHTML = msg;
+
+        if (title != ''){
+            ele.appendChild(titleEle);
+            ele.appendChild(separationEle);
+        }
+
+        ele.appendChild(messageEle);
+
+        if (GNOmelinkFlag){
+            ele.appendChild(glinkEle);
+        }
+
+        this.AlertLowLevel(ele, 400, 260, "45%");
+    }
+
+
+    this.AlertLowLevel = function (ele, width, height, VerticalPositionPercentage) {
         if (VerticalPositionPercentage == undefined){
             VerticalPositionPercentage = "50%"
         }
@@ -1691,25 +1763,29 @@ function GNOmeBrowserBase (DIVID) {
     }
 
     this.HintShow = function () {
-        let ele = document.createElement('div');
+        let title, msg;
         if (this.DisplayScreen == 0){
-            ele.innerHTML = "<div style='margin: 20px; background: white; border-radius: 5px; width: 400px; height: 200px;'><h3>Topology Selector</h3><div><div style=\"padding-top: 14px;\"><ul style=\"position: relative; top: -20px;\"><li>Click controls at left to add/remove monosaccharides</li><li>Click a Topology to jump to Subsumption Navigator</li><li>Shortcuts:</li><ul><li>n/N - add/remove GlcNAc</li><li>m/M - add/remove Man</li><li>g/G - add/remove Gal</li><li>f/F - add/remove Fuc</li><li>s/S - add/remove NeuAc</li></ul></ul><a href=\"https://github.com/glygen-glycan-data/GNOme/blob/master/README.md\" style=\"position: absolute; bottom: 10px; right: 30px; text-align: right;\">GNOme</a></div></div></div>";
+            title = this.HintTitleForScreenA;
+            msg = this.HintMessageForScreenA;
         }
         else if (this.DisplayScreen == 1){
-            ele.innerHTML = this.HintMessageForScreenB;
+            title = this.HintTitleForScreenB;
+            msg = this.HintMessageForScreenB;
         }
-        this.Alert(ele, 400, 240, "50%");
+
+        this.Alert(title, msg, true);
     }
 
     this.SearchBoxShow = function () {
         let thisLib = this;
 
         let searchBox = document.createElement("div");
-        searchBox.style = "width: 400px; height: 40px; overflow: hidden; background: rgb(210, 210, 210); opacity:0.8; border: none; border-radius: 10px; position: absolute; top: 40px; align: center; box-shadow: 5px 5px 3px grey;";
+        console.log(1);
+        searchBox.style = "width: 400px; height: 40px; overflow: hidden; background: rgb(160, 160, 160); opacity:0.8; border: none; border-radius: 10px; position: absolute; top: 40px; align: center; box-shadow: 5px 5px 3px grey;";
         let searchBoxInput = document.createElement("input");
         searchBoxInput.placeholder = "Search... ";
         searchBoxInput.type = "text";
-        searchBoxInput.style = "font-size: 100%;border: none;height: 90% ;background: inherit;width: 350px";
+        searchBoxInput.style = "font-size: 100%; border: none; border-color: transparent; height: 40px; width: 350px; background: transparent; overflow: hidden; ";
         searchBoxInput.addEventListener("keyup", function (d) {
             if (d.key == "Enter") {
                 thisLib.SearchGo(this.value);
@@ -1726,7 +1802,7 @@ function GNOmeBrowserBase (DIVID) {
 
         let msg = searchBox;
 
-        this.Alert(msg, 400, 100, "20%");
+        this.AlertLowLevel(msg, 400, 100, "20%");
     }
 
     this.SearchGo = function (d) {
@@ -1897,6 +1973,12 @@ function GNOmeBrowserBase (DIVID) {
 
         for (let acc of this.MatchedGlycans){
             let GlycanImage = this.CreateGlycanFigure(acc);
+
+            if (this.HighLightGlycans.includes(acc)) {
+                GlycanImage.style.border = "solid";
+                GlycanImage.style.borderColor = "rgb(43, 124, 233)";
+            }
+
             let td = document.createElement("td");
 
             td.appendChild(GlycanImage);
@@ -1927,6 +2009,8 @@ function GNOmeBrowserBase (DIVID) {
         img.onclick = function () {
             thisLib.SubsumptionNavigatorFocusAccession = gtcid;
             thisLib.SetToScreenB();
+            thisLib.UpdateHighlightGlycansFlag = false;
+            thisLib.UpdateMonoFreqFlag = false;
             thisLib.RefreshUI();
         };
         let caption = document.createElement("figcaption");
@@ -1969,9 +2053,25 @@ function GNOmeBrowserBase (DIVID) {
 
     }
 
+    this.UpdateHighlightGlycans = function (acc) {
+        this.HighLightGlycans = [];
+        let anc = this.GetAncestors(acc);
+        anc.push(acc);
+
+        for (let x of anc){
+            if (!this.HighLightGlycans.includes(x)){
+                if (this.TopLevelThings.includes(x)){
+
+                }
+                this.HighLightGlycans.push(x);
+            }
+        }
+
+        return 0
+    }
+
     this.FindAllMatchedThings = function () {
         this.MatchedGlycans = [];
-        this.HightLightGlycans = [];
         for (let acc of this.TopLevelThings){
             if (this.MatchToCurrentItemCount(this.SubsumptionData[acc].ButtonConfig)){
                 this.MatchedGlycans.push(acc);
@@ -2105,15 +2205,11 @@ function GNOmeBrowserBase (DIVID) {
         return res
     }
 
-    this.highlightglycanonscreenapartb = function () {}
 
-
-    this.ShowSubsumptionNavigator = function (UpdateHighlightGlycans, UpdateMonoFreq) {
+    this.ShowSubsumptionNavigator = function () {
 
         let acc = this.SubsumptionNavigatorFocusAccession;
         let thisLib = this;
-
-        this.ItemCount = JSON.parse(JSON.stringify(this.SubsumptionData[acc].ButtonConfig));
 
         let component = {};
         let parent = [];
@@ -2224,6 +2320,23 @@ function GNOmeBrowserBase (DIVID) {
 
     }
 
+    this.InjectGoogleAnalytics = function () {
+        // TODO
+
+        /*
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-164151077-4"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-164151077-4');
+        </script>
+         */
+
+    }
+
 
 
 
@@ -2250,6 +2363,9 @@ function GNOmeBrowserBase (DIVID) {
     this.SetImageSource = function (prefix, suffix) {
         this.ImageURLPrefix = prefix;
         this.ImageURLSuffix = suffix;
+
+        this.SubsumptionNavigatorOption.essentials.imgURL1 = prefix;
+        this.SubsumptionNavigatorOption.essentials.imgURL2 = suffix;
     }
 
     this.SetWidth = function (w) {
@@ -2308,6 +2424,10 @@ function GNOmeBrowserBase (DIVID) {
         let s = d.trim();
         let acc = s;
 
+        if (this.GlyTouCanAccessionRegex(acc)){
+            acc = acc.toUpperCase();
+        }
+
         if (Object.keys(this.Byonic).includes(s)){
             acc = this.Byonic[s];
         }
@@ -2320,13 +2440,27 @@ function GNOmeBrowserBase (DIVID) {
             this.SetToScreenA();
             this.ItemCount = JSON.parse(JSON.stringify(this.IUPACCompositionData[acc]))
         }
-        //else if (Object.keys(this.).includes(acc)){}
-        //else if (Object.keys(this.).includes(acc)){}
+        else{
+            let msg = '<br><br><br>';
+            if (this.GlyTouCanAccessionRegex(acc)){
+                msg += 'Bad GlyTouCan accession: ' + acc;
+            }
+            else{
+                msg += "Unable to recognize: " + d.trim();
+            }
+
+            this.Alert('Error', msg, false)
+            return
+        }
 
         this.RefreshUI();
 
     }
 
+    this.GlyTouCanAccessionRegex = function (acc) {
+        let re = /g|G\d{5}\w{2}/;
+        return re.test(acc)
+    }
 
 
 
@@ -2584,6 +2718,23 @@ function GNOmeCompositionBrowser(DIVID) {
         }
         return true
     }
+
+
+    // Hint title and message
+    this.HintTitleForScreenA = 'Composition Selector';
+    this.HintTitleForScreenB = 'Subsumption Navigator';
+
+    this.HintMessageForScreenA = "<ul style='position: relative; top: -20px; text-align: left; '><li>Click controls at left to add/remove monosaccharides</li>" +
+        "<li>Click a Composition to jump to Subsumption Navigator</li>" +
+        "<li>Shortcuts:</li><ul>" +
+        "<li>n/N - add/remove GlcNAc</li>" +
+        "<li>m/M - add/remove Man</li>" +
+        "<li>g/G - add/remove Gal</li>" +
+        "<li>f/F - add/remove Fuc</li>" +
+        "<li>s/S - add/remove NeuAc</li></ul></ul>";
+    this.HintMessageForScreenB = "<ul style='position: relative; top: -20px; text-align: left; '><li>Double click on structure to navigate subsumption hierarchy.</li>" +
+        "<li>Right click popup to jump to GlyGen, GlycanData, GlyTouCan.</li></ul>";
+
 }
 GNOmeCompositionBrowser.prototype = new GNOmeBrowserBase();
 GNOmeCompositionBrowser.prototype.constructor = GNOmeCompositionBrowser;
@@ -2635,7 +2786,6 @@ function GNOmeDisplayPresetFullScreen(GNOmeBrowserX) {
         else{
             return
         }
-
 
 
         let URL = location.protocol + '//' + location.host + location.pathname;
@@ -2732,20 +2882,66 @@ function GNOmeDisplayPresetFullScreen(GNOmeBrowserX) {
         return res
     }
 
+    this.FixAnyHexCount = function (p) {
+        let hex = 0;
+        let hexnac = 0;
+        let dhex = 0;
+
+        for (let m of ['Glc', 'Gal', 'Man']){
+            if (Object.keys(p).includes(m)){
+                hex += parseInt(p[m]);
+            }
+        }
+
+        for (let m of ['GlcNAc', 'GalNAc', 'ManNAc']){
+            if (Object.keys(p).includes(m)){
+                hexnac += parseInt(p[m]);
+            }
+        }
+
+        for (let m of ['Fuc']){
+            if (Object.keys(p).includes(m)){
+                dhex += parseInt(p[m]);
+            }
+        }
+
+        for (let m of ['Hex','HexNAc','dHex']){
+            if (p[m] == undefined){
+                p[m] = "0";
+            }
+        }
+
+        if (hex > 0 && parseInt(p['Hex']) < hex){
+            p['Hex'] = hex.toString();
+        }
+
+        if (hexnac > 0 && parseInt(p['HexNAc']) < hexnac){
+            p['HexNAc'] = hexnac.toString();
+        }
+
+        if (dhex > 0 && parseInt(p['dHex']) < dhex){
+            p['dHex'] = dhex.toString();
+        }
+        return p
+
+    }
+
 }
 
 
 
+// TODO All platform compatibility check
+// TODO GNOme release script
+// TODO New API documentation
+
+
+// TODO support all sym ?
 
 
 
 
 
-// TODO injecting google analytics
-// TODO Spinning wheels while loading things initially
-// TODO Invalid input alert
-// TODO automatically figure out Hex, HexNAc and dHex count
-// TODO hightlight glycans on ScreenAPartB
+
 
 
 
