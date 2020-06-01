@@ -919,7 +919,7 @@ let glycanviewer = {
         options = thisLib.options;
         naviNetwork.setOptions(options);
         naviNetwork.setData(data);
-        glycanviewer.network.selectNodes(thisLib.para.essentials.highLightedNodes);
+        thisLib.network.selectNodes(thisLib.para.essentials.highLightedNodes);
 
         thisLib.naviNetwork = naviNetwork;
 
@@ -1386,7 +1386,7 @@ function GNOmeBrowserBase (DIVID) {
     this.StyleSearchSwitch = "position: absolute; top: 20px; right: 20px; z-index: 10";
     this.StyleHintSwitch   = "position: absolute; top: 80px; right: 20px; z-index: 10";
     this.StyleGreyBackground = "position: absolute; z-index: 11; background-color: rgba(100,100,100,0.5); width: 100%; height: 100%; display: none; ";
-    this.StyleAlert = "position: fixed; z-index: 11; display: none; top: 50%; left: 50%; margin-top: -50px; margin-left: -100px;";
+    this.StyleAlert = "position: absolute; z-index: 11; display: none; top: 50%; left: 50%; margin-top: -50px; margin-left: -100px;";
 
     // Subsumption Navigator related things
     this.SubsumptionNavigatorOption = {
@@ -1421,6 +1421,8 @@ function GNOmeBrowserBase (DIVID) {
         }
     };
     this.SubsumptionNavigatorOption.GNOmeBrowser = this;
+
+    this.SubsumptionNavigatorController = jQuery.extend({}, glycanviewer);
 
 
     // Preset things...
@@ -1780,8 +1782,8 @@ function GNOmeBrowserBase (DIVID) {
         let thisLib = this;
 
         let searchBox = document.createElement("div");
-        console.log(1);
         searchBox.style = "width: 400px; height: 40px; overflow: hidden; background: rgb(160, 160, 160); opacity:0.8; border: none; border-radius: 10px; position: absolute; top: 40px; align: center; box-shadow: 5px 5px 3px grey;";
+
         let searchBoxInput = document.createElement("input");
         searchBoxInput.placeholder = "Search... ";
         searchBoxInput.type = "text";
@@ -1791,6 +1793,7 @@ function GNOmeBrowserBase (DIVID) {
                 thisLib.SearchGo(this.value);
             }
         })
+
         let searchBoxButton = document.createElement("button");
         searchBoxButton.style = "font-size: 100%;border: none;height: 100%;background: inherit;padding: 0 10px 0 0; float: right";
         searchBoxButton.innerHTML = "&#128269";
@@ -2315,7 +2318,7 @@ function GNOmeBrowserBase (DIVID) {
 
         this.SubsumptionNavigatorOption.essentials.component = component;
         this.SubsumptionNavigatorOption.essentials.highLightedNodes = [acc];
-        glycanviewer.init(this.SubsumptionNavigatorOption);
+        this.SubsumptionNavigatorController.init(this.SubsumptionNavigatorOption);
 
 
     }
