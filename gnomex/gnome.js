@@ -1262,7 +1262,7 @@ let glycanviewer = {
             d.id = d.name;
             d.level -= rootlevel;
             d.shape = 'image';
-            //d.image = "http://glytoucan.org/glycans/"+d.name+"/image?style=extended&format=png&notation=cfg";
+            //d.image = "https://glytoucan.org/glycans/"+d.name+"/image?style=extended&format=png&notation=cfg";
             d.image = para.essentials.imgURL + d.name + '.png';
 
             d.size = d.height / magicNumberForHeightScaleRatio;
@@ -1315,7 +1315,6 @@ let glycanviewer = {
 
 };
 
-
 function GNOmeBrowserBase (DIVID) {
 
     this.ContainerID = DIVID;
@@ -1336,7 +1335,7 @@ function GNOmeBrowserBase (DIVID) {
     this.IconConfig;
 
 
-    // Display Status
+    // The data decides what to show
     this.ItemCount = {};
     this.ItemCountMax = {};
     this.MatchedGlycans = [];
@@ -1401,7 +1400,7 @@ function GNOmeBrowserBase (DIVID) {
                 format: "png", // Other Options: jpg
                 notation: "cfg" // Other Options: cfgbw, uoxf, uoxf-color, cfg-uoxf, iupac
             },
-            imgURL1: "http://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/", // Unnecessary if useGlyTouCanAsImageSource is true
+            imgURL1: "https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/", // Unnecessary if useGlyTouCanAsImageSource is true
             imgURL2: ".png"
         },
         display: {
@@ -1494,7 +1493,13 @@ function GNOmeBrowserBase (DIVID) {
             theme = await this.GetJSON(para.theme);
         }
 
-
+        // Backward compatibility with theme encoding
+        if (Object.keys(theme).includes('image_source_prefix')){
+            theme['image_url_prefix'] = theme['image_source_prefix'];
+        }
+        if (Object.keys(theme).includes('image_source_suffix')){
+            theme['image_url_suffix'] = theme['image_source_suffix'];
+        }
 
         if (Object.keys(para).includes('icon_style')){
             theme['icon_style'] = para['icon_style'];
@@ -1508,17 +1513,7 @@ function GNOmeBrowserBase (DIVID) {
             theme['image_url_suffix'] = para['image_url_suffix'];
         }
 
-        // Backward compatibility with theme encoding
-        if (Object.keys(theme).includes('image_source_prefix')){
-            theme['image_url_prefix'] = theme['image_source_prefix'];
-        }
 
-        if (Object.keys(theme).includes('image_source_suffix')){
-            theme['image_url_suffix'] = theme['image_source_suffix'];
-        }
-
-
-        // TODO probably add a checker for parameter validity
         if (Object.keys(theme).includes('icon_style')){
             this.SetIconConfig(theme['icon_style']);
         }
@@ -1666,6 +1661,7 @@ function GNOmeBrowserBase (DIVID) {
 
             this.ContainerScreenAPartA.style = this.StyleScreenAPartA;
             this.ContainerScreenAPartB.style = this.StyleScreenAPartB;
+            this.ContainerScreenAPartB.style.width = this.Width - 130 + "px";
             this.ContainerScreenAPartB.style.height = this.Height + "px";
 
             this.ContainerScreenSwitch.style.display = "none";
@@ -1710,16 +1706,19 @@ function GNOmeBrowserBase (DIVID) {
         ele.style = "width: 400px; height: 260px; background-color: white; border-radius: 10px; box-shadow: 5px 5px 3px grey;";
 
         let titleEle = document.createElement('h3');
+        let closeEle = document.createElement('div');
         let separationEle = document.createElement("div");
         let messageEle = document.createElement('div');
         let glinkEle = document.createElement('a');
 
         titleEle.style = 'width: 100%; text-align: center; padding-top: 20px; ';
+        closeEle.style = 'position: absolute; top: 20px; right: 10px; font-size: 30px; color: grey; cursor: default; font-family: Arial, sans-serif;';
         separationEle.style = 'width: 100%; height: 0; border: 0 0 1px 0; border-style: solid; border-color: grey; ';
         messageEle.style = 'width: 100%; height: 100%; text-align: center; padding: 20px 0 0 0';
         glinkEle.style = 'position: absolute; bottom: 0px; right: 40px; text-align: right;';
 
         titleEle.innerText = title;
+        closeEle.innerText = "x";
         glinkEle.innerText = 'GNOme';
         glinkEle.href = "https://github.com/glygen-glycan-data/GNOme/blob/master/README.md";
 
@@ -1727,7 +1726,13 @@ function GNOmeBrowserBase (DIVID) {
 
         if (title != ''){
             ele.appendChild(titleEle);
+            ele.appendChild(closeEle);
             ele.appendChild(separationEle);
+
+            let thisLib = this;
+            closeEle.onclick = function () {
+                thisLib.CloseAlert();
+            }
         }
 
         ele.appendChild(messageEle);
@@ -1759,9 +1764,21 @@ function GNOmeBrowserBase (DIVID) {
 
         let thisLib = this;
         this.ContainerGreyBackground.onclick = function () {
-            thisLib.ContainerGreyBackground.style.display = "none";
-            thisLib.ContainerAlert.style.display = "none";
+            thisLib.CloseAlert();
         }
+
+        document.addEventListener("keyup", function (d) {
+
+            if (d.key == 'Escape'){
+                thisLib.CloseAlert();
+            }
+        })
+
+    }
+
+    this.CloseAlert = function () {
+        this.ContainerGreyBackground.style.display = "none";
+        this.ContainerAlert.style.display = "none";
     }
 
     this.HintShow = function () {
@@ -1782,7 +1799,7 @@ function GNOmeBrowserBase (DIVID) {
         let thisLib = this;
 
         let searchBox = document.createElement("div");
-        searchBox.style = "width: 400px; height: 40px; overflow: hidden; background: rgb(160, 160, 160); opacity:0.8; border: none; border-radius: 10px; position: absolute; top: 40px; align: center; box-shadow: 5px 5px 3px grey;";
+        searchBox.style = "width: 400px; height: 40px; overflow: hidden; background: rgb(255, 255, 255); opacity:0.8; border: none; border-radius: 10px; position: absolute; top: 40px; align: center; box-shadow: 5px 5px 3px grey;";
 
         let searchBoxInput = document.createElement("input");
         searchBoxInput.placeholder = "Search... ";
@@ -1999,6 +2016,12 @@ function GNOmeBrowserBase (DIVID) {
         }
 
         this.ContainerScreenAPartB.appendChild(table);
+        if (c % colnum > 0.5 * colnum) {
+            // Make the banner more visible
+            let placeholder = document.createElement("div")
+            placeholder.style = "height: 50px";
+            this.ContainerScreenAPartB.appendChild(placeholder);
+        }
     }
 
     this.CreateGlycanFigure = function (gtcid) {
@@ -2324,10 +2347,8 @@ function GNOmeBrowserBase (DIVID) {
     }
 
     this.InjectGoogleAnalytics = function () {
-        // TODO
 
         /*
-        <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-164151077-4"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
@@ -2342,10 +2363,7 @@ function GNOmeBrowserBase (DIVID) {
 
 
 
-
-
-
-    //
+    // Functions for setting things
     this.SetIconConfig = function (IconStyle) {
         if (['cfg', 'snfg'].includes(IconStyle)){
             this.IconStyle = IconStyle;
@@ -2471,7 +2489,7 @@ function GNOmeBrowserBase (DIVID) {
 
 
 
-    //
+    // Functions for getting things
     this.GetStatus = function () {
         let res = {};
         res.Screen = this.DisplayScreen;
@@ -2493,7 +2511,7 @@ function GNOmeStructureBrowser (DIVID) {
 
     this.AllItems = ['GlcNAc', 'GalNAc', 'ManNAc', 'HexNAc','Glc', 'Gal', 'Man', 'Hex','Fuc', 'dHex', 'NeuAc', 'NeuGc', 'Xxx'];
     this.ScreenATitle = "GNOme Topology Selector";
-    this.DataPreProcess = function (RawData) {
+    this.DataPreProcessOLD = function (RawData) {
         let AllChildren = new Set();
 
         let AllAccession = Object.keys(RawData);
@@ -2550,6 +2568,89 @@ function GNOmeStructureBrowser (DIVID) {
 
     }
 
+    this.DataPreProcess = function (RawData) {
+
+        let AllAccession = Object.keys(RawData);
+        let Parents = {};
+
+        for (let acc of AllAccession) {
+
+            let d = RawData[acc];
+            if (!['topology'].includes(d.level)) {
+                continue
+            }
+            Parents[acc] = [];
+        }
+
+
+
+        for (let acc of AllAccession){
+
+            let d = RawData[acc];
+
+            let ButtonConfig = this.ButtonConfigCleanUp(d.count);
+            let Children = [];
+            let ByonicStr = d.byonic;
+
+            if (ByonicStr != undefined){
+                this.Byonic[ByonicStr] = acc;
+            }
+
+            // Filter which child to keep
+            if (d.children != undefined){
+                for (let c of d.children){
+                    let tmp = RawData[c];
+                    if (tmp == undefined){continue}
+                    if (['topology', 'saccharide'].includes(tmp.level)){
+                        Children.push(c);
+
+                        if ('topology' == d.level && 'topology' == tmp.level){
+                            Parents[c].push(acc);
+                        }
+
+                    }
+                }
+            }
+
+            if ( ['topology', 'saccharide'].includes(d.level) ){
+                this.SubsumptionData[acc] = {
+                    "SubsumptionLevel": d.level,
+                    "Children": Children,
+                    "ButtonConfig": ButtonConfig
+                };
+
+            }
+            if ( ['basecomposition', 'composition'].includes(d.level) ){
+                this.IUPACCompositionData[acc] = ButtonConfig;
+            }
+
+
+        }
+
+        for (let acc of Object.keys(Parents)){
+            let f = true;
+
+            for (let p of Parents[acc]) {
+                let ItemCountP = this.SubsumptionData[p].ButtonConfig;
+                let ItemCountC = this.SubsumptionData[acc].ButtonConfig;
+
+                for (let m of this.AllItems) {
+
+                    if (ItemCountP[m] != ItemCountC[m]) {
+                        break
+                    }
+                    f = false;
+                }
+            }
+
+            if (f){
+                this.TopLevelThings.push(acc);
+            }
+
+        }
+
+    }
+
     this.ButtonConfigCleanUp = function (d) {
         let res = {};
 
@@ -2570,7 +2671,6 @@ function GNOmeStructureBrowser (DIVID) {
         res["Xxx"] = xxx;
         return res
     }
-
 
     this.MatchToCurrentItemCount = function (ItemCountX) {
 
@@ -2933,9 +3033,6 @@ function GNOmeDisplayPresetFullScreen(GNOmeBrowserX) {
 
 
 
-// TODO All platform compatibility check
-// TODO GNOme release script
-// TODO New API documentation
 
 
 // TODO support all sym ?

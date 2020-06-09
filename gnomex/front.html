@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>GNOme Browser</title>
+    <style>
+        * {
+            font-size: 100%;
+            font-family: Arial;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-    <!--
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
-    -->
 
     <script src="./gnome.js"></script>
+
 </head>
+<script>
+    // TODO Google analytics for PROD
+</script>
 <body>
 <div id="gnome"></div>
 
@@ -28,10 +35,11 @@
         // theme: default GlyTouCan GlyGen
         await gsb.Init({
             "data":"./GNOme.browser.json",
-            "theme":"./theme/GlyTouCan.json",
-            //"icon_style":"snfg",
-            //"image_url_prefix":"https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/",
-            //"image_url_suffix":".png",
+            "theme":"./theme/default.json",
+
+            // "icon_style":"cfg","image_url_prefix":"https://edwardslab.bmcb.georgetown.edu/~wzhang/web/glycan_images/cfg/extended/","image_url_suffix":".png",
+            // "icon_style":"cfg","image_url_prefix":"https://api.glygen.org/glycan/image/","image_url_suffix":"",
+            // "icon_style":"snfg", "image_url_prefix":"https://image.glycosmos.org/snfg/png/","image_url_suffix":"",
         })
 
         FullScreenControl.ResizeToCurrent();
