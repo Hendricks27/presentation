@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Widget</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+</head>
+<body>
+<input type="button" value="Feeling lucky" onclick="ran()"><br>
+<span id="title"></span><br>
+<img id="motif">
+<br>
+<select id="align"></select>
+<div id="svg"></div>
+<div id="wurcs"></div><br>
+<div id="glycoct"></div>
+
+
+
+<script>
+    var motifacc = "G00016MO"
+    var acc = "G56180KG";//"G56180KG";
+    var wurcs, glycoct, svg;
+    var span_ele, g_ele;
+    var click = true;
+
+    var lastmotif, lacc;
+
+    var alignments;
+    var allalignments;
+    d3.json("alignment.json").then(function (d) {
+        alignments = d[motifacc][acc];
+        allalignments = d;
+
+        refresh();
+        update()
+    })
+
+    function ran() {
+        lastmotif = motifacc;
+        lacc = acc;
+
+        var motifacci = Math.floor(Math.random() * Object.keys(allalignments).length);
+        motifacc = Object.keys(allalignments)[motifacci]
+        var acci = Math.floor(Math.random() * Object.keys(allalignments[motifacc]).length);
+        acc = Object.keys(allalignments[motifacc])[acci];
+        alignments = allalignments[motifacc][acc];
+
+        refresh();
+        update();
+    }
+
+    function back() {
+        motifacc = lastmotif;
+        acc = lacc;
+        refresh();
+        update();
+    }
+
+    function refresh() {
+        document.getElementById('title').innerText = motifacc + " VS " + acc;
+
+        var selections = document.getElementById('align');
+        selections.innerHTML = "";
+
+        var option = document.createElement('option');
+        option.value = 'x';
+        option.innerText = "Clear";
+        selections.appendChild(option);
+
+        for (let i in Object.keys(alignments)){
+            var option = document.createElement('option');
+            option.value = i;
+            option.innerText = "Alignment: #"+(1+parseInt(i));
+            selections.appendChild(option);
+        }
+
+
+        selections.onchange = function () {
+            alignchange();
+        };
+        alignchange();
+    }
+
+    function alignchange() {
+        var i = document.getElementById('align').value;
+        if (i == "x"){
+            reset();
+            return
+        }
+
+        let alignment = alignments[i];
+        console.log(i, alignment)
+
+        reset();
+        for (let hl of Object.values(alignment)){
+            highlight(hl);
+        }
+    }
+
+    function inter() {
+        click = document.getElementById("a").checked;
+        reset();
+        addMouseEvents();
+    }
+
+    update();
+    function update(){
+
+        let img = document.getElementById("motif");
+        img.src = "https://image.glycosmos.org/snfg/png/" + motifacc;
+
+        d3.json("./svg_widget_data/"+acc+".json").then(function (data) {
+            wurcs = data["w"];
+            glycoct = data["g"];
+            svg = data["s"];
+
+            document.getElementById("wurcs").innerHTML = wurcs;
+            document.getElementById("glycoct").innerHTML = glycoct;
+            document.getElementById("svg").innerHTML = svg;
+
+            var bBox = document.getElementsByTagName("svg")[0].getBBox();
+            console.log(bBox.width, bBox.height);
+            //document.getElementById("svg").style.overflow = "visible";
+            document.getElementsByTagName("svg")[0].style.width = bBox.width + "px";
+            document.getElementsByTagName("svg")[0].style.height = bBox.height + "px";
+
+
+            findallele();
+            //addMouseEvents();
+        }, function (error) {
+            //alert("GlyTouCan accession: " + acc + " is not supported yet...");
+            ran();
+        });
+    }
+
+    function findallele() {
+        span_ele = {};
+        g_ele = {};
+        for (var span of document.getElementsByTagName("span")){
+            if (span.getAttribute("wurcs_mono_id") == null){
+                continue
+            }
+            var mono_id = span.getAttribute("wurcs_mono_id").split(",");
+
+            for (var mid0 of mono_id){
+                if (!Object.keys(span_ele).includes(mid0)){
+                    span_ele[mid0] = [];
+                }
+                span_ele[mid0].push(span)
+            }
+        }
+
+        for (var g of document.getElementsByTagName("g")){
+            if (g.getAttribute("wurcs_mono_id") == null){
+                continue
+            }
+            var mono_id = g.getAttribute("wurcs_mono_id").split(",");
+
+            for (var mid0 of mono_id){
+                if (!Object.keys(g_ele).includes(mid0)){
+                    g_ele[mid0] = [];
+                }
+                g_ele[mid0].push(g)
+            }
+        }
+
+        //console.log(span_ele);
+        //console.log(g_ele);
+
+    }
+
+    function addMouseEvents() {
+        for (var span of document.getElementsByTagName("span")){
+            if (span.getAttribute("wurcs_mono_id") == null) {
+                continue
+            }
+
+            if (click){
+                span.onclick = function (d) {
+                    reset();
+                    var mono_id = this.getAttribute("wurcs_mono_id").split(",");
+                    for (var mid0 of mono_id){
+                        highlight(mid0);
+                    }
+                };
+                span.onmouseout = function () {};
+                span.onmouseover = function () {};
+                continue
+            }
+
+            span.onclick = function(){};
+            span.onmouseover = function (d) {
+                var mono_id = this.getAttribute("wurcs_mono_id").split(",");
+                for (var mid0 of mono_id){
+                    highlight(mid0);
+                }
+            };
+
+            span.onmouseout = function (d) {
+                reset();
+            }
+        }
+
+        for (var g of document.getElementsByTagName("g")){
+            if (g.getAttribute("wurcs_mono_id") == null) {
+                continue
+            }
+
+            if (click){
+                g.onclick = function (d) {
+                    reset();
+
+                    var mono_id = this.getAttribute("wurcs_mono_id").split(",");
+                    for (var mid0 of mono_id){
+                        console.log(mid0);
+                        highlight(mid0);
+                    }
+                };
+                g.onmouseout = function () {};
+                g.onmouseover = function () {};
+                continue
+            }
+            var mono_id = g.getAttribute("wurcs_mono_id");
+
+            g.onmouseover = function (d) {
+                var mono_id = this.getAttribute("wurcs_mono_id").split(",");
+                for (var mid0 of mono_id){
+                    highlight(mid0);
+                }
+            };
+
+            g.onmouseout = function (d) {
+                reset();
+            }
+        }
+
+    }
+
+    function spanHighlight(mid) {
+        for (var span of span_ele[mid]){
+            span.style.color = "red";
+        }
+    }
+
+    function spanReset() {
+        for (var span of document.getElementsByTagName("span")){
+            if (span.getAttribute("wurcs_mono_id") != null){
+                span.style.color = "";
+            }
+        }
+    }
+
+    function gHighlight(mid) {
+        //console.log(mid);
+        for (var g of g_ele[mid]){
+            //console.log(g);
+            g.setAttribute("transform","translate(0, -10)");
+        }
+    }
+
+    function gReset() {
+        for (var g of document.getElementsByTagName("g")){
+            if (g.getAttribute("wurcs_mono_id") != null){
+                g.setAttribute("transform","");
+            }
+        }
+    }
+
+    function highlight(mid) {
+        spanHighlight(mid);
+        gHighlight(mid);
+    }
+
+    function reset() {
+        spanReset();
+        gReset();
+    }
+
+
+
+
+</script>
+
+</body>
+</html>
