@@ -1323,7 +1323,7 @@ function GNOmeBrowserBase (DIVID) {
     this.SubsumptionData = {};
     this.IUPACCompositionData = {};
     this.TopLevelThings = [];
-    this.Byonic = {};
+    this.Synonym = {};
 
     // Tailored parameter for different browser
     this.AllItems = undefined;
@@ -1472,12 +1472,13 @@ function GNOmeBrowserBase (DIVID) {
 
     this.HintMessageForScreenA = "<ul style='position: relative; top: -20px; text-align: left; '><li>Click controls at left to add/remove monosaccharides</li>" +
         "<li>Click a Topology to jump to Subsumption Navigator</li>" +
-        "<li>Shortcuts:</li><ul>" +
-        "<li>n/N - add/remove GlcNAc</li>" +
-        "<li>m/M - add/remove Man</li>" +
-        "<li>g/G - add/remove Gal</li>" +
-        "<li>f/F - add/remove Fuc</li>" +
-        "<li>s/S - add/remove NeuAc</li></ul></ul>";
+        "";
+        //"<li>Shortcuts:</li><ul>" +
+        //"<li>n/N - add/remove GlcNAc</li>" +
+        //"<li>m/M - add/remove Man</li>" +
+        //"<li>g/G - add/remove Gal</li>" +
+        //"<li>f/F - add/remove Fuc</li>" +
+        //"<li>s/S - add/remove NeuAc</li></ul></ul>";
     this.HintMessageForScreenB = "<ul style='position: relative; top: -20px; text-align: left; '><li>Double click on structure to navigate subsumption hierarchy.</li>" +
         "<li>Right click popup to jump to GlyGen, GlycanData, GlyTouCan.</li></ul>";
 
@@ -1618,7 +1619,7 @@ function GNOmeBrowserBase (DIVID) {
         this.ContainerBanner.innerHTML = "GNOme - Glycan Naming and Subsumption Ontology";
         this.ContainerBanner.style = "position: absolute; bottom: 10px; z-index: 500; text-align: center; color: grey;";
         this.ContainerBanner.onclick = function(){
-            window.open("https://github.com/glygen-glycan-data/GNOme/blob/master/README.md");
+            window.open("https://gnome.glyomics.org/");
         };
 
         this.ContainerGreyBackground = document.createElement("div");
@@ -1720,7 +1721,7 @@ function GNOmeBrowserBase (DIVID) {
         titleEle.innerText = title;
         closeEle.innerText = "x";
         glinkEle.innerText = 'GNOme';
-        glinkEle.href = "https://github.com/glygen-glycan-data/GNOme/blob/master/README.md";
+        glinkEle.href = "https://gnome.glyomics.org/";
 
         messageEle.innerHTML = msg;
 
@@ -1830,6 +1831,7 @@ function GNOmeBrowserBase (DIVID) {
         this.ContainerGreyBackground.style.display = "none";
 
         this.SetFocus(d);
+        this.RefreshUI();
     }
 
 
@@ -2449,8 +2451,8 @@ function GNOmeBrowserBase (DIVID) {
             acc = acc.toUpperCase();
         }
 
-        if (Object.keys(this.Byonic).includes(s)){
-            acc = this.Byonic[s];
+        if (Object.keys(this.Synonym).includes(s)){
+            acc = this.Synonym[s];
         }
 
         if (Object.keys(this.SubsumptionData).includes(acc)){
@@ -2474,7 +2476,7 @@ function GNOmeBrowserBase (DIVID) {
             return
         }
 
-        this.RefreshUI();
+        // this.RefreshUI();
 
     }
 
@@ -2511,62 +2513,6 @@ function GNOmeStructureBrowser (DIVID) {
 
     this.AllItems = ['GlcNAc', 'GalNAc', 'ManNAc', 'HexNAc','Glc', 'Gal', 'Man', 'Hex','Fuc', 'dHex', 'NeuAc', 'NeuGc', 'Xxx'];
     this.ScreenATitle = "GNOme Topology Selector";
-    this.DataPreProcessOLD = function (RawData) {
-        let AllChildren = new Set();
-
-        let AllAccession = Object.keys(RawData);
-        for (let acc of AllAccession){
-
-            let d = RawData[acc];
-
-            let ButtonConfig = this.ButtonConfigCleanUp(d.count);
-            let Children = [];
-            let ByonicStr = d.byonic;
-
-            if (ByonicStr != undefined){
-                this.Byonic[ByonicStr] = acc;
-            }
-
-            // Filter which child to keep
-            if (d.children != undefined){
-                for (let c of d.children){
-                    let tmp = RawData[c];
-                    if (tmp == undefined){continue}
-                    if (['topology', 'saccharide'].includes(tmp.level)){
-                        Children.push(c);
-                    }
-                }
-            }
-
-            if ( ['topology', 'saccharide'].includes(d.level) ){
-                this.SubsumptionData[acc] = {
-                    "SubsumptionLevel": d.level,
-                    "Children": Children,
-                    "ButtonConfig": ButtonConfig
-                };
-
-                for (let c of Children){
-                    AllChildren.add(c);
-                }
-            }
-            if ( ['basecomposition', 'composition'].includes(d.level) ){
-                this.IUPACCompositionData[acc] = ButtonConfig;
-            }
-
-
-        }
-
-        for (let acc of AllAccession){
-            if (AllChildren.has(acc)){
-                continue;
-            }
-            if ( ['topology'].includes(RawData[acc].level) ){
-                this.TopLevelThings.push(acc);
-            }
-
-        }
-
-    }
 
     this.DataPreProcess = function (RawData) {
 
@@ -2590,10 +2536,12 @@ function GNOmeStructureBrowser (DIVID) {
 
             let ButtonConfig = this.ButtonConfigCleanUp(d.count);
             let Children = [];
-            let ByonicStr = d.byonic;
+            let syms = d.syms;
 
-            if (ByonicStr != undefined){
-                this.Byonic[ByonicStr] = acc;
+            if (syms != undefined){
+                for (let sym of syms){
+                    this.Synonym[sym] = acc;
+                }
             }
 
             // Filter which child to keep
@@ -2732,6 +2680,14 @@ function GNOmeCompositionBrowser(DIVID) {
             let ButtonConfig = this.ButtonConfigCleanUp(d.count);
             let Children = [];
 
+            let syms = d.syms;
+
+            if (syms != undefined){
+                for (let sym of syms){
+                    this.Synonym[sym] = acc;
+                }
+            }
+
             if (d.children != undefined){
                 for (let c of d.children){
                     let tmp = RawData[c];
@@ -2829,12 +2785,13 @@ function GNOmeCompositionBrowser(DIVID) {
 
     this.HintMessageForScreenA = "<ul style='position: relative; top: -20px; text-align: left; '><li>Click controls at left to add/remove monosaccharides</li>" +
         "<li>Click a Composition to jump to Subsumption Navigator</li>" +
-        "<li>Shortcuts:</li><ul>" +
-        "<li>n/N - add/remove GlcNAc</li>" +
-        "<li>m/M - add/remove Man</li>" +
-        "<li>g/G - add/remove Gal</li>" +
-        "<li>f/F - add/remove Fuc</li>" +
-        "<li>s/S - add/remove NeuAc</li></ul></ul>";
+        "";
+        // "<li>Shortcuts:</li><ul>" +
+        // "<li>n/N - add/remove GlcNAc</li>" +
+        // "<li>m/M - add/remove Man</li>" +
+        //  "<li>g/G - add/remove Gal</li>" +
+        //  "<li>f/F - add/remove Fuc</li>" +
+        //  "<li>s/S - add/remove NeuAc</li></ul></ul>";
     this.HintMessageForScreenB = "<ul style='position: relative; top: -20px; text-align: left; '><li>Double click on structure to navigate subsumption hierarchy.</li>" +
         "<li>Right click popup to jump to GlyGen, GlycanData, GlyTouCan.</li></ul>";
 
@@ -2966,9 +2923,9 @@ function GNOmeDisplayPresetFullScreen(GNOmeBrowserX) {
             })
             GNOmeBrowserX.SetItemCount(NewCount);
             GNOmeBrowserX.SetToScreenA();
-
-            GNOmeBrowserX.RefreshUI();
         }
+
+        GNOmeBrowserX.RefreshUI();
     }
 
     this.GetURLParameter = function (thisLib) {
@@ -3035,7 +2992,6 @@ function GNOmeDisplayPresetFullScreen(GNOmeBrowserX) {
 
 
 
-// TODO support all sym ?
 
 
 
