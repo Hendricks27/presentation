@@ -17,7 +17,20 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
 <script>
     'use strict';
 
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    let params = {};
+
+    for (let k of urlParams.keys()){
+        params[k] = urlParams.get(k)
+    }
+
+
     let acc = "G59480BZ";
+    if (Object.keys(params).includes("accession")){
+        acc = params["accession"];
+    }
     let data;
 
     let container = document.getElementById("x");
@@ -32,8 +45,8 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
 
     jQuery.getJSON("data.json", function(d) {
         data = d;
+        colnumupdate();
         update();
-
     });
 
     function press() {
@@ -43,8 +56,11 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
         update();
     }
 
-    document.getElementsByTagName('body')[0].onresize = colnumupdate;
-    colnumupdate();
+    document.getElementsByTagName('body')[0].onresize = function () {
+        colnumupdate();
+        update();
+    };
+
     function colnumupdate() {
         let w = window.innerWidth;
         if (w < 300){
@@ -53,7 +69,6 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
         else {
             colnum = Math.floor(w/210);
         }
-        update();
     }
 
 
