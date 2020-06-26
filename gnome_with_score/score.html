@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button onclick="press();">GO!</button>
+<div id="x"></div>
+<script>
+    'use strict';
+
+    let acc = "G59480BZ";
+    let data;
+
+    let container = document.getElementById("x");
+
+    let imageURLprefix = "https://image.glycosmos.org/snfg/png/";
+    let imageURLsuffix = "";
+
+    let SBURL = "./Structure.html?focus=";
+    let CBURL = "./Composition.html?focus=";
+
+    let colnum = 4;
+
+    jQuery.getJSON("data.json", function(d) {
+        data = d;
+        update();
+
+    });
+
+    function press() {
+        acc = document.getElementById('acc').value;
+        acc = acc.toUpperCase();
+
+        update();
+    }
+
+    document.getElementsByTagName('body')[0].onresize = colnumupdate;
+    function colnumupdate() {
+        let w = window.innerWidth;
+        if (w < 300){
+            colnum = 1;
+        }
+        else {
+            colnum = Math.floor(w/210);
+        }
+        update();
+    }
+
+
+    function update() {
+
+        let d = data[acc];
+        if (d == undefined){
+            alert("Accession is not supported");
+            return
+        }
+        container.innerHTML = "";
+        console.log(d);
+
+        let bcomp, comp, topo;
+        let score;
+        let children = [], descendents;
+
+        if (d["bcomp"]){
+            bcomp = d["bcomp"];
+        }
+
+        if (d["comp"]){
+            comp = d["comp"];
+        }
+
+        if (d["topo"]){
+            topo = d["topo"];
+        }
+
+        if (d["score"]){
+            score = d["score"];
+        }
+        else{
+            score = "????";
+        }
+
+        if (d["children"]){
+            children = d["children"];
+        }
+
+
+        descendents = getDescendents(acc);
+
+        let table = document.createElement("table");
+        let tr = document.createElement("tr");
+        let td;
+
+
+        if (bcomp){
+            let td = document.createElement("td");
+            let title = document.createElement("h4");
+            title.style.textAlign = "center";
+            title.innerText = "Base Composition:";
+
+            let figure = CreateGlycanFigure(bcomp)
+
+            td.appendChild(title);
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+
+        if (comp){
+            let td = document.createElement("td");
+            let title = document.createElement("h4");
+            title.style.textAlign = "center";
+            title.innerText = "Composition";
+
+            let figure = CreateGlycanFigure(comp);
+
+            td.appendChild(title);
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+
+        if (topo){
+            let td = document.createElement("td");
+            let title = document.createElement("h4");
+            title.innerText = "Topology:";
+
+            let figure = CreateGlycanFigure(topo)
+
+            td.appendChild(title);
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+        //table.appendChild(tr);
+
+        //tr = document.createElement("tr");
+        td = document.createElement("td");
+
+        let title = document.createElement("h2");
+        title.style.textAlign = "center";
+        title.innerText = acc;
+        let figure = CreateGlycanFigure(acc)
+        td.appendChild(title);
+        td.appendChild(figure);
+        td.style = "border: solid 2px lightblue"
+        tr.appendChild(td);
+        table.appendChild(tr);
+
+
+
+        let count = 0;
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+
+        if (children.length > 0){
+            let title = document.createElement("h4");
+            if (children.length == 1){
+                title.innerText = "Direct Child:";
+            }
+            else {
+                title.innerText = "Direct Children:";
+            }
+            table.appendChild(title);
+        }
+        for (let c of children){
+            count += 1;
+            if (count == colnum+1){
+                table.appendChild(tr);
+                count = 1;
+                tr = document.createElement("tr");
+            }
+            td = document.createElement("td");
+            let figure = CreateGlycanFigure(c)
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+
+
+        count = 0;
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+
+        if (descendents.length - children.length > 0){
+            let title = document.createElement("h4");
+            if (descendents.length - children.length == 1){
+                title.innerText = "Descendent:";
+            }
+            else {
+                title.innerText = "Descendents:";
+            }
+            table.appendChild(title);
+        }
+
+        for (let c of descendents){
+            if (children.includes(c)){
+                continue;
+            }
+            count += 1;
+            if (count == colnum+1){
+                table.appendChild(tr);
+                count = 1;
+                tr = document.createElement("tr");
+            }
+            td = document.createElement("td");
+            let figure = CreateGlycanFigure(c)
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+
+
+        container.appendChild(table);
+
+    }
+
+
+
+    function getDescendents(acc) {
+        let res = [];
+        if (!Array.isArray(data[acc].children)){
+            return res
+        }
+
+        for (let nc of data[acc].children){
+            res = res.concat(JSON.parse(JSON.stringify(getDescendents(nc))));
+            res.push(nc);
+        }
+
+        let res2 = [];
+        res.forEach(function (d) {
+            if (!res2.includes(d)){
+                res2.push(d);
+            }
+        });
+
+        return res2
+    }
+
+    function CreateGlycanFigure(gtcid) {
+
+        let figure = document.createElement("figure");
+
+        figure.style = "width: 200px; ";
+        figure.style.margin = 0;
+        figure.id = "img_" + gtcid;
+
+        let img = document.createElement("img");
+        img.src = imageURLprefix + gtcid + imageURLsuffix;
+        img.style = "width: 200px; height: auto;";
+        img.acc = gtcid;
+        img.cf = data[gtcid].cf == true;
+        console.log()
+
+        img.ondblclick = function () {
+            acc = img.acc;
+            update()
+        };
+
+        img.oncontextmenu = function (e) {
+            let x = SBURL;
+            if (img.cf){
+                x = CBURL;
+            }
+            window.open(x+img.acc);
+        };
+
+        let caption = document.createElement("figcaption");
+        caption.innerHTML = gtcid + "<br>" + data[gtcid].score;
+        caption.style.textAlign = "center";
+
+        figure.appendChild(img);
+        figure.appendChild(caption);
+
+        return figure
+    }
+    
+
+    
+    function f() {
+
+    }
+    
+
+
+</script>
+
+</body>
+</html>
