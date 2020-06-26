@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        * {
+            font-size: 100%;
+            font-family: Arial;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 </head>
 <body>
@@ -134,6 +140,7 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
             let td = document.createElement("td");
             let title = document.createElement("h4");
             title.innerText = "Topology:";
+            title.style.textAlign = "center";
 
             let figure = CreateGlycanFigure(topo)
 
