@@ -38,6 +38,7 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
     }
 
     document.getElementsByTagName('body')[0].onresize = colnumupdate;
+    colnumupdate();
     function colnumupdate() {
         let w = window.innerWidth;
         if (w < 300){
@@ -89,6 +90,14 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
 
 
         descendents = getDescendents(acc);
+
+        children = children.sort(function (a, b) {
+            return data[b].score - data[a].score
+        })
+
+        descendents = descendents.sort(function (a, b) {
+            return data[b].score - data[a].score
+        })
 
         let table = document.createElement("table");
         let tr = document.createElement("tr");
