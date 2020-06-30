@@ -75,16 +75,21 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
     function update() {
 
         let d = data[acc];
+
+        let URL = location.protocol + '//' + location.host + location.pathname + "?accession=" + acc;
+        history.pushState({}, "", URL);
+        document.getElementById('acc').value = acc;
+
         if (d == undefined){
             alert("Accession is not supported");
             return
         }
         container.innerHTML = "";
-        console.log(d);
+        // console.log(d);
 
         let bcomp, comp, topo;
         let score;
-        let children = [], descendents;
+        let children = [], descendents, parents;
 
         if (d["bcomp"]){
             bcomp = d["bcomp"];
@@ -111,6 +116,7 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
 
 
         descendents = getDescendents(acc);
+        parents = getParents(acc);
 
         children = children.sort(function (a, b) {
             return data[b].score - data[a].score
@@ -179,8 +185,36 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
         table.appendChild(tr);
 
 
-
         let count = 0;
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+
+        if (parents.length > 0){
+            let title = document.createElement("h4");
+            if (parents.length == 1){
+                title.innerText = "Direct Parent:";
+            }
+            else {
+                title.innerText = "Direct Parents:";
+            }
+            table.appendChild(title);
+        }
+        for (let c of parents){
+            count += 1;
+            if (count == colnum+1){
+                table.appendChild(tr);
+                count = 1;
+                tr = document.createElement("tr");
+            }
+            td = document.createElement("td");
+            let figure = CreateGlycanFigure(c)
+            td.appendChild(figure);
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+
+
+        count = 0;
         tr = document.createElement("tr");
         td = document.createElement("td");
 
@@ -267,6 +301,20 @@ GlyTouCan Accession: <input type="text" id="acc" value="G59480BZ">&nbsp<button o
         });
 
         return res2
+    }
+
+    function getParents(acc) {
+        let res = [];
+        for (let x of Object.keys(data)){
+            if (!Array.isArray(data[x].children)){
+                continue;
+            }
+
+            if (data[x].children.includes(acc)){
+                res.push(x)
+            }
+        }
+        return res
     }
 
     function CreateGlycanFigure(gtcid) {
